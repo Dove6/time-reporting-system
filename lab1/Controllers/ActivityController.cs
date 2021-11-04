@@ -9,11 +9,11 @@ using TRS.Models;
 
 namespace TRS.Controllers
 {
-    public class HomeController : Controller
+    public class ActivityController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<ActivityController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public ActivityController(ILogger<ActivityController> logger)
         {
             _logger = logger;
         }
