@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TRS.Models
+namespace TRS.DataManager.JsonHelpers
 {
     public class DateJsonConverter : JsonConverter<DateTime>
     {

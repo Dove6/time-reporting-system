@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace TRS.Models
+namespace TRS.Models.JsonModels
 {
-    public class MonthlyReportModel
+    public class ReportModel
     {
         public bool Frozen { get; set; }
-        public List<MonthlyReportEntryModel> Entries { get; set; }
+        public List<ReportEntryModel> Entries { get; set; }
         public List<AcceptedSummaryModel> Accepted { get; set; }
     }
 }

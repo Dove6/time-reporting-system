@@ -1,14 +1,19 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
-namespace TRS.Models
+namespace TRS.Models.DomainModels
 {
-    public class MonthlyReportEntryModel
+    public class ReportEntryModel
     {
-        [JsonConverter(typeof(DateJsonConverter))]
+        [Required]
+        public int Id { get; set; }
+
+        [Required]
+        public string Owner { get; set; }
+
         [Display(Name = "Data")]
         [DataType(DataType.Date)]
+        [Required]
         public DateTime Date { get; set; }
 
         [Display(Name = "Kod projektu")]
@@ -20,6 +25,7 @@ namespace TRS.Models
         public string Subcode { get; set; }
 
         [Display(Name = "Czas (w minutach)")]
+        [Required]
         public int Time { get; set; }
 
         [Display(Name = "Opis")]

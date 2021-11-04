@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 
-namespace TRS.Models
+namespace TRS.Models.JsonModels
 {
-    public class ActivityModel
+    public class ProjectModel
     {
         public string Code { get; set; }
         public string Manager { get; set; }
         public string Name { get; set; }
         public int Budget { get; set; }
         public bool Active { get; set; }
-        public List<SubactivityModel> Subactivities { get; set; }
+        public List<DomainModels.CategoryModel> Subactivities { get; set; }
     }
 }
