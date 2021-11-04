@@ -1,11 +1,12 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TRS.Models
 {
     public class ReportEntryModel
     {
-        public string Date { get; set; }
+        [JsonConverter(typeof(DateJsonConverter))]
+        public DateTime Date { get; set; }
         public string Code { get; set; }
         public string Subcode { get; set; }
         public int Time { get; set; }
