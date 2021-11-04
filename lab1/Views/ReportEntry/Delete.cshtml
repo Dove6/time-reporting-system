@@ -1,0 +1,54 @@
+﻿@model TRS.Models.MonthlyReportEntryModel
+
+@{
+    ViewData["Title"] = "Usuwanie wpisu";
+}
+
+<main class="bd-main order-1 gap-3">
+    <p>Czy na pewno chcesz usunąć wpis?</p>
+    <div class="text-center">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Date)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Code)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Subcode)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Time)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => model.Date)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Subcode)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Time)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Description)
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <form method="POST">
+        <button asp-action="Delete">Potwierdź</button>
+    </form>
+</main>

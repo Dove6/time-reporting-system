@@ -1,0 +1,53 @@
+﻿@model TRS.Models.MonthlyReportEntryModel
+
+@{
+    ViewData["Title"] = "Dodawanie wpisu";
+}
+
+<main class="bd-main order-1 gap-3">
+    <form method="POST">
+        <div class="text-center">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Code)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Subcode)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Time)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        @Html.EditorFor(model => model.Date)
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.Code)
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.Subcode)
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.Time)
+                    </td>
+                    <td>
+                        @Html.EditorFor(model => model.Description)
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <button asp-action="Add">Zatwierdź</button>
+    </form>
+</main>

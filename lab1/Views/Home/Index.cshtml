@@ -1,8 +1,64 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model TRS.Models.ViewModels.DailyReportModel
+
+@{
+    ViewData["Title"] = "Strona główna";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>This is the main view of Home controller.</p>
-</div>
+<main class="bd-main order-1 gap-3">
+    <div class="d-md-flex align-items-center justify-content-between">
+        <h1 class="display-6">Podsumowanie czasu pracy w dniu @Html.DisplayFor(model => model.Date)</h1>
+        <form asp-action="Index" method="GET">
+            <span>Przejdź do: </span>
+            <input asp-for="Date" />
+            <input type="submit" value="Wyślij" />
+        </form>
+    </div>
+    <div class="text-center">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Entries[0].Code)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Entries[0].Subcode)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Entries[0].Time)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Entries[0].Description)
+                </th>
+                <th>
+                    Akcje
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Entries)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Code)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Subcode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Time)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        <a asp-controller="ReportEntry" asp-action="Index">Obejrzyj</a> |
+                        <a asp-controller="ReportEntry" asp-action="Edit">Zmień</a> |
+                        <a asp-controller="ReportEntry" asp-action="Delete">Skasuj</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <a asp-controller="ReportEntry" asp-action="Add">Dodaj</a>
+</main>
