@@ -9,6 +9,8 @@ namespace TRS.DataManager
         void AddUser(UserModel user);
         UserModel FindUserByName(string name);
 
+        Dictionary<string, UserModel> GetAllUsers();
+
         void AddProject(ProjectModel project);
         ProjectModel FindProjectByCode(string code);
         List<ProjectModel> GetAllProjects();

@@ -36,14 +36,14 @@ namespace TRS.DataManager
             _mapper = mapper;
         }
 
-        private List<UserModel> ReadAllUsers()
+        private Dictionary<string, UserModel> ReadAllUsers()
         {
             if (!File.Exists(UserListPath))
-                return new List<UserModel>();
+                return new Dictionary<string, UserModel>();
 
             var data = File.ReadAllText(UserListPath);
             var userList = JsonSerializer.Deserialize<List<string>>(data, SerializerOptions);
-            return userList.Select(x => new UserModel { Name = x }).ToList();
+            return userList.Select(x => new UserModel { Name = x }).ToDictionary(x => x.Name, x => x);
         }
 
         private List<ProjectModel> ReadAllProjects()
@@ -91,9 +91,9 @@ namespace TRS.DataManager
             return mappedReport;
         }
 
-        private void WriteAllUsers(IEnumerable<UserModel> userList)
+        private void WriteAllUsers(Dictionary<string, UserModel> users)
         {
-            var mappedUserList = userList.Select(x => x.Name).ToList();
+            var mappedUserList = users.Values.Select(x => x.Name).ToList();
             var data = JsonSerializer.Serialize(mappedUserList, SerializerOptions);
             File.WriteAllText(UserListPath, data);
         }
@@ -117,12 +117,19 @@ namespace TRS.DataManager
 
         public void AddUser(UserModel user)
         {
-            throw new NotImplementedException();
+            var users = ReadAllUsers();
+            users.TryAdd(user.Name, user);
+            WriteAllUsers(users);
         }
 
         public UserModel FindUserByName(string name)
         {
-            return ReadAllUsers().FirstOrDefault(x => x.Name == name);
+            return ReadAllUsers().TryGetValue(name, out var user) ? user : null;
+        }
+
+        public Dictionary<string, UserModel> GetAllUsers()
+        {
+            return ReadAllUsers();
         }
 
         public void AddProject(ProjectModel project)

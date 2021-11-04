@@ -1,10 +1,15 @@
-﻿@model TRS.Models.DomainModels.UserModel
+﻿@model TRS.Models.ViewModels.UserSelectListModel
 
 @{
-    ViewData["Title"] = "User Page";
+    ViewData["Title"] = "Logowanie";
 }
 
 <div class="text-center">
-    <h1 class="display-6">Welcome</h1>
-    <p>This is the main view of User controller.</p>
+    <h1 class="display-6">Wybierz swoją nazwę użytkownika:</h1>
+    <form method="POST">
+        <select asp-for="Username" asp-items="Model.Usernames">
+        </select>
+        <button asp-action="Login">Zaloguj się</button>
+    </form>
+    <p>Nie posiadasz konta? <a asp-action="Register">Zarejestruj się!</a></p>
 </div>

@@ -1,8 +1,11 @@
 ﻿@{
-    ViewData["Title"] = "User Page";
+    ViewData["Title"] = "Rejestracja";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>This is the main view of User controller.</p>
+    <h1 class="display-6">Wpisz nową nazwę użytkownika:</h1>
+    <form method="POST">
+        <input type="text" name="username" />
+        <button asp-action="Register">Utwórz konto</button>
+    </form>
 </div>
