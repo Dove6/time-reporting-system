@@ -3,11 +3,19 @@
 @{
     ViewData["Title"] = "Strona główna";
     var date = Model.Date.ToString("yyyy-MM-dd");
+    var dailySummary = Model.Report.Entries.Where(x => DayEquals(Model.Date, x.Date))
+        .GroupBy(x => x.Code)
+        .ToDictionary(x => x.Key, x => x.Sum(y => y.Time));
+    var dailyTotal = Model.Report.Entries.Where(x => DayEquals(Model.Date, x.Date))
+        .Sum(x => x.Time);
+
+    bool DayEquals(DateTime date1, DateTime date2) =>
+        date1.ToString("yyyy-MM-dd") == date2.ToString("yyyy-MM-dd");
 }
 
 <main class="bd-main order-1 gap-3">
     <div class="d-md-flex align-items-center justify-content-between">
-        <h1 class="display-6">Podsumowanie czasu pracy w dniu @Html.DisplayFor(model => model.Date)</h1>
+        <h1 class="display-6">Raport czasu pracy na dzień @Html.DisplayFor(model => model.Date)</h1>
         <form asp-action="Index" method="GET">
             <span>Przejdź do: </span>
             <input asp-for="Date"/>
@@ -38,7 +46,7 @@
             <tbody>
             @for (var i = 0; i < Model.Report.Entries.Count; i++)
             {
-                if (Model.Report.Entries[i].Date.ToString("yyyy-MM-dd") != Model.Date.ToString("yyyy-MM-dd"))
+                if (!DayEquals(Model.Report.Entries[i].Date, Model.Date))
                     continue;
                 <tr>
                     <td>
@@ -65,5 +73,34 @@
             </tbody>
         </table>
     </div>
-    <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date">Dodaj</a>
+    <p>
+        <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date">Dodaj</a>
+    </p>
+    <p>
+        <strong>Podsumowanie dzienne</strong>
+    </p>
+    <table class="table">
+        <tbody>
+        @foreach (var (projectCode, time) in dailySummary)
+        {
+            <tr>
+                <td>
+                    @projectCode
+                </td>
+                <td>
+                    @time
+                </td>
+            </tr>
+        }
+        <tr><td></td><td></td></tr>
+        <tr>
+            <td>
+                Razem
+            </td>
+            <td>
+                @dailyTotal
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </main>
