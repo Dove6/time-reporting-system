@@ -6,20 +6,18 @@ namespace TRS.DataManager
 {
     public interface IDataManager
     {
-        void AddUser(UserModel user);
-        UserModel FindUserByName(string name);
+        User AddUser(User user);
+        User FindUserByName(string name);
 
-        Dictionary<string, UserModel> GetAllUsers();
+        HashSet<User> GetAllUsers();
 
-        void AddProject(ProjectModel project);
-        ProjectModel FindProjectByCode(string code);
-        List<ProjectModel> GetAllProjects();
-        void UpdateProject(ProjectModel project);
+        Project AddProject(Project project);
+        Project FindProjectByCode(string code);
+        HashSet<Project> GetAllProjects();
+        Project UpdateProject(Project project);
 
-        void AddReportEntry(ReportEntryModel reportEntry);
-        void DeleteReportEntry(ReportEntryModel reportEntry);
-        ReportEntryModel FindReportEntryByIdForUserInMonth(int id, string user, DateTime month);
-        ReportModel GetReportForUserInMonth(string user, DateTime month);
-        void UpdateReportEntry(ReportEntryModel reportEntry);
+        Report AddReport(Report report);
+        Report FindReportByUserAndMonth(User user, DateTime month);
+        Report UpdateReport(Report report);
     }
 }

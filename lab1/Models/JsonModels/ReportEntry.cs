@@ -4,7 +4,7 @@ using TRS.DataManager.JsonHelpers;
 
 namespace TRS.Models.JsonModels
 {
-    public class ReportEntryModel
+    public class ReportEntry
     {
         [JsonConverter(typeof(DateJsonConverter))]
         public DateTime Date { get; set; }

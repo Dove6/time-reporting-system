@@ -1,6 +1,6 @@
 ﻿namespace TRS.Models.JsonModels
 {
-    public class CategoryModel
+    public class Category
     {
         public string Code { get; set; }
     }

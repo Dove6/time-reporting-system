@@ -33,7 +33,7 @@ namespace TRS.Controllers
         {
             var userSelectList = new UserSelectListModel
             {
-                Usernames = _dataManager.GetAllUsers().Values.Select(x => new SelectListItem(x.Name, x.Name)).ToList()
+                Usernames = _dataManager.GetAllUsers().Select(x => new SelectListItem(x.Name, x.Name)).ToList()
             };
             return View(userSelectList);
         }
@@ -68,7 +68,7 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Register(string username)
         {
-            _dataManager.AddUser(new UserModel { Name = username });
+            _dataManager.AddUser(new User(username));
             return Login(username);
         }
 

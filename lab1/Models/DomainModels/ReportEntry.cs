@@ -3,13 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TRS.Models.DomainModels
 {
-    public class ReportEntryModel
+    public class ReportEntry
     {
         [Required]
-        public int Id { get; set; }
-
-        [Required]
-        public string Owner { get; set; }
+        public User Owner { get; set; }
 
         [Display(Name = "Data")]
         [DataType(DataType.Date)]

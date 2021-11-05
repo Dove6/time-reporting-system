@@ -2,9 +2,9 @@
 @using TRS.Models.DomainModels
 
 @{
-    var user = (UserModel)null;
+    var user = (User)null;
     if (Context.Request.Cookies.TryGetValue("user", out var encodedUser))
-        user = JsonSerializer.Deserialize<UserModel>(encodedUser);
+        user = JsonSerializer.Deserialize<User>(encodedUser);
 }
 
 <!DOCTYPE html>

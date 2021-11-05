@@ -6,6 +6,6 @@ namespace TRS.Models.DomainModels
     public class ProjectListModel
     {
         [Required]
-        public List<ProjectModel> Activities { get; set; }
+        public HashSet<Project> Activities { get; set; }
     }
 }

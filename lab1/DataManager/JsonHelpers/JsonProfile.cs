@@ -8,19 +8,19 @@ namespace TRS.DataManager.JsonHelpers
     {
         public JsonProfile()
         {
-            CreateMap<TRS.Models.JsonModels.ProjectModel, ProjectModel>();
-            CreateMap<TRS.Models.JsonModels.ProjectListModel, ProjectListModel>();
-            CreateMap<TRS.Models.JsonModels.ReportEntryModel, ReportEntryModel>();
-            CreateMap<TRS.Models.JsonModels.AcceptedSummaryModel, AcceptedSummaryModel>();
-            CreateMap<TRS.Models.JsonModels.ReportModel, ReportModel>()
-                .AfterMap((_, dest) =>
-                {
-                    var index = 1;
-                    foreach (var entry in dest.Entries)
-                        entry.Id = index++;
-                });
-            CreateMap<ReportModel, TRS.Models.JsonModels.ReportModel>();
-            CreateMap<ReportEntryModel, DailyReportEntryModel>();
+            CreateMap<Models.JsonModels.Project, Project>()
+                .ConstructUsing(src => new Project(src.Code));
+            CreateMap<Models.JsonModels.ProjectListModel, ProjectListModel>();
+            CreateMap<Models.JsonModels.ReportEntry, ReportEntry>();
+            CreateMap<Models.JsonModels.AcceptedSummary, AcceptedSummary>()
+                .ConstructUsing(src => new AcceptedSummary(src.Code));
+            CreateMap<Models.JsonModels.ReportModel, Report>()
+                .ConstructUsing(src => new Report(
+                    JsonDataManager.GetUserFromFilename(src.Filename),
+                    JsonDataManager.GetMonthFromFilename(src.Filename)
+                ));
+            CreateMap<Report, Models.JsonModels.ReportModel>();
+            CreateMap<ReportEntry, DailyReportEntryModel>();
         }
     }
 }

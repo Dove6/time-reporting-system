@@ -30,9 +30,9 @@ namespace TRS.Controllers
         {
             if (Request.Cookies.TryGetValue("user", out var encodedUser))
             {
-                var user = JsonSerializer.Deserialize<UserModel>(encodedUser);
+                var user = JsonSerializer.Deserialize<User>(encodedUser);
                 var dateFilter = date ?? DateTime.Today;
-                var report = _dataManager.GetReportForUserInMonth(user.Name, dateFilter);
+                var report = _dataManager.FindReportByUserAndMonth(user, dateFilter);
                 var filteredEntries = report.Entries
                     .Where(x => x.Date.ToString("yyyy-MM-dd") == dateFilter.ToString("yyyy-MM-dd"));
                 var dailyReport = new DailyReportModel
