@@ -62,20 +62,26 @@
                         @Html.DisplayFor(model => model.Report.Entries[i].Description)
                     </td>
                     <td>
-                        <a asp-controller="ReportEntry" asp-action="Index" asp-route-date="@date" asp-route-id="@i">Obejrzyj</a> |
-                        <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date" asp-route-id="@i">Zmień</a> |
-                        <form method="POST">
-                            <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date" asp-route-id="@i">Skasuj</button>
-                        </form>
+                        <a asp-controller="ReportEntry" asp-action="Index" asp-route-date="@date" asp-route-id="@i">Obejrzyj</a>
+                        @if (!Model.Report.Frozen)
+                        {
+                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date" asp-route-id="@i">Zmień</a>
+                            <form method="POST">
+                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date" asp-route-id="@i">Skasuj</button>
+                            </form>
+                        }
                     </td>
                 </tr>
             }
             </tbody>
         </table>
     </div>
-    <p>
-        <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date">Dodaj</a>
-    </p>
+    @if (!Model.Report.Frozen)
+    {
+        <p>
+            <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date">Dodaj</a>
+        </p>
+    }
     <p>
         <strong>Podsumowanie dzienne</strong>
     </p>

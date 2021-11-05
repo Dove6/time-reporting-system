@@ -22,13 +22,23 @@ namespace TRS.Controllers
 
         public IActionResult Index(DateTime? date)
         {
-            if (HttpContext.Items.TryGetValue("user", out var user))
-            {
-                var dateFilter = date ?? DateTime.Today;
-                var report = DataManager.FindReportByUserAndMonth((User)user, dateFilter);
-                return View(new DailyReportModel { Date = dateFilter, Report = report });
-            }
-            return View("IndexNotLoggedIn");
+            var user = LoggedInUser;
+            if (user == null)
+                return View("IndexNotLoggedIn");
+            var dateFilter = date ?? DateTime.Today;
+            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
+            return View(new DailyReportModel { Date = dateFilter, Report = report });
+        }
+
+        [HttpPost]
+        public IActionResult FreezeReport(DateTime? date)
+        {
+            var user = LoggedInUser;
+            var dateFilter = date ?? DateTime.Today;
+            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
+            report.Frozen = true;
+            DataManager.UpdateReport(report);
+            return RedirectToAction("Index");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
