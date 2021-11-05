@@ -20,7 +20,7 @@ namespace TRS.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index(DateTime? date, int id)
+        public IActionResult Show(DateTime? date, int id)
         {
             var user = (User)HttpContext.Items["user"];
             var dateFilter = date ?? DateTime.Today;

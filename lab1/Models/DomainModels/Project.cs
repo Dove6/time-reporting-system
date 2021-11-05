@@ -22,7 +22,7 @@ namespace TRS.Models.DomainModels
         public bool Active { get; set; }
 
         [Required]
-        public HashSet<Category> Subactivities { get; } = new();
+        public HashSet<Category> Subactivities { get; set; } = new();
 
         public Project(string code)
         {

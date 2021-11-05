@@ -62,7 +62,7 @@
                         @Html.DisplayFor(model => model.Report.Entries[i].Description)
                     </td>
                     <td>
-                        <a asp-controller="ReportEntry" asp-action="Index" asp-route-date="@date" asp-route-id="@i">Obejrzyj</a>
+                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date" asp-route-id="@i">Obejrzyj</a>
                         @if (!Model.Report.Frozen)
                         {
                             <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date" asp-route-id="@i">Zmień</a>

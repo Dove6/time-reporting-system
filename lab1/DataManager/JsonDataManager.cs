@@ -56,7 +56,7 @@ namespace TRS.DataManager
 
             var data = File.ReadAllText(ProjectListPath);
             var projectList = JsonSerializer.Deserialize<Models.JsonModels.ProjectListModel>(data, SerializerOptions);
-            var mappedProjectList = _mapper.Map<ProjectListModel>(projectList);
+            var mappedProjectList = _mapper.Map<ProjectList>(projectList);
             return mappedProjectList.Activities;
         }
 
@@ -100,12 +100,12 @@ namespace TRS.DataManager
 
         private void WriteAllProjects(HashSet<Project> projectList)
         {
-            var mappedProjectList = new TRS.Models.JsonModels.ProjectListModel
+            var mappedProjectList = new Models.JsonModels.ProjectListModel
             {
                 Activities = _mapper.Map<List<Models.JsonModels.Project>>(projectList)
             };
             var data = JsonSerializer.Serialize(mappedProjectList, SerializerOptions);
-            File.WriteAllText(UserListPath, data);
+            File.WriteAllText(ProjectListPath, data);
         }
 
         private void WriteReportForUserInMonth(Report report)

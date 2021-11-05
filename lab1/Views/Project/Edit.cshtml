@@ -1,8 +1,53 @@
-﻿@{
-    ViewData["Title"] = "Project Page";
+﻿@model TRS.Models.ViewModels.ProjectModel
+@{
+    ViewData["Title"] = "Edycja projektu";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>This is the main view of Project controller.</p>
-</div>
+<main class="bd-main order-1 gap-3">
+    <h1 class="display-6">Edycja projektu @Model.Name</h1>
+    <form method="POST">
+        <div class="text-center">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Code)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Budget)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Subactivities)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Active)
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <input asp-for="Code" readonly />
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Name)
+                    </td>
+                    <td>
+                        <input asp-for="Budget" />
+                    </td>
+                    <td>
+                        <textarea asp-for="Subactivities"></textarea>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Active)
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <button asp-action="Edit">Zatwierdź</button>
+    </form>
+</main>

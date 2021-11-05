@@ -1,8 +1,69 @@
-﻿@{
-    ViewData["Title"] = "Project Page";
+﻿@model TRS.Models.ViewModels.ProjectListModel
+@{
+    ViewData["Title"] = "Przegląd projektów";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>This is the main view of Project controller.</p>
-</div>
+<main class="bd-main order-1 gap-3">
+    <h1 class="display-6">Nadzorowane projekty</h1>
+    <div class="text-center">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Activities[0].Code)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Activities[0].Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Activities[0].Budget)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Activities[0].Subactivities)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Activities[0].Active)
+                </th>
+                <th>
+                    Akcje
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @for (var i = 0; i < Model.Activities.Length; i++)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(model => model.Activities[i].Code)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Activities[i].Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Activities[i].Budget)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Activities[i].Subactivities)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Activities[i].Active)
+                    </td>
+                    <td>
+                        <a asp-controller="Project" asp-action="Show" asp-route-id="@Model.Activities[i].Code">Obejrzyj</a>
+                        @if (Model.Activities[i].Active)
+                        {
+                            <a asp-controller="Project" asp-action="Edit" asp-route-id="@Model.Activities[i].Code">Zmień</a>
+                            <form method="POST">
+                                <button asp-controller="Project" asp-action="Close" asp-route-id="@Model.Activities[i].Code">Zamknij</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <p>
+        <a asp-controller="Project" asp-action="Add">Dodaj</a>
+    </p>
+</main>
