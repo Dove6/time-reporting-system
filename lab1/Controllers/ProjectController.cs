@@ -5,7 +5,7 @@ using TRS.Models;
 
 namespace TRS.Controllers
 {
-    public class ProjectController : Controller
+    public class ProjectController : BaseController
     {
         private readonly ILogger<ProjectController> _logger;
 

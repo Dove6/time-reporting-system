@@ -5,7 +5,7 @@ using TRS.Models;
 
 namespace TRS.Controllers
 {
-    public class ReportEntryController : Controller
+    public class ReportEntryController : BaseController
     {
         private readonly ILogger<ReportEntryController> _logger;
 

@@ -1,10 +1,9 @@
-﻿@using System.Text.Json
-@using TRS.Models.DomainModels
+﻿@using TRS.Models.DomainModels
 
 @{
     var user = (User)null;
-    if (Context.Request.Cookies.TryGetValue("user", out var encodedUser))
-        user = JsonSerializer.Deserialize<User>(encodedUser);
+    if (Context.Items.TryGetValue("user", out var contextUser))
+        user = (User)contextUser;
 }
 
 <!DOCTYPE html>

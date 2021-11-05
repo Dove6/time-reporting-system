@@ -13,7 +13,7 @@ using TRS.Models.ViewModels;
 
 namespace TRS.Controllers
 {
-    public class UserController : Controller
+    public class UserController : BaseController
     {
         private readonly ILogger<UserController> _logger;
         private readonly IDataManager _dataManager;
