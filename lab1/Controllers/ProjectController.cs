@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -22,7 +24,7 @@ namespace TRS.Controllers
 
         public IActionResult Index()
         {
-            var userProjectList = DataManager.GetAllProjects().Where(x => x.Manager == LoggedInUser.Name).ToList();
+            var userProjectList = DataManager.FindProjectsByManager(LoggedInUser);
             var projectListModel = new ProjectListModel
             {
                 Activities = Mapper.Map<ProjectModel[]>(userProjectList)
@@ -34,7 +36,13 @@ namespace TRS.Controllers
         {
             var project = DataManager.FindProjectByCode(id);
             var projectModel = Mapper.Map<ProjectModel>(project);
-            return View(projectModel);
+            var users = DataManager.FindUsersByProject(project).Select(x => x.Name).ToArray();
+            var projectWithUsersModel = new ProjectWithUsersModel
+            {
+                Project = projectModel,
+                Users = users
+            };
+            return View(projectWithUsersModel);
         }
 
         public IActionResult Edit(string id)

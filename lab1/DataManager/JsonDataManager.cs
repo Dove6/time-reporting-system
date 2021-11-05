@@ -60,35 +60,24 @@ namespace TRS.DataManager
             return mappedProjectList.Activities;
         }
 
-        private List<ReportEntry> ReadAllReportEntries()
+        private HashSet<Report> ReadAllReports(User user = null, DateTime? month = null)
         {
-            var allReportEntries = new List<ReportEntry>();
-            foreach (var reportPath in Directory.GetFiles(StoragePath, "*?-*?-*?.json"))
+            var allReports = new HashSet<Report>();
+            var userSearchPattern = user != null ? user.Name : "*?";
+            var monthSearchPattern = month?.ToString("yyyy-MM") ?? "????-??";
+            var searchPattern = $"{userSearchPattern}-{monthSearchPattern}.json";
+            foreach (var reportPath in Directory.GetFiles(StoragePath, searchPattern))
             {
-                var user = ParseFilename(reportPath).Owner;
                 var data = File.ReadAllText(reportPath);
                 var report = JsonSerializer.Deserialize<Models.JsonModels.ReportModel>(data, SerializerOptions);
+                report.Filename = reportPath;
                 var mappedReport = _mapper.Map<Report>(report);
+                var owner = user ?? GetUserFromFilename(reportPath);
                 foreach (var entry in mappedReport.Entries)
-                    entry.Owner = user;
-                allReportEntries.AddRange(mappedReport.Entries);
+                    entry.Owner = owner;
+                allReports.Add(mappedReport);
             }
-            return allReportEntries;
-        }
-
-        private Report ReadReportForUserInMonth(User user, DateTime month)
-        {
-            var reportPath = UserMonthEntryListPath(user.Name, month);
-            if (!File.Exists(reportPath))
-                return new Report(user, month);
-
-            var data = File.ReadAllText(reportPath);
-            var report = JsonSerializer.Deserialize<Models.JsonModels.ReportModel>(data, SerializerOptions);
-            report.Filename = reportPath;
-            var mappedReport = _mapper.Map<Report>(report);
-            foreach (var entry in mappedReport.Entries)
-                entry.Owner = user;
-            return mappedReport;
+            return allReports;
         }
 
         private void WriteAllUsers(HashSet<User> users)
@@ -129,6 +118,13 @@ namespace TRS.DataManager
             return GetAllUsers().FirstOrDefault(x => x.Name == name);
         }
 
+        public HashSet<User> FindUsersByProject(Project project)
+        {
+            return ReadAllReports().SelectMany(x => x.Entries)
+                .Select(x => x.Owner)
+                .ToHashSet();
+        }
+
         public HashSet<User> GetAllUsers()
         {
             return ReadAllUsers();
@@ -145,6 +141,11 @@ namespace TRS.DataManager
         public Project FindProjectByCode(string code)
         {
             return ReadAllProjects().FirstOrDefault(x => x.Code == code);
+        }
+
+        HashSet<Project> IDataManager.FindProjectsByManager(User manager)
+        {
+            return ReadAllProjects().Where(x => x.Manager == manager.Name).ToHashSet();
         }
 
         public HashSet<Project> GetAllProjects()
@@ -170,7 +171,17 @@ namespace TRS.DataManager
 
         public Report FindReportByUserAndMonth(User user, DateTime month)
         {
-            return ReadReportForUserInMonth(user, month);
+            return ReadAllReports(user, month).FirstOrDefault() ?? new Report(user, month);
+        }
+
+        public HashSet<Report> FindReportsByUser(User user)
+        {
+            return ReadAllReports(user);
+        }
+
+        public HashSet<Report> GetAllReports()
+        {
+            return ReadAllReports();
         }
 
         public Report UpdateReport(Report report)

@@ -1,50 +1,62 @@
-﻿@model TRS.Models.ViewModels.ProjectModel
+﻿@model TRS.Models.ViewModels.ProjectWithUsersModel
 @{
     ViewData["Title"] = "Przegląd projektu";
 }
 
 <main class="bd-main order-1 gap-3">
-    <h1 class="display-6">Przegląd projektu @Model.Name</h1>
+    <h1 class="display-6">Przegląd projektu @Model.Project.Name</h1>
     <div class="text-center">
         <table class="table">
             <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.Code)
+                    @Html.DisplayNameFor(model => model.Project.Code)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Name)
+                    @Html.DisplayNameFor(model => model.Project.Name)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Budget)
+                    @Html.DisplayNameFor(model => model.Project.Budget)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Subactivities)
+                    @Html.DisplayNameFor(model => model.Project.Subactivities)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Active)
+                    @Html.DisplayNameFor(model => model.Project.Active)
                 </th>
             </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        @Html.DisplayFor(model => model.Code)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(model => model.Name)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(model => model.Budget)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(model => model.Subactivities)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(model => model.Active)
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => model.Project.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Project.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Project.Budget)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Project.Subactivities)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Project.Active)
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>
+    @if (Model.Users.Length > 0)
+    {
+        <strong>Zestawienie czasu pracy dla pracowników:</strong>
+        <ul>
+        @foreach (var user in Model.Users)
+        {
+            <li>
+                <a asp-controller="Report" asp-action="Index" asp-route-username="@user">@user</a>
+            </li>
+        }
+        </ul>
+    }
 </main>

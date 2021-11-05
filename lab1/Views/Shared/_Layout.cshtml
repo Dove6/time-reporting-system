@@ -1,9 +1,9 @@
 ﻿@using TRS.Models.DomainModels
 
 @{
-    var user = (User)null;
+    var loggedInUser = (User)null;
     if (Context.Items.TryGetValue("user", out var contextUser))
-        user = (User)contextUser;
+        loggedInUser = (User)contextUser;
 }
 
 <!DOCTYPE html>
@@ -38,7 +38,7 @@
                 </ul>
                 <ul class="navbar-nav flex-grow-1 flex-row-reverse">
                     @{
-                        if (user != null)
+                        if (loggedInUser != null)
                         {
                             <li class="nav-item">
                                 <form method="POST">
@@ -46,7 +46,7 @@
                                 </form>
                             </li>
                             <li>
-                                Zalogowany jako @user.Name
+                                Zalogowany jako @loggedInUser.Name
                             </li>
                         }
                         else

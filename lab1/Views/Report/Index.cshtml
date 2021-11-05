@@ -44,7 +44,7 @@
     @if (!Model.Frozen)
     {
         <form method="POST">
-            <button asp-controller="Report" asp-action="Freeze" asp-route-date="@date">Zatwierdź</button>
+            <button asp-controller="Report" asp-action="Freeze" asp-route-date="@date" asp-route-username="@Model.Owner">Zatwierdź</button>
         </form>
     }
 </main>
