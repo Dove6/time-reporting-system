@@ -1,4 +1,5 @@
-﻿@model TRS.Models.DomainModels.ReportEntry
+﻿@using TRS.Models.DomainModels
+@model TRS.Models.DomainModels.ReportEntry
 
 @{
     ViewData["Title"] = "Dodawanie wpisu";
@@ -30,19 +31,19 @@
                 <tbody>
                 <tr>
                     <td>
-                        @Html.EditorFor(model => model.Date)
+                        <input name="@nameof(ReportEntry.Date)" asp-for="Date" />
                     </td>
                     <td>
-                        @Html.EditorFor(model => model.Code)
+                        <input name="@nameof(ReportEntry.Code)" asp-for="Code" />
                     </td>
                     <td>
-                        @Html.EditorFor(model => model.Subcode)
+                        <input name="@nameof(ReportEntry.Subcode)" asp-for="Subcode" />
                     </td>
                     <td>
-                        @Html.EditorFor(model => model.Time)
+                        <input name="@nameof(ReportEntry.Time)" asp-for="Time" />
                     </td>
                     <td>
-                        @Html.EditorFor(model => model.Description)
+                        <input name="@nameof(ReportEntry.Description)" asp-for="Description" />
                     </td>
                 </tr>
                 </tbody>

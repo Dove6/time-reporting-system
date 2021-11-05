@@ -46,14 +46,31 @@ namespace TRS.Controllers
             return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToString("yyyy-MM-dd") });
         }
 
-        public IActionResult Add()
+        public IActionResult Add(DateTime? date)
         {
-            return View();
+            var initialDate = date ?? DateTime.Today;
+            var reportEntry = new ReportEntry { Date = initialDate };
+            return View(reportEntry);
         }
 
-        public IActionResult Delete()
+        [HttpPost]
+        public IActionResult Add(ReportEntry reportEntry)
         {
-            return View();
+            reportEntry.Owner = LoggedInUser;
+            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, reportEntry.Date);
+            report.Entries.Add(reportEntry);
+            DataManager.UpdateReport(report);
+            return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToString("yyyy-MM-dd") });
+        }
+
+        [HttpPost]
+        public IActionResult Delete(DateTime? date, int id)
+        {
+            var dateFilter = date ?? DateTime.Today;
+            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, dateFilter);
+            report.Entries.RemoveAt(id);
+            DataManager.UpdateReport(report);
+            return RedirectToAction("Index", "Home", new { Date = dateFilter.ToString("yyyy-MM-dd") });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
