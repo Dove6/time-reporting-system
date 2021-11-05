@@ -1,7 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
-using System.Text.Json;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -36,11 +34,26 @@ namespace TRS.Controllers
         {
             var project = DataManager.FindProjectByCode(id);
             var projectModel = Mapper.Map<ProjectModel>(project);
-            var users = DataManager.FindUsersByProject(project).Select(x => x.Name).ToArray();
-            var projectWithUsersModel = new ProjectWithUsersModel
+            var reports = DataManager.FindReportByProject(project);
+            var userSummaries = reports.Select(x =>
+            {
+                var acceptedSummary = x.Accepted.FirstOrDefault(y => y.Code == project.Code);
+                return new UserProjectMonthlySummaryModel
+                {
+                    Username = x.Owner.Name,
+                    Month = x.Month,
+                    Time = acceptedSummary?.Time ?? x.Entries.Where(y => y.Code == project.Code).Sum(y => y.Time),
+                    Status = acceptedSummary != null
+                        ? UserProjectMonthlySummaryModel.SummaryStatus.Accepted
+                        : x.Frozen
+                            ? UserProjectMonthlySummaryModel.SummaryStatus.Declared
+                            : UserProjectMonthlySummaryModel.SummaryStatus.InProgress
+                };
+            }).ToArray();
+            var projectWithUsersModel = new ProjectWithUserSummaryModel
             {
                 Project = projectModel,
-                Users = users
+                UserSummaries = userSummaries
             };
             return View(projectWithUsersModel);
         }

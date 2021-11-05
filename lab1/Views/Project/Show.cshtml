@@ -1,4 +1,5 @@
-﻿@model TRS.Models.ViewModels.ProjectWithUsersModel
+﻿@using TRS.Models.ViewModels
+@model TRS.Models.ViewModels.ProjectWithUserSummaryModel
 @{
     ViewData["Title"] = "Przegląd projektu";
 }
@@ -47,16 +48,54 @@
             </tbody>
         </table>
     </div>
-    @if (Model.Users.Length > 0)
+    @if (Model.UserSummaries.Length > 0)
     {
         <strong>Zestawienie czasu pracy dla pracowników:</strong>
-        <ul>
-        @foreach (var user in Model.Users)
-        {
-            <li>
-                <a asp-controller="Report" asp-action="Index" asp-route-username="@user">@user</a>
-            </li>
-        }
-        </ul>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].Username)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].Month)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].Time)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].Status)
+                </th>
+                <th>
+                    Akcje
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var userSummary in Model.UserSummaries)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(model => userSummary.Username)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => userSummary.Month)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => userSummary.Time)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => userSummary.Status)
+                    </td>
+                    <td>
+                        @if (userSummary.Status != UserProjectMonthlySummaryModel.SummaryStatus.InProgress)
+                        {
+                            <a href="#">Zatwierdź</a>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
     }
 </main>

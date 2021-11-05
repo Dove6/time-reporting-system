@@ -20,6 +20,7 @@ namespace TRS.DataManager
         Report AddReport(Report report);
         Report FindReportByUserAndMonth(User user, DateTime month);
         HashSet<Report> FindReportsByUser(User user);
+        HashSet<Report> FindReportByProject(Project project);
         HashSet<Report> GetAllReports();
         Report UpdateReport(Report report);
     }

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TRS.DataManager;
 using TRS.Models;
-using TRS.Models.DomainModels;
 
 namespace TRS.Controllers
 {
@@ -19,9 +18,9 @@ namespace TRS.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index(DateTime? date, string username)
+        public IActionResult Index(DateTime? date)
         {
-            var user = string.IsNullOrEmpty(username) ? LoggedInUser : new User(username);
+            var user = LoggedInUser;
             var dateFilter = date ?? DateTime.Today;
             var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
             return View(report);

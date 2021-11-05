@@ -21,6 +21,7 @@ namespace TRS.DataManager
 
         private static readonly string UserListPath = Path.Combine(StoragePath, UserListFilename);
         private static readonly string ProjectListPath = Path.Combine(StoragePath, ProjectListFilename);
+
         private static string UserMonthEntryListPath(string username, DateTime month) =>
             Path.Combine(StoragePath, $"{username}-{month.ToString(MonthDateFormat)}.json");
 
@@ -179,6 +180,11 @@ namespace TRS.DataManager
             return ReadAllReports(user);
         }
 
+        public HashSet<Report> FindReportByProject(Project project)
+        {
+            return ReadAllReports().Where(x => x.Entries.Exists(y => y.Code == project.Code)).ToHashSet();
+        }
+
         public HashSet<Report> GetAllReports()
         {
             return ReadAllReports();
@@ -197,11 +203,14 @@ namespace TRS.DataManager
             return new ParsedFilename
             {
                 Owner = new User(userRegex.Match(filename).Groups[1].Value),
-                Month = DateTime.ParseExact(userRegex.Match(filename).Groups[2].Value, "yyyy-MM", CultureInfo.InvariantCulture)
+                Month = DateTime.ParseExact(userRegex.Match(filename).Groups[2].Value,
+                    "yyyy-MM",
+                    CultureInfo.InvariantCulture)
             };
         }
 
         public static User GetUserFromFilename(string reportPath) => ParseFilename(reportPath).Owner;
+
         public static DateTime GetMonthFromFilename(string reportPath) => ParseFilename(reportPath).Month;
 
         private class ParsedFilename
