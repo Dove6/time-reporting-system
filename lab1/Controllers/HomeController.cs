@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text.Json;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -15,15 +12,12 @@ namespace TRS.Controllers
 {
     public class HomeController : BaseController
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly IDataManager _dataManager;
-        private readonly IMapper _mapper;
+        private ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, IDataManager dataManager, IMapper mapper)
+        public HomeController(IDataManager dataManager, IMapper mapper, ILogger<HomeController> logger)
+            : base(dataManager, mapper)
         {
             _logger = logger;
-            _dataManager = dataManager;
-            _mapper = mapper;
         }
 
         public IActionResult Index(DateTime? date)
@@ -31,15 +25,8 @@ namespace TRS.Controllers
             if (HttpContext.Items.TryGetValue("user", out var user))
             {
                 var dateFilter = date ?? DateTime.Today;
-                var report = _dataManager.FindReportByUserAndMonth((User)user, dateFilter);
-                var filteredEntries = report.Entries
-                    .Where(x => x.Date.ToString("yyyy-MM-dd") == dateFilter.ToString("yyyy-MM-dd"));
-                var dailyReport = new DailyReportModel
-                {
-                    Date = dateFilter,
-                    Entries = _mapper.Map<List<DailyReportEntryModel>>(filteredEntries)
-                };
-                return View(dailyReport);
+                var report = DataManager.FindReportByUserAndMonth((User)user, dateFilter);
+                return View(new DailyReportModel { Date = dateFilter, Report = report });
             }
             return View("IndexNotLoggedIn");
         }

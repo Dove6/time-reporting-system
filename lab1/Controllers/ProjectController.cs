@@ -1,15 +1,18 @@
 ﻿using System.Diagnostics;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using TRS.DataManager;
 using TRS.Models;
 
 namespace TRS.Controllers
 {
     public class ProjectController : BaseController
     {
-        private readonly ILogger<ProjectController> _logger;
+        private ILogger<ProjectController> _logger;
 
-        public ProjectController(ILogger<ProjectController> logger)
+        public ProjectController(IDataManager dataManager, IMapper mapper, ILogger<ProjectController> logger)
+            : base(dataManager, mapper)
         {
             _logger = logger;
         }

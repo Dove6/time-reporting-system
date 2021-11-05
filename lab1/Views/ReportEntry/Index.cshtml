@@ -1,7 +1,8 @@
-﻿@model TRS.Models.DomainModels.ReportEntry
+﻿@model TRS.Models.ViewModels.DailyReportModel
 
 @{
     ViewData["Title"] = "Podgląd wpisu";
+    var id = int.Parse((string)Url.ActionContext.RouteData.Values["id"]);
 }
 
 <main class="bd-main order-1 gap-3">
@@ -10,40 +11,43 @@
             <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.Date)
+                    @Html.DisplayNameFor(model => model.Report.Entries[0].Date)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Code)
+                    @Html.DisplayNameFor(model => model.Report.Entries[0].Code)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Subcode)
+                    @Html.DisplayNameFor(model => model.Report.Entries[0].Subcode)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Time)
+                    @Html.DisplayNameFor(model => model.Report.Entries[0].Time)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Description)
+                    @Html.DisplayNameFor(model => model.Report.Entries[0].Description)
                 </th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>
-                    @Html.DisplayFor(model => model.Date)
-                </td>
-                <td>
-                    @Html.DisplayFor(model => model.Code)
-                </td>
-                <td>
-                    @Html.DisplayFor(model => model.Subcode)
-                </td>
-                <td>
-                    @Html.DisplayFor(model => model.Time)
-                </td>
-                <td>
-                    @Html.DisplayFor(model => model.Description)
-                </td>
-            </tr>
+            @if (id < Model.Report.Entries.Count)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(model => model.Report.Entries[id].Date)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Report.Entries[id].Code)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Report.Entries[id].Subcode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Report.Entries[id].Time)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Report.Entries[id].Description)
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
     </div>

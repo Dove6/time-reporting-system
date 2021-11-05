@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -15,13 +16,12 @@ namespace TRS.Controllers
 {
     public class UserController : BaseController
     {
-        private readonly ILogger<UserController> _logger;
-        private readonly IDataManager _dataManager;
+        private ILogger<UserController> _logger;
 
-        public UserController(ILogger<UserController> logger, IDataManager dataManager)
+        public UserController(IDataManager dataManager, IMapper mapper, ILogger<UserController> logger)
+            : base(dataManager, mapper)
         {
             _logger = logger;
-            _dataManager = dataManager;
         }
 
         public IActionResult Index()
@@ -33,7 +33,7 @@ namespace TRS.Controllers
         {
             var userSelectList = new UserSelectListModel
             {
-                Usernames = _dataManager.GetAllUsers().Select(x => new SelectListItem(x.Name, x.Name)).ToList()
+                Usernames = DataManager.GetAllUsers().Select(x => new SelectListItem(x.Name, x.Name)).ToList()
             };
             return View(userSelectList);
         }
@@ -41,7 +41,7 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Login(string username)
         {
-            var user = _dataManager.FindUserByName(username);
+            var user = DataManager.FindUserByName(username);
             if (user != null)
                 Response.Cookies.Append("user",
                     JsonSerializer.Serialize(user),
@@ -68,7 +68,7 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Register(string username)
         {
-            _dataManager.AddUser(new User(username));
+            DataManager.AddUser(new User(username));
             return Login(username);
         }
 

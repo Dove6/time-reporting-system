@@ -1,27 +1,49 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using TRS.DataManager;
 using TRS.Models;
+using TRS.Models.DomainModels;
+using TRS.Models.ViewModels;
 
 namespace TRS.Controllers
 {
     public class ReportEntryController : BaseController
     {
-        private readonly ILogger<ReportEntryController> _logger;
+        private ILogger<ReportEntryController> _logger;
 
-        public ReportEntryController(ILogger<ReportEntryController> logger)
+        public ReportEntryController(IDataManager dataManager, IMapper mapper, ILogger<ReportEntryController> logger)
+            : base(dataManager, mapper)
         {
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(DateTime? date, int id)
         {
-            return View();
+            var user = (User)HttpContext.Items["user"];
+            var dateFilter = date ?? DateTime.Today;
+            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
+            return View(new DailyReportModel { Date = dateFilter, Report = report });
         }
 
-        public IActionResult Edit()
+        public IActionResult Edit(DateTime? date, int id)
         {
-            return View();
+            var user = LoggedInUser;
+            var dateFilter = date ?? DateTime.Today;
+            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
+            return View(new DailyReportModel { Date = dateFilter, Report = report });
+        }
+
+        [HttpPost]
+        public IActionResult Edit(int id, ReportEntry reportEntry)
+        {
+            reportEntry.Owner = LoggedInUser;
+            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, reportEntry.Date);
+            report.Entries[id] = reportEntry;
+            DataManager.UpdateReport(report);
+            return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToString("yyyy-MM-dd") });
         }
 
         public IActionResult Add()

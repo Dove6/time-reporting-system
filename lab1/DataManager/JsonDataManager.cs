@@ -26,8 +26,9 @@ namespace TRS.DataManager
 
         private static readonly JsonSerializerOptions SerializerOptions = new()
         {
+            AllowTrailingCommas = true,
             PropertyNamingPolicy = new LowerCaseNamingPolicy(),
-            AllowTrailingCommas = true
+            WriteIndented = true
         };
 
         private readonly IMapper _mapper;
