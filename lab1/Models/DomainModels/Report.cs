@@ -10,6 +10,8 @@ namespace TRS.Models.DomainModels
         public User Owner { get; }
 
         [Required]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM}", ApplyFormatInEditMode = true)]
         public DateTime Month { get; }
 
         [Required]

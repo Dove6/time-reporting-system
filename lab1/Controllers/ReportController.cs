@@ -5,15 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TRS.DataManager;
 using TRS.Models;
-using TRS.Models.ViewModels;
 
 namespace TRS.Controllers
 {
-    public class HomeController : BaseController
+    public class ReportController : BaseController
     {
-        private ILogger<HomeController> _logger;
+        private ILogger<ReportController> _logger;
 
-        public HomeController(IDataManager dataManager, IMapper mapper, ILogger<HomeController> logger)
+        public ReportController(IDataManager dataManager, IMapper mapper, ILogger<ReportController> logger)
             : base(dataManager, mapper)
         {
             _logger = logger;
@@ -22,11 +21,20 @@ namespace TRS.Controllers
         public IActionResult Index(DateTime? date)
         {
             var user = LoggedInUser;
-            if (user == null)
-                return View("IndexNotLoggedIn");
             var dateFilter = date ?? DateTime.Today;
             var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
-            return View(new DailyReportModel { Date = dateFilter, Report = report });
+            return View(report);
+        }
+
+        [HttpPost]
+        public IActionResult Freeze(DateTime? date)
+        {
+            var user = LoggedInUser;
+            var dateFilter = date ?? DateTime.Today;
+            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
+            report.Frozen = true;
+            DataManager.UpdateReport(report);
+            return RedirectToAction("Index");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
