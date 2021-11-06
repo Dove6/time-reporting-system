@@ -4,10 +4,9 @@ using TRS.Models.DomainModels;
 
 namespace TRS.Models.ViewModels
 {
-    public class EditableReportEntryModel
+    public class ReportEntryForEditingModel
     {
         public ReportEntry ReportEntry { get; set; }
-        public List<SelectListItem> ProjectSelectList { get; set; }
-        public Dictionary<string, List<SelectListItem>> ProjectCategorySelectList { get; set; }
+        public List<SelectListItem> CategorySelectList { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 ﻿@using TRS.Models.DomainModels
-@model TRS.Models.ViewModels.DailyReportModel
+@model TRS.Models.ViewModels.ReportEntryForEditingModel
 
 @{
     ViewData["Title"] = "Edycja wpisu";
@@ -13,48 +13,44 @@
                 <thead>
                 <tr>
                     <th>
-                        @Html.DisplayNameFor(model => model.Report.Entries[0].Date)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Date)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Report.Entries[0].Code)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Code)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Report.Entries[0].Subcode)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Subcode)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Report.Entries[0].Time)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Time)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Report.Entries[0].Description)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Description)
                     </th>
                 </tr>
                 </thead>
                 <tbody>
-                @if (id < Model.Report.Entries.Count)
-                {
-                    <tr>
-                        <td>
-                            @Html.DisplayFor(model => model.Report.Entries[0].Date)
-                            <input type="hidden" name="@nameof(ReportEntry.Date)" asp-for="Report.Entries[id].Date" />
-                        </td>
-                        <td>
-                            @Html.DisplayFor(model => model.Report.Entries[0].Code)
-                            <input type="hidden" name="@nameof(ReportEntry.Code)" asp-for="Report.Entries[id].Code" />
-                        </td>
-                        <td>
-                            <input name="@nameof(ReportEntry.Subcode)" asp-for="Report.Entries[id].Subcode" />
-                        </td>
-                        <td>
-                            <input name="@nameof(ReportEntry.Time)" asp-for="Report.Entries[id].Time" />
-                        </td>
-                        <td>
-                            <input name="@nameof(ReportEntry.Description)" asp-for="Report.Entries[id].Description" />
-                        </td>
-                    </tr>
-                }
+                <tr>
+                    <td>
+                        @Html.DisplayFor(model => model.ReportEntry.Date)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.ReportEntry.Code)
+                    </td>
+                    <td>
+                        <select name="@nameof(ReportEntry.Subcode)" asp-items="Model.CategorySelectList" asp-for="ReportEntry.Subcode">
+                        </select>
+                    </td>
+                    <td>
+                        <input name="@nameof(ReportEntry.Time)" asp-for="ReportEntry.Time"/>
+                    </td>
+                    <td>
+                        <input name="@nameof(ReportEntry.Description)" asp-for="ReportEntry.Description"/>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
-        <button asp-action="Edit">Zatwierdź</button>
+        <button asp-action="Edit" asp-route-id="@id" asp-route-date="@Model.ReportEntry.Date.ToString("yyyy-MM-dd")">Zatwierdź</button>
     </form>
 </main>

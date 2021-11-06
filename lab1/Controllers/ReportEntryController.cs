@@ -36,17 +36,27 @@ namespace TRS.Controllers
             var user = LoggedInUser;
             var dateFilter = date ?? DateTime.Today;
             var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
-            return View(new DailyReportModel { Date = dateFilter, Report = report });
+            var project = DataManager.FindProjectByCode(report.Entries[id].Code);
+            var categoryCodes = new List<SelectListItem> { new("nieokreślony", "") }.Concat(
+                project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
+            var model = new ReportEntryForEditingModel
+            {
+                ReportEntry = report.Entries[id],
+                CategorySelectList = categoryCodes
+            };
+            return View(model);
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, ReportEntry reportEntry)
+        public IActionResult Edit(DateTime? date, int id, ReportEntryUpdateModel reportEntryUpdate)
         {
-            reportEntry.Owner = LoggedInUser;
-            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, reportEntry.Date);
-            report.Entries[id] = reportEntry;
+            var dateFilter = date ?? DateTime.Today;
+            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, dateFilter);
+            report.Entries[id].Subcode = reportEntryUpdate.Subcode;
+            report.Entries[id].Time = reportEntryUpdate.Time;
+            report.Entries[id].Description = reportEntryUpdate.Description;
             DataManager.UpdateReport(report);
-            return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToString("yyyy-MM-dd") });
+            return RedirectToAction("Index", "Home", new { Date = dateFilter.ToString("yyyy-MM-dd") });
         }
 
         public IActionResult Add(DateTime? date)
@@ -58,7 +68,7 @@ namespace TRS.Controllers
                 x => new List<SelectListItem> { new("nieokreślony", "") }.Concat(
                     x.Subactivities.Select(y => new SelectListItem(y.Code, y.Code)).ToList()
                     ).ToList());
-            var model = new EditableReportEntryModel
+            var model = new ReportEntryForAddingModel
             {
                 ReportEntry = new ReportEntry { Date = initialDate },
                 ProjectSelectList = projectCodes,
