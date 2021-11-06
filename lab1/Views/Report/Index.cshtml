@@ -1,11 +1,8 @@
-﻿@model TRS.Models.DomainModels.Report
+﻿@model TRS.Models.ViewModels.MonthlySummaryModel
 
 @{
     ViewData["Title"] = "Miesięczne zestawienie";
     var date = Model.Month.ToString("yyyy-MM-dd");
-    var monthlySummary = Model.Entries.GroupBy(x => x.Code)
-        .ToDictionary(x => x.Key, x => x.Sum(y => y.Time));
-    var monthlyTotal = Model.Entries.Sum(x => x.Time);
 }
 
 <main class="bd-main order-1 gap-3">
@@ -13,30 +10,40 @@
         <h1 class="display-6">Zestawienie czasu pracy na miesiąc @Html.DisplayFor(model => model.Month)</h1>
         <form asp-action="Index" method="GET">
             <span>Przejdź do: </span>
-            <input asp-for="Month" asp-format="{0:yyyy-MM-dd}"/>
+            <input name="Date" asp-for="Month"/>
             <input type="submit" value="Wyślij"/>
         </form>
     </div>
     <table class="table">
         <tbody>
-        @foreach (var (projectCode, time) in monthlySummary)
+        @foreach (var summaryEntry in Model.PerProject)
         {
             <tr>
                 <td>
-                    @projectCode
+                    @summaryEntry.ProjectCode
                 </td>
                 <td>
-                    @time
+                    @summaryEntry.Time
                 </td>
             </tr>
         }
-        <tr><td></td><td></td></tr>
+        <tr>
+            <td></td><td></td>
+        </tr>
         <tr>
             <td>
-                Razem
+                Razem zadeklarowanych
             </td>
             <td>
-                @monthlyTotal
+                @Model.TotalTime
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Razem zaakceptowanych
+            </td>
+            <td>
+                @Model.TotalAcceptedTime
             </td>
         </tr>
         </tbody>
@@ -44,7 +51,7 @@
     @if (!Model.Frozen)
     {
         <form method="POST">
-            <button asp-controller="Report" asp-action="Freeze" asp-route-date="@date" asp-route-username="@Model.Owner">Zatwierdź</button>
+            <button asp-controller="Report" asp-action="Freeze" asp-route-date="@date">Zatwierdź</button>
         </form>
     }
 </main>

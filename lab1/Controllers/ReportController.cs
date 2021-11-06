@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TRS.DataManager;
 using TRS.Models;
+using TRS.Models.ViewModels;
 
 namespace TRS.Controllers
 {
@@ -23,7 +25,21 @@ namespace TRS.Controllers
             var user = LoggedInUser;
             var dateFilter = date ?? DateTime.Today;
             var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
-            return View(report);
+            var summaryEntries = report.Entries.GroupBy(x => x.Code)
+                .Select(x => new MonthlySummaryEntry
+                {
+                    ProjectCode = x.Key,
+                    Time = x.Sum(y => y.Time)
+                }).ToList();
+            var model = new MonthlySummaryModel
+            {
+                Month = dateFilter,
+                Frozen = report.Frozen,
+                PerProject = summaryEntries,
+                TotalTime = summaryEntries.Sum(x => x.Time),
+                TotalAcceptedTime = summaryEntries.Sum(x => x.AcceptedTime ?? 0)
+            };
+            return View(model);
         }
 
         [HttpPost]
