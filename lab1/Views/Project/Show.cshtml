@@ -1,5 +1,4 @@
-﻿@using TRS.Models.ViewModels
-@model TRS.Models.ViewModels.ProjectWithUserSummaryModel
+﻿@model TRS.Models.ViewModels.ProjectWithUserSummaryModel
 @{
     ViewData["Title"] = "Przegląd projektu";
 }
@@ -20,6 +19,9 @@
                     @Html.DisplayNameFor(model => model.Project.Budget)
                 </th>
                 <th>
+                    @Html.DisplayNameFor(model => model.Project.BudgetLeft)
+                </th>
+                <th>
                     @Html.DisplayNameFor(model => model.Project.Subactivities)
                 </th>
                 <th>
@@ -37,6 +39,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(model => model.Project.Budget)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Project.BudgetLeft)
                 </td>
                 <td>
                     @Html.DisplayFor(model => model.Project.Subactivities)
@@ -61,41 +66,51 @@
                     @Html.DisplayNameFor(model => model.UserSummaries[0].Month)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.UserSummaries[0].Time)
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].DeclaredTime)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.UserSummaries[0].Status)
-                </th>
-                <th>
-                    Akcje
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].AcceptedTime)
                 </th>
             </tr>
             </thead>
             <tbody>
-            @foreach (var userSummary in Model.UserSummaries)
+            @for (var i = 0; i < Model.UserSummaries.Length; i++)
             {
                 <tr>
                     <td>
-                        @Html.DisplayFor(model => userSummary.Username)
+                        @Html.DisplayFor(model => model.UserSummaries[i].Username)
+                        <input id="Username-@i" form="form-@i" name="Username" type="hidden" asp-for="UserSummaries[i].Username"/>
                     </td>
                     <td>
-                        @Html.DisplayFor(model => userSummary.Month)
+                        @Html.DisplayFor(model => model.UserSummaries[i].Month)
+                        <input id="Month-@i" form="form-@i" name="Month" type="hidden" asp-for="UserSummaries[i].Month"/>
                     </td>
                     <td>
-                        @Html.DisplayFor(model => userSummary.Time)
+                        @Html.DisplayFor(model => model.UserSummaries[i].DeclaredTime)
                     </td>
                     <td>
-                        @Html.DisplayFor(model => userSummary.Status)
-                    </td>
-                    <td>
-                        @if (userSummary.Status != UserProjectMonthlySummaryModel.SummaryStatus.InProgress)
+                        @if (Model.Project.Active)
                         {
-                            <a href="#">Zatwierdź</a>
+                            <input id="AcceptedTime-@i" form="form-@i" name="AcceptedTime" asp-for="UserSummaries[i].AcceptedTime"/>
+                            <button type="submit" form="form-@i">Zatwierdź</button>
+                        }
+                        else
+                        {
+                            @Html.DisplayFor(model => model.UserSummaries[i].AcceptedTime)
                         }
                     </td>
                 </tr>
             }
             </tbody>
         </table>
+        <p>
+            <strong>Zaakceptowany czas razem:</strong>
+            @Model.UserSummaries.Sum(x => x.AcceptedTime ?? 0)
+        </p>
+        @for (var i = 0; i < Model.UserSummaries.Length; i++)
+        {
+            <form id="form-@i" asp-action="UpdateAcceptedTime" asp-route-id="@Model.Project.Code">
+            </form>
+        }
     }
 </main>

@@ -19,6 +19,9 @@
                     @Html.DisplayNameFor(model => model.Activities[0].Budget)
                 </th>
                 <th>
+                    @Html.DisplayNameFor(model => model.Activities[0].BudgetLeft)
+                </th>
+                <th>
                     @Html.DisplayNameFor(model => model.Activities[0].Subactivities)
                 </th>
                 <th>
@@ -41,6 +44,9 @@
                     </td>
                     <td>
                         @Html.DisplayFor(model => model.Activities[i].Budget)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Activities[i].BudgetLeft)
                     </td>
                     <td>
                         @Html.DisplayFor(model => model.Activities[i].Subactivities)

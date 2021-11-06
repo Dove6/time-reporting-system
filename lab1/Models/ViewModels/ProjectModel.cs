@@ -21,6 +21,10 @@ namespace TRS.Models.ViewModels
         public int Budget { get; set; }
 
         [Required]
+        [Display(Name = "Budżet pomniejszony o zaakceptowany czas")]
+        public int BudgetLeft { get; set; }
+
+        [Required]
         [Display(Name = "Aktywny")]
         public bool Active { get; set; }
 

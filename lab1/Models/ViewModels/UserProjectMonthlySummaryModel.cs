@@ -15,21 +15,11 @@ namespace TRS.Models.ViewModels
         public DateTime Month { get; set; }
 
         [Required]
-        [Display(Name = "Czas pracy (w minutach)")]
-        public int Time { get; set; }
+        [Display(Name = "Zadeklarowany czas pracy (w minutach)")]
+        public int DeclaredTime { get; set; }
 
         [Required]
-        [Display(Name = "Stan raportu")]
-        public SummaryStatus Status { get; set; }
-
-        public enum SummaryStatus
-        {
-            [Display(Name = "Niezgłoszony")]
-            InProgress,
-            [Display(Name = "Zgłoszony")]
-            Declared,
-            [Display(Name = "Zaakceptowany")]
-            Accepted
-        }
+        [Display(Name = "Zaakceptowany czas pracy (w minutach)", Prompt = "Uzupełnij...")]
+        public int? AcceptedTime { get; set; }
     }
 }

@@ -144,7 +144,7 @@ namespace TRS.DataManager
             return ReadAllProjects().FirstOrDefault(x => x.Code == code);
         }
 
-        HashSet<Project> IDataManager.FindProjectsByManager(User manager)
+        public HashSet<Project> FindProjectsByManager(User manager)
         {
             return ReadAllProjects().Where(x => x.Manager == manager.Name).ToHashSet();
         }

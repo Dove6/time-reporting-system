@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,16 @@ namespace TRS.Controllers
             var userProjectList = DataManager.FindProjectsByManager(LoggedInUser);
             var projectListModel = new ProjectListModel
             {
-                Activities = Mapper.Map<ProjectModel[]>(userProjectList)
+                Activities = userProjectList.Select(x =>
+                {
+                    var mappedProject = Mapper.Map<ProjectModel>(x);
+                    var totalAcceptedTime = DataManager.FindReportByProject(x)
+                        .SelectMany(y => y.Accepted)
+                        .Where(y => y.Code == x.Code)
+                        .Sum(y => y.Time);
+                    mappedProject.BudgetLeft = x.Budget - totalAcceptedTime;
+                    return mappedProject;
+                }).ToArray()
             };
             return View(projectListModel);
         }
@@ -35,21 +45,18 @@ namespace TRS.Controllers
             var project = DataManager.FindProjectByCode(id);
             var projectModel = Mapper.Map<ProjectModel>(project);
             var reports = DataManager.FindReportByProject(project);
-            var userSummaries = reports.Select(x =>
+            var userSummaries = reports.Where(x => x.Frozen).Select(x =>
             {
                 var acceptedSummary = x.Accepted.FirstOrDefault(y => y.Code == project.Code);
                 return new UserProjectMonthlySummaryModel
                 {
                     Username = x.Owner.Name,
                     Month = x.Month,
-                    Time = acceptedSummary?.Time ?? x.Entries.Where(y => y.Code == project.Code).Sum(y => y.Time),
-                    Status = acceptedSummary != null
-                        ? UserProjectMonthlySummaryModel.SummaryStatus.Accepted
-                        : x.Frozen
-                            ? UserProjectMonthlySummaryModel.SummaryStatus.Declared
-                            : UserProjectMonthlySummaryModel.SummaryStatus.InProgress
+                    DeclaredTime = x.Entries.Where(y => y.Code == project.Code).Sum(y => y.Time),
+                    AcceptedTime = acceptedSummary?.Time
                 };
             }).ToArray();
+            projectModel.BudgetLeft = projectModel.Budget - userSummaries.Sum(x => x.AcceptedTime ?? 0);
             var projectWithUsersModel = new ProjectWithUserSummaryModel
             {
                 Project = projectModel,
@@ -98,6 +105,19 @@ namespace TRS.Controllers
             project.Active = false;
             DataManager.UpdateProject(project);
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult UpdateAcceptedTime(string id, string username, DateTime month, int? acceptedTime)
+        {
+            if (!acceptedTime.HasValue)
+                return RedirectToAction("Show", new { Id = id });
+            var report = DataManager.FindReportByUserAndMonth(new User(username), month);
+            var acceptedSummary = new AcceptedSummary(id) { Time = acceptedTime.Value };
+            report.Accepted.Remove(acceptedSummary);
+            report.Accepted.Add(acceptedSummary);
+            DataManager.UpdateReport(report);
+            return RedirectToAction("Show", new { Id = id });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
