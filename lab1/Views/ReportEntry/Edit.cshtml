@@ -34,10 +34,12 @@
                 {
                     <tr>
                         <td>
-                            <input name="@nameof(ReportEntry.Date)" asp-for="Report.Entries[id].Date" />
+                            @Html.DisplayFor(model => model.Report.Entries[0].Date)
+                            <input type="hidden" name="@nameof(ReportEntry.Date)" asp-for="Report.Entries[id].Date" />
                         </td>
                         <td>
-                            <input name="@nameof(ReportEntry.Code)" asp-for="Report.Entries[id].Code" />
+                            @Html.DisplayFor(model => model.Report.Entries[0].Code)
+                            <input type="hidden" name="@nameof(ReportEntry.Code)" asp-for="Report.Entries[id].Code" />
                         </td>
                         <td>
                             <input name="@nameof(ReportEntry.Subcode)" asp-for="Report.Entries[id].Subcode" />

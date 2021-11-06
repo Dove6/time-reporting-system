@@ -29,7 +29,8 @@ namespace TRS.Controllers
                 .Select(x => new MonthlySummaryEntry
                 {
                     ProjectCode = x.Key,
-                    Time = x.Sum(y => y.Time)
+                    Time = x.Sum(y => y.Time),
+                    AcceptedTime = report.Accepted.FirstOrDefault(y => y.Code == x.Key)?.Time
                 }).ToList();
             var model = new MonthlySummaryModel
             {

@@ -1,5 +1,4 @@
-﻿@using TRS.Models.DomainModels
-@model TRS.Models.DomainModels.ReportEntry
+﻿@model TRS.Models.ViewModels.EditableReportEntryModel
 
 @{
     ViewData["Title"] = "Dodawanie wpisu";
@@ -12,38 +11,40 @@
                 <thead>
                 <tr>
                     <th>
-                        @Html.DisplayNameFor(model => model.Date)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Date)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Code)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Code)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Subcode)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Subcode)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Time)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Time)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Description)
+                        @Html.DisplayNameFor(model => model.ReportEntry.Description)
                     </th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
                     <td>
-                        <input name="@nameof(ReportEntry.Date)" asp-for="Date" />
+                        <input name="Date" asp-for="ReportEntry.Date" />
                     </td>
                     <td>
-                        <input name="@nameof(ReportEntry.Code)" asp-for="Code" />
+                        <select id="ProjectSelectList" name="Code" asp-for="ReportEntry.Code" asp-items="Model.ProjectSelectList">
+                        </select>
                     </td>
                     <td>
-                        <input name="@nameof(ReportEntry.Subcode)" asp-for="Subcode" />
+                        <select id="ProjectCategorySelectList" name="Subcode">
+                        </select>
                     </td>
                     <td>
-                        <input name="@nameof(ReportEntry.Time)" asp-for="Time" />
+                        <input name="Time" asp-for="ReportEntry.Time" />
                     </td>
                     <td>
-                        <input name="@nameof(ReportEntry.Description)" asp-for="Description" />
+                        <input name="Description" asp-for="ReportEntry.Description" />
                     </td>
                 </tr>
                 </tbody>
@@ -52,3 +53,31 @@
         <button asp-action="Add">Zatwierdź</button>
     </form>
 </main>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        (() => {
+            const categoryData = @Json.Serialize(Model.ProjectCategorySelectList);
+            console.log('@Html.IdFor(model => model.ReportEntry.Code)');
+            const projectSelect = document.getElementById("ProjectSelectList");
+            const categorySelect = document.getElementById("ProjectCategorySelectList");
+
+            projectSelect.addEventListener("change", updateCategorySelect);
+            window.addEventListener("load", updateCategorySelect);
+
+            function updateCategorySelect() {
+                if (projectSelect.selectedIndex !== -1) {
+                    let currentData = categoryData[projectSelect.selectedOptions[0].value];
+                    while (categorySelect.options.length > currentData.length) categorySelect.remove(0);
+                    while (categorySelect.options.length < currentData.length) categorySelect.add(document.createElement('option'));
+                    for (let i = 0; i < currentData.length; i++)
+                        Object.assign(categorySelect.options[i], currentData[i]);
+                    categorySelect.disabled = false;
+                } else {
+                    categorySelect.disabled = true;
+                }
+            }
+        })()
+    </script>
+}

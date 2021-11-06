@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using TRS.DataManager;
 using TRS.Models;
@@ -49,8 +52,19 @@ namespace TRS.Controllers
         public IActionResult Add(DateTime? date)
         {
             var initialDate = date ?? DateTime.Today;
-            var reportEntry = new ReportEntry { Date = initialDate };
-            return View(reportEntry);
+            var availableProjects = DataManager.GetAllProjects().Where(x => x.Active);
+            var projectCodes = availableProjects.Select(x => new SelectListItem(x.Name, x.Code)).ToList();
+            var categoryCodes = availableProjects.ToDictionary(x => x.Code,
+                x => new List<SelectListItem> { new("nieokreślony", "") }.Concat(
+                    x.Subactivities.Select(y => new SelectListItem(y.Code, y.Code)).ToList()
+                    ).ToList());
+            var model = new EditableReportEntryModel
+            {
+                ReportEntry = new ReportEntry { Date = initialDate },
+                ProjectSelectList = projectCodes,
+                ProjectCategorySelectList = categoryCodes
+            };
+            return View(model);
         }
 
         [HttpPost]
