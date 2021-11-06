@@ -1,7 +1,10 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Linq;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using TRS.Controllers.Attributes;
 using TRS.DataManager;
 using TRS.Models.DomainModels;
 
@@ -12,13 +15,32 @@ namespace TRS.Controllers
         protected readonly IDataManager DataManager;
         protected readonly IMapper Mapper;
 
+        private const string UsernameCookieName = "username";
+        private const string UserItemName = "user";
+
+        private User _loggedInUser;
         protected User LoggedInUser
         {
-            get
+            get => _loggedInUser;
+            set
             {
-                if (HttpContext.Items.TryGetValue("user", out var user))
-                    return (User)user;
-                return null;
+                _loggedInUser = value;
+                if (_loggedInUser == null)
+                {
+                    Response.Cookies.Delete(UsernameCookieName);
+                    HttpContext.Items.Remove(UserItemName);
+                }
+                else
+                {
+                    Response.Cookies.Append(UsernameCookieName,
+                        _loggedInUser.Name,
+                        new CookieOptions
+                        {
+                            MaxAge = TimeSpan.FromHours(1),
+                            HttpOnly = true
+                        });
+                    HttpContext.Items[UserItemName] = _loggedInUser;
+                }
             }
         }
 
@@ -30,11 +52,12 @@ namespace TRS.Controllers
 
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            if (Request.Cookies.TryGetValue("user", out var encodedUser))
-            {
-                var loggedInUser = JsonSerializer.Deserialize<User>(encodedUser);
-                HttpContext.Items.Add("user", loggedInUser);
-            }
+            if (Request.Cookies.TryGetValue(UsernameCookieName, out var username))
+                LoggedInUser = DataManager.FindUserByName(username!);
+
+            if (LoggedInUser == null &&
+                filterContext.ActionDescriptor.EndpointMetadata.OfType<ForLoggedInOnlyAttribute>().Any())
+                filterContext.Result = RedirectToAction("NotLoggedIn", "Home");
         }
     }
 }

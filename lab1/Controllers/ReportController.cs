@@ -4,12 +4,14 @@ using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using TRS.Controllers.Attributes;
 using TRS.DataManager;
 using TRS.Models;
 using TRS.Models.ViewModels;
 
 namespace TRS.Controllers
 {
+    [ForLoggedInOnly]
     public class ReportController : BaseController
     {
         private ILogger<ReportController> _logger;

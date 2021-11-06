@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -50,6 +51,11 @@ namespace TRS
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapFallback(httpContext =>
+                {
+                    httpContext.Response.Redirect("/Home/Index");
+                    return Task.CompletedTask;
+                });
             });
         }
     }

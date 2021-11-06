@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using TRS.Controllers.Attributes;
 using TRS.DataManager;
 using TRS.Models;
 using TRS.Models.DomainModels;
@@ -13,6 +14,7 @@ using TRS.Models.ViewModels;
 
 namespace TRS.Controllers
 {
+    [ForLoggedInOnly]
     public class ReportEntryController : BaseController
     {
         private ILogger<ReportEntryController> _logger;

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using TRS.Controllers.Attributes;
 using TRS.DataManager;
 using TRS.Models;
 using TRS.Models.ViewModels;
@@ -19,14 +20,19 @@ namespace TRS.Controllers
             _logger = logger;
         }
 
+        [ForLoggedInOnly]
         public IActionResult Index(DateTime? date)
         {
-            var user = LoggedInUser;
-            if (user == null)
-                return View("IndexNotLoggedIn");
             var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
+            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, dateFilter);
             return View(new DailyReportModel { Date = dateFilter, Report = report });
+        }
+
+        public IActionResult NotLoggedIn()
+        {
+            if (LoggedInUser != null)
+                return RedirectToAction("Index");
+            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

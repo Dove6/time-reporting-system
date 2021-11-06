@@ -1,12 +1,10 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
-using System.Text.Json;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using TRS.Controllers.Attributes;
 using TRS.DataManager;
 using TRS.Models;
 using TRS.Models.DomainModels;
@@ -24,6 +22,7 @@ namespace TRS.Controllers
             _logger = logger;
         }
 
+        [ForLoggedInOnly]
         public IActionResult Index()
         {
             return View();
@@ -43,20 +42,15 @@ namespace TRS.Controllers
         {
             var user = DataManager.FindUserByName(username);
             if (user != null)
-                Response.Cookies.Append("user",
-                    JsonSerializer.Serialize(user),
-                    new CookieOptions
-                    {
-                        MaxAge = TimeSpan.FromHours(1),
-                        HttpOnly = true
-                    });
+                LoggedInUser = user;
             return RedirectToAction("Index", "Home");
         }
 
+        [ForLoggedInOnly]
         [HttpPost]
         public IActionResult Logout()
         {
-            Response.Cookies.Delete("user");
+            LoggedInUser = null;
             return RedirectToAction("Index", "Home");
         }
 
