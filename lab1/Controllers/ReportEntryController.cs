@@ -27,23 +27,21 @@ namespace TRS.Controllers
 
         public IActionResult Show(DateTime? date, int id)
         {
-            var user = (User)HttpContext.Items["user"];
             var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
-            return View(new DailyReportModel { Date = dateFilter, Report = report });
+            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser, dateFilter, id);
+            return View(reportEntry);
         }
 
         public IActionResult Edit(DateTime? date, int id)
         {
-            var user = LoggedInUser;
             var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
-            var project = DataManager.FindProjectByCode(report.Entries[id].Code);
+            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser, dateFilter, id);
+            var project = DataManager.FindProjectByCode(reportEntry.Code);
             var categoryCodes = new List<SelectListItem> { new("nieokreślony", "") }.Concat(
                 project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
             var model = new ReportEntryForEditingModel
             {
-                ReportEntry = report.Entries[id],
+                ReportEntry = reportEntry,
                 CategorySelectList = categoryCodes
             };
             return View(model);
@@ -52,12 +50,13 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Edit(DateTime? date, int id, ReportEntryUpdateModel reportEntryUpdate)
         {
+
             var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, dateFilter);
-            report.Entries[id].Subcode = reportEntryUpdate.Subcode;
-            report.Entries[id].Time = reportEntryUpdate.Time;
-            report.Entries[id].Description = reportEntryUpdate.Description;
-            DataManager.UpdateReport(report);
+            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser, dateFilter, id);
+            reportEntry.Subcode = reportEntryUpdate.Subcode;
+            reportEntry.Time = reportEntryUpdate.Time;
+            reportEntry.Description = reportEntryUpdate.Description;
+            DataManager.UpdateReportEntry(LoggedInUser, reportEntry);
             return RedirectToAction("Index", "Home", new { Date = dateFilter.ToString("yyyy-MM-dd") });
         }
 
@@ -82,10 +81,7 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Add(ReportEntry reportEntry)
         {
-            reportEntry.Owner = LoggedInUser;
-            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, reportEntry.Date);
-            report.Entries.Add(reportEntry);
-            DataManager.UpdateReport(report);
+            DataManager.AddReportEntry(LoggedInUser, reportEntry);
             return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToString("yyyy-MM-dd") });
         }
 
@@ -93,9 +89,7 @@ namespace TRS.Controllers
         public IActionResult Delete(DateTime? date, int id)
         {
             var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, dateFilter);
-            report.Entries.RemoveAt(id);
-            DataManager.UpdateReport(report);
+            DataManager.DeleteReportEntry(LoggedInUser, dateFilter, id);
             return RedirectToAction("Index", "Home", new { Date = dateFilter.ToString("yyyy-MM-dd") });
         }
 

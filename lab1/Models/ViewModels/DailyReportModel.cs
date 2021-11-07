@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using TRS.Models.DomainModels;
 
 namespace TRS.Models.ViewModels
 {
@@ -10,6 +10,12 @@ namespace TRS.Models.ViewModels
         [DataType(DataType.Date)]
         public DateTime Date { get; set; }
 
-        public Report Report { get; set; }
+        public bool Frozen { get; set; }
+
+        public List<DailyReportEntry> Entries { get; set; }
+
+        public Dictionary<string, int> ProjectTimeSummary { get; set; }
+
+        public int TotalDailyTime { get; set; }
     }
 }

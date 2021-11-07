@@ -3,14 +3,6 @@
 @{
     ViewData["Title"] = "Strona główna";
     var date = Model.Date.ToString("yyyy-MM-dd");
-    var dailySummary = Model.Report.Entries.Where(x => DayEquals(Model.Date, x.Date))
-        .GroupBy(x => x.Code)
-        .ToDictionary(x => x.Key, x => x.Sum(y => y.Time));
-    var dailyTotal = Model.Report.Entries.Where(x => DayEquals(Model.Date, x.Date))
-        .Sum(x => x.Time);
-
-    bool DayEquals(DateTime date1, DateTime date2) =>
-        date1.ToString("yyyy-MM-dd") == date2.ToString("yyyy-MM-dd");
 }
 
 <main class="bd-main order-1 gap-3">
@@ -27,16 +19,16 @@
             <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.Report.Entries[0].Code)
+                    @Html.DisplayNameFor(model => model.Entries[0].Code)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Report.Entries[0].Subcode)
+                    @Html.DisplayNameFor(model => model.Entries[0].Subcode)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Report.Entries[0].Time)
+                    @Html.DisplayNameFor(model => model.Entries[0].Time)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Report.Entries[0].Description)
+                    @Html.DisplayNameFor(model => model.Entries[0].Description)
                 </th>
                 <th>
                     Akcje
@@ -44,30 +36,28 @@
             </tr>
             </thead>
             <tbody>
-            @for (var i = 0; i < Model.Report.Entries.Count; i++)
+            @foreach (var entry in Model.Entries)
             {
-                if (!DayEquals(Model.Report.Entries[i].Date, Model.Date))
-                    continue;
                 <tr>
                     <td>
-                        @Html.DisplayFor(model => model.Report.Entries[i].Code)
+                        @Html.DisplayFor(model => entry.Code)
                     </td>
                     <td>
-                        @Html.DisplayFor(model => model.Report.Entries[i].Subcode)
+                        @Html.DisplayFor(model => entry.Subcode)
                     </td>
                     <td>
-                        @Html.DisplayFor(model => model.Report.Entries[i].Time)
+                        @Html.DisplayFor(model => entry.Time)
                     </td>
                     <td>
-                        @Html.DisplayFor(model => model.Report.Entries[i].Description)
+                        @Html.DisplayFor(model => entry.Description)
                     </td>
                     <td>
-                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date" asp-route-id="@i">Obejrzyj</a>
-                        @if (!Model.Report.Frozen)
+                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date" asp-route-id="@entry.Id">Obejrzyj</a>
+                        @if (!Model.Frozen)
                         {
-                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date" asp-route-id="@i">Zmień</a>
+                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date" asp-route-id="@entry.Id">Zmień</a>
                             <form method="POST">
-                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date" asp-route-id="@i">Skasuj</button>
+                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date" asp-route-id="@entry.Id">Skasuj</button>
                             </form>
                         }
                     </td>
@@ -76,7 +66,7 @@
             </tbody>
         </table>
     </div>
-    @if (!Model.Report.Frozen)
+    @if (!Model.Frozen)
     {
         <p>
             <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date">Dodaj</a>
@@ -87,7 +77,7 @@
     </p>
     <table class="table">
         <tbody>
-        @foreach (var (projectCode, time) in dailySummary)
+        @foreach (var (projectCode, time) in Model.ProjectTimeSummary)
         {
             <tr>
                 <td>
@@ -104,7 +94,7 @@
                 Razem
             </td>
             <td>
-                @dailyTotal
+                @Model.TotalDailyTime
             </td>
         </tr>
         </tbody>

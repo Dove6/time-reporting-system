@@ -2,8 +2,10 @@
 
 namespace TRS.Models.ViewModels
 {
-    public class DailyReportEntryModel
+    public class DailyReportEntry
     {
+        public int Id { get; set; }
+
         [Display(Name = "Kod projektu")]
         [Required]
         public string Code { get; set; }

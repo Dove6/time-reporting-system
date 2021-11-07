@@ -4,30 +4,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TRS.Models.DomainModels
 {
-    public class Report : IEquatable<Report>
+    public class Report : ReportWithoutEntries, IEquatable<Report>
     {
         [Required]
-        public User Owner { get; }
-
-        [Required]
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM}")]
-        public DateTime Month { get; }
-
-        [Required]
-        public bool Frozen { get; set; }
-
-        [Required]
-        public List<ReportEntry> Entries { get; } = new();
-
-        [Required]
-        public HashSet<AcceptedSummary> Accepted { get; } = new();
+        public List<ReportEntry> Entries { get; set; } = new();
 
         public Report(User owner, DateTime month)
-        {
-            Owner = owner;
-            Month = TruncateToMonth(month);
-        }
+            : base(owner, month)
+        {}
 
         public bool Equals(Report other)
         {
@@ -35,7 +19,7 @@ namespace TRS.Models.DomainModels
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            return Equals(Owner, other.Owner) && TruncateToMonth(Month).Equals(TruncateToMonth(other.Month));
+            return base.Equals(other);
         }
 
         public override bool Equals(object obj)
@@ -51,12 +35,7 @@ namespace TRS.Models.DomainModels
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Owner, TruncateToMonth(Month));
-        }
-
-        private static DateTime TruncateToMonth(DateTime dateTime)
-        {
-            return new DateTime(dateTime.Year, dateTime.Month, 1);
+            return base.GetHashCode();
         }
     }
 }

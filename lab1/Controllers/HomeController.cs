@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -25,7 +27,16 @@ namespace TRS.Controllers
         {
             var dateFilter = date ?? DateTime.Today;
             var report = DataManager.FindReportByUserAndMonth(LoggedInUser, dateFilter);
-            return View(new DailyReportModel { Date = dateFilter, Report = report });
+            var reportEntries = DataManager.FindReportEntriesByDay(LoggedInUser, dateFilter);
+            return View(new DailyReportModel
+            {
+                Date = dateFilter,
+                Frozen = report.Frozen,
+                Entries = Mapper.Map<List<DailyReportEntry>>(reportEntries),
+                ProjectTimeSummary = reportEntries.GroupBy(x => x.Code)
+                    .ToDictionary(x => x.Key, x => x.Sum(y => y.Time)),
+                TotalDailyTime = reportEntries.Sum(x => x.Time)
+            });
         }
 
         public IActionResult NotLoggedIn()

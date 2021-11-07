@@ -27,7 +27,8 @@ namespace TRS.Controllers
             var user = LoggedInUser;
             var dateFilter = date ?? DateTime.Today;
             var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
-            var summaryEntries = report.Entries.GroupBy(x => x.Code)
+            var reportEntries = DataManager.FindReportEntriesByMonth(user, dateFilter);
+            var summaryEntries = reportEntries.GroupBy(x => x.Code)
                 .Select(x => new MonthlySummaryEntry
                 {
                     ProjectCode = x.Key,

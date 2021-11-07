@@ -58,7 +58,7 @@ namespace TRS.DataManager
             var data = File.ReadAllText(ProjectListPath);
             var projectList = JsonSerializer.Deserialize<Models.JsonModels.ProjectListModel>(data, SerializerOptions);
             var mappedProjectList = _mapper.Map<ProjectList>(projectList);
-            return mappedProjectList.Activities;
+            return mappedProjectList.Projects.ToHashSet();
         }
 
         private HashSet<Report> ReadAllReports(User user = null, DateTime? month = null)
@@ -73,9 +73,6 @@ namespace TRS.DataManager
                 var report = JsonSerializer.Deserialize<Models.JsonModels.ReportModel>(data, SerializerOptions);
                 report.Filename = reportPath;
                 var mappedReport = _mapper.Map<Report>(report);
-                var owner = user ?? GetUserFromFilename(reportPath);
-                foreach (var entry in mappedReport.Entries)
-                    entry.Owner = owner;
                 allReports.Add(mappedReport);
             }
             return allReports;
@@ -83,7 +80,8 @@ namespace TRS.DataManager
 
         private void WriteAllUsers(HashSet<User> users)
         {
-            var mappedUserList = users.Select(x => x.Name).ToList();
+            var mappedUserList = users.Select(x => x.Name)
+                .OrderBy(x => x).ToList();
             var data = JsonSerializer.Serialize(mappedUserList, SerializerOptions);
             File.WriteAllText(UserListPath, data);
         }
@@ -94,6 +92,7 @@ namespace TRS.DataManager
             {
                 Activities = _mapper.Map<List<Models.JsonModels.Project>>(projectList)
             };
+            mappedProjectList.Activities.Sort((x, y) => string.Compare(x.Code, y.Code, StringComparison.InvariantCulture));
             var data = JsonSerializer.Serialize(mappedProjectList, SerializerOptions);
             File.WriteAllText(ProjectListPath, data);
         }
@@ -117,13 +116,6 @@ namespace TRS.DataManager
         public User FindUserByName(string name)
         {
             return GetAllUsers().FirstOrDefault(x => x.Name == name);
-        }
-
-        public HashSet<User> FindUsersByProject(Project project)
-        {
-            return ReadAllReports().SelectMany(x => x.Entries)
-                .Select(x => x.Owner)
-                .ToHashSet();
         }
 
         public HashSet<User> GetAllUsers()
@@ -164,36 +156,79 @@ namespace TRS.DataManager
             return project;
         }
 
-        public Report AddReport(Report report)
+        public ReportWithoutEntries FindReportByUserAndMonth(User user, DateTime month)
         {
-            WriteReportForUserInMonth(report);
-            return report;
+            return _mapper.Map<ReportWithoutEntries>(ReadAllReports(user, month).FirstOrDefault() ?? new Report(user, month));
         }
 
-        public Report FindReportByUserAndMonth(User user, DateTime month)
+        private Report GetUserMonthlyReport(User user, DateTime month)
         {
             return ReadAllReports(user, month).FirstOrDefault() ?? new Report(user, month);
         }
 
-        public HashSet<Report> FindReportsByUser(User user)
-        {
-            return ReadAllReports(user);
-        }
-
         public HashSet<Report> FindReportByProject(Project project)
         {
-            return ReadAllReports().Where(x => x.Entries.Exists(y => y.Code == project.Code)).ToHashSet();
+            return ReadAllReports().Where(x => x.Entries.Any(y => y.Code == project.Code)).ToHashSet();
         }
 
-        public HashSet<Report> GetAllReports()
+        public ReportWithoutEntries UpdateReport(ReportWithoutEntries reportWithoutEntries)
         {
-            return ReadAllReports();
-        }
-
-        public Report UpdateReport(Report report)
-        {
+            var report = GetUserMonthlyReport(reportWithoutEntries.Owner, reportWithoutEntries.Month);
+            _mapper.Map(reportWithoutEntries, report);
             WriteReportForUserInMonth(report);
-            return report;
+            return reportWithoutEntries;
+        }
+
+        public ReportEntry AddReportEntry(User user, ReportEntry reportEntry)
+        {
+            var report = ReadAllReports(user, reportEntry.Date).FirstOrDefault();
+            if (report == null)
+                return null;
+            var maxDayId = report.Entries.Where(x => x.Date.Date == reportEntry.Date.Date)
+                .Max()?.IndexForDate ?? -1;
+            reportEntry.IndexForDate = maxDayId + 1;
+            report.Entries.Add(reportEntry);
+            WriteReportForUserInMonth(report);
+            return reportEntry;
+        }
+
+        public void DeleteReportEntry(User user, DateTime day, int indexForDate)
+        {
+            var report = ReadAllReports(user, day).FirstOrDefault();
+            if (report == null)
+                return;
+            report.Entries.Remove(new ReportEntry { Date = day, IndexForDate = indexForDate });
+            WriteReportForUserInMonth(report);
+        }
+
+        public ReportEntry FindReportEntryByDayAndIndex(User user, DateTime day, int indexForDate)
+        {
+            var report = ReadAllReports(user, day).FirstOrDefault();
+            return report?.Entries.FirstOrDefault(x => x.Date.Date == day.Date && x.IndexForDate == indexForDate);
+        }
+
+        public HashSet<ReportEntry> FindReportEntriesByDay(User user, DateTime day)
+        {
+            var report = ReadAllReports(user, day).FirstOrDefault();
+            return report?.Entries.Where(x => x.Date.Date == day.Date)
+                .ToHashSet();
+        }
+
+        public HashSet<ReportEntry> FindReportEntriesByMonth(User user, DateTime month)
+        {
+            var report = ReadAllReports(user, month).FirstOrDefault();
+            return report?.Entries.ToHashSet();
+        }
+
+        public ReportEntry UpdateReportEntry(User user, ReportEntry reportEntry)
+        {
+            var report = ReadAllReports(user, reportEntry.Date).FirstOrDefault();
+            if (report == null)
+                return null;
+            if (report.Entries.Remove(reportEntry))
+                report.Entries.Add(reportEntry);
+            WriteReportForUserInMonth(report);
+            return reportEntry;
         }
 
         private static ParsedFilename ParseFilename(string reportPath)

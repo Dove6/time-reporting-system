@@ -8,7 +8,6 @@ namespace TRS.DataManager
     {
         User AddUser(User user);
         User FindUserByName(string name);
-        HashSet<User> FindUsersByProject(Project project);
         HashSet<User> GetAllUsers();
 
         Project AddProject(Project project);
@@ -17,11 +16,15 @@ namespace TRS.DataManager
         HashSet<Project> GetAllProjects();
         Project UpdateProject(Project project);
 
-        Report AddReport(Report report);
-        Report FindReportByUserAndMonth(User user, DateTime month);
-        HashSet<Report> FindReportsByUser(User user);
+        ReportWithoutEntries FindReportByUserAndMonth(User user, DateTime month);
         HashSet<Report> FindReportByProject(Project project);
-        HashSet<Report> GetAllReports();
-        Report UpdateReport(Report report);
+        ReportWithoutEntries UpdateReport(ReportWithoutEntries report);
+
+        ReportEntry AddReportEntry(User user, ReportEntry reportEntry);
+        void DeleteReportEntry(User user, DateTime day, int indexForDate);
+        ReportEntry FindReportEntryByDayAndIndex(User user, DateTime day, int indexForDate);
+        HashSet<ReportEntry> FindReportEntriesByDay(User user, DateTime day);
+        HashSet<ReportEntry> FindReportEntriesByMonth(User user, DateTime month);
+        ReportEntry UpdateReportEntry(User user, ReportEntry reportEntry);
     }
 }
