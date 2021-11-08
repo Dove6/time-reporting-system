@@ -6,8 +6,12 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using AutoMapper;
+using TRS.DataManager.Exceptions;
 using TRS.DataManager.JsonHelpers;
 using TRS.Models.DomainModels;
+using TRS.Models.JsonModels;
+using Report = TRS.Models.DomainModels.Report;
+using ReportEntry = TRS.Models.DomainModels.ReportEntry;
 
 namespace TRS.DataManager
 {
@@ -65,6 +69,7 @@ namespace TRS.DataManager
 
             var serializedUserList = File.ReadAllText(UserListPath);
             var userList = JsonSerializer.Deserialize<List<string>>(serializedUserList, SerializerOptions);
+            userList ??= new List<string>();
             var mappedUserList = userList.Select(x => new User { Name = x }).ToHashSet();
             return mappedUserList;
         }
@@ -76,21 +81,23 @@ namespace TRS.DataManager
 
             var serializedProjectList = File.ReadAllText(ProjectListPath);
             var projectList =
-                JsonSerializer.Deserialize<Models.JsonModels.ActivityList>(serializedProjectList, SerializerOptions);
+                JsonSerializer.Deserialize<ActivityList>(serializedProjectList, SerializerOptions);
+            projectList ??= new ActivityList();
             var mappedProjectList = _mapper.Map<HashSet<Project>>(projectList.Activities);
             return mappedProjectList;
         }
 
-        private HashSet<Report> ReadAllReports(User user = null, DateTime? month = null)
+        private HashSet<Report> ReadAllReports(string username = null, DateTime? month = null)
         {
             var readReports = new HashSet<Report>();
-            var userSearchPattern = user != null ? user.Name : "*?";
+            var userSearchPattern = username ?? "*?";
             var monthSearchPattern = month?.ToString(MonthDateFormat) ?? "????-??";
             var searchPattern = $"{userSearchPattern}-{monthSearchPattern}.json";
             foreach (var reportPath in Directory.GetFiles(StoragePath, searchPattern))
             {
                 var serializedReport = File.ReadAllText(reportPath);
                 var report = JsonSerializer.Deserialize<Models.JsonModels.Report>(serializedReport, SerializerOptions);
+                report ??= new Models.JsonModels.Report();
                 report.Filename = reportPath;
                 var mappedReport = _mapper.Map<Report>(report);
                 mappedReport.Entries = report.Entries.Select((x, i) =>
@@ -114,9 +121,9 @@ namespace TRS.DataManager
 
         private void WriteAllProjects(HashSet<Project> projectList)
         {
-            var mappedProjectList = new Models.JsonModels.ActivityList
+            var mappedProjectList = new ActivityList
             {
-                Activities = _mapper.Map<List<Models.JsonModels.Activity>>(projectList)
+                Activities = _mapper.Map<List<Activity>>(projectList)
             };
             mappedProjectList.Activities.Sort((x, y) =>
                 string.Compare(x.Code, y.Code, StringComparison.InvariantCulture));
@@ -132,12 +139,12 @@ namespace TRS.DataManager
             File.WriteAllText(reportPath, data);
         }
 
-        public User AddUser(User user)
+        public void AddUser(User user)
         {
             var userSet = GetAllUsers();
-            userSet.Add(user);
+            if (!userSet.Add(user))
+                throw new AlreadyExistingException();
             WriteAllUsers(userSet);
-            return user;
         }
 
         public User FindUserByName(string name)
@@ -150,19 +157,19 @@ namespace TRS.DataManager
             return ReadAllUsers();
         }
 
-        public Project AddProject(Project project)
+        public void AddProject(Project project)
         {
             var projectSet = GetAllProjects();
-            projectSet.Add(project);
+            if (!projectSet.Add(project))
+                throw new AlreadyExistingException();
             WriteAllProjects(projectSet);
-            return project;
         }
 
         public Project FindProjectByCode(string code) =>
             ReadAllProjects().FirstOrDefault(x => x.Code == code);
 
-        public HashSet<Project> FindProjectsByManager(User manager) =>
-            ReadAllProjects().Where(x => x.Manager == manager.Name).ToHashSet();
+        public HashSet<Project> FindProjectsByManager(string managerName) =>
+            ReadAllProjects().Where(x => x.Manager == managerName).ToHashSet();
 
         public HashSet<Project> GetAllProjects()
         {
@@ -170,83 +177,82 @@ namespace TRS.DataManager
             return new HashSet<Project>(mappedProjectList);
         }
 
-        public Project UpdateProject(Project project)
+        public void UpdateProject(Project project)
         {
             var projectSet = ReadAllProjects();
-            projectSet.Remove(project);
+            if (projectSet.Remove(project))
+                throw new NotFoundException();
             projectSet.Add(project);
             WriteAllProjects(projectSet);
-            return project;
         }
 
-        public Report FindReportByUserAndMonth(User user, DateTime month) =>
-            ReadAllReports(user, month).FirstOrDefault() ?? new Report { Owner = user.Name, Month = month };
+        public Report FindReportByUserAndMonth(string username, DateTime month) =>
+            ReadAllReports(username, month).FirstOrDefault() ?? new Report { Owner = username, Month = month };
 
         public HashSet<Report> FindReportByProject(Project project) =>
             ReadAllReports().Where(x => x.Entries.Any(y => y.Code == project.Code)).ToHashSet();
 
-        public void FreezeReport(User user, DateTime month)
+        public void FreezeReport(string username, DateTime month)
         {
-            var report = FindReportByUserAndMonth(user, month);
+            var report = FindReportByUserAndMonth(username, month);
             report.Frozen = true;
             WriteReportForUserInMonth(report);
         }
 
-        public ReportEntry AddReportEntry(User user, ReportEntry reportEntry)
+        public void AddReportEntry(string username, ReportEntry reportEntry)
         {
-            var report = FindReportByUserAndMonth(user, reportEntry.Date);
-            if (report == null)
-                return null;
+            var report = FindReportByUserAndMonth(username, reportEntry.Date);
             reportEntry.MonthlyIndex = report.Entries.Count;
+            if (!report.Entries.Add(reportEntry))
+                throw new AlreadyExistingException();
+            WriteReportForUserInMonth(report);
+        }
+
+        public void DeleteReportEntry(string username, DateTime day, int id)
+        {
+            var report = ReadAllReports(username, day).FirstOrDefault();
+            if (report == null)
+                throw new NotFoundException();
+            if (report.Entries.RemoveWhere(x => x.Date == day.Date && x.MonthlyIndex == id) == 0)
+                throw new NotFoundException();
+            WriteReportForUserInMonth(report);
+        }
+
+        public ReportEntry FindReportEntryByDayAndIndex(string username, DateTime day, int id) =>
+            FindReportByUserAndMonth(username, day).Entries.FirstOrDefault(x => x.Date == day.Date && x.MonthlyIndex == id);
+
+        public HashSet<ReportEntry> FindReportEntriesByDay(string username, DateTime day) =>
+            FindReportByUserAndMonth(username, day).Entries.Where(x => x.Date == day.Date).ToHashSet();
+
+        public HashSet<ReportEntry> FindReportEntriesByMonth(string username, DateTime month) =>
+            ReadAllReports(username, month).FirstOrDefault()?.Entries.ToHashSet() ?? new HashSet<ReportEntry>();
+
+        public void UpdateReportEntry(string username, DateTime day, int id, ReportEntry reportEntry)
+        {
+            var report = ReadAllReports(username, reportEntry.Date).FirstOrDefault();
+            if (report == null)
+                throw new NotFoundException();
+            if (!report.Entries.Remove(reportEntry))
+                throw new NotFoundException();
             report.Entries.Add(reportEntry);
             WriteReportForUserInMonth(report);
-            return reportEntry;
         }
 
-        public void DeleteReportEntry(User user, DateTime day, int id)
+        public void AddAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime)
         {
-            var report = ReadAllReports(user, day).FirstOrDefault();
-            if (report == null)
-                return;
-            report.Entries.RemoveWhere(x => x.Date == day.Date && x.MonthlyIndex == id);
+            var report = FindReportByUserAndMonth(username, month);
+            if (!report.Accepted.Add(acceptedTime))
+                throw new AlreadyExistingException();
             WriteReportForUserInMonth(report);
         }
 
-        public ReportEntry FindReportEntryByDayAndIndex(User user, DateTime day, int id) =>
-            FindReportByUserAndMonth(user, day).Entries.FirstOrDefault(x => x.Date == day.Date && x.MonthlyIndex == id);
-
-        public HashSet<ReportEntry> FindReportEntriesByDay(User user, DateTime day) =>
-            FindReportByUserAndMonth(user, day)?.Entries.Where(x => x.Date == day.Date).ToHashSet() ?? new HashSet<ReportEntry>();
-
-        public HashSet<ReportEntry> FindReportEntriesByMonth(User user, DateTime month) =>
-            ReadAllReports(user, month).FirstOrDefault()?.Entries.ToHashSet() ?? new HashSet<ReportEntry>();
-
-        public ReportEntry UpdateReportEntry(User user, DateTime day, int id, ReportEntry reportEntry)
+        public void UpdateAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime)
         {
-            var report = ReadAllReports(user, reportEntry.Date).FirstOrDefault();
-            if (report == null)
-                return null;
-            if (report.Entries.Remove(reportEntry))
-                report.Entries.Add(reportEntry);
-            WriteReportForUserInMonth(report);
-            return reportEntry;
-        }
-
-        public AcceptedTime AddAcceptedTime(User user, DateTime month, AcceptedTime acceptedTime)
-        {
-            var report = FindReportByUserAndMonth(user, month);
+            var report = FindReportByUserAndMonth(username, month);
+            if (!report.Accepted.Remove(acceptedTime))
+                throw new NotFoundException();
             report.Accepted.Add(acceptedTime);
             WriteReportForUserInMonth(report);
-            return acceptedTime;
-        }
-
-        public AcceptedTime UpdateAcceptedTime(User user, DateTime month, AcceptedTime acceptedTime)
-        {
-            var report = FindReportByUserAndMonth(user, month);
-            report.Accepted.Remove(acceptedTime);
-            report.Accepted.Add(acceptedTime);
-            WriteReportForUserInMonth(report);
-            return acceptedTime;
         }
     }
 }

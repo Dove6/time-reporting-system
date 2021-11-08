@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
 using TRS.DataManager;
-using TRS.Models;
 using TRS.Models.DomainModels;
 using TRS.Models.ViewModels;
 

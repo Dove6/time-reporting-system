@@ -11,13 +11,13 @@ namespace TRS.Models
         public ViewModelProfile()
         {
             CreateMap<Project, ProjectModel>()
-                .ForMember(dest => dest.Subactivities,
+                .ForMember(dest => dest.Categories,
                     dest => dest.MapFrom(src =>
                         string.Join('\n', src.Subactivities.Select(x => x.Code))));
             CreateMap<ProjectModel, Project>()
                 .ForMember(dest => dest.Subactivities,
                     dest => dest.MapFrom(src =>
-                        src.Subactivities.Split('\n',
+                        src.Categories.Split('\n',
                                 16,
                                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                             .Select(x => new CategoryModel { Code = x })));

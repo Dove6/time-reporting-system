@@ -9,6 +9,6 @@ namespace TRS.Models.JsonModels
         public string Name { get; set; }
         public int Budget { get; set; }
         public bool Active { get; set; }
-        public List<Subactivity> Subactivities { get; set; }
+        public List<Subactivity> Subactivities { get; set; } = new();
     }
 }

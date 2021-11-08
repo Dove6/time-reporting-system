@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
 using TRS.DataManager;
-using TRS.Models;
 using TRS.Models.DomainModels;
 using TRS.Models.ViewModels;
 
@@ -25,10 +24,10 @@ namespace TRS.Controllers
 
         public IActionResult Index()
         {
-            var userProjectList = DataManager.FindProjectsByManager(LoggedInUser);
+            var userProjectList = DataManager.FindProjectsByManager(LoggedInUser.Name);
             var projectListModel = new ProjectListModel
             {
-                Activities = userProjectList.Select(x =>
+                Projects = userProjectList.Select(x =>
                 {
                     var mappedProject = Mapper.Map<ProjectModel>(x);
                     var totalAcceptedTime = DataManager.FindReportByProject(x)
@@ -114,12 +113,12 @@ namespace TRS.Controllers
         {
             if (!acceptedTime.HasValue)
                 return RedirectToAction("Show", new { Id = id });
-            var report = DataManager.FindReportByUserAndMonth(new User { Name = username }, month);
+            var report = DataManager.FindReportByUserAndMonth(username, month);
             var accepted = new AcceptedTime { Code = id, Time = acceptedTime.Value };
             if (report.Accepted.Contains(accepted))
-                DataManager.UpdateAcceptedTime(new User { Name = username }, month, accepted);
+                DataManager.UpdateAcceptedTime(username, month, accepted);
             else
-                DataManager.AddAcceptedTime(new User { Name = username }, month, accepted);
+                DataManager.AddAcceptedTime(username, month, accepted);
             return RedirectToAction("Show", new { Id = id });
         }
 

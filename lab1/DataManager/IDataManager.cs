@@ -6,28 +6,28 @@ namespace TRS.DataManager
 {
     public interface IDataManager
     {
-        User AddUser(User user);
+        void AddUser(User user);
         User FindUserByName(string name);
         HashSet<User> GetAllUsers();
 
-        Project AddProject(Project project);
+        void AddProject(Project project);
         Project FindProjectByCode(string code);
-        HashSet<Project> FindProjectsByManager(User manager);
+        HashSet<Project> FindProjectsByManager(string managerName);
         HashSet<Project> GetAllProjects();
-        Project UpdateProject(Project project);
+        void UpdateProject(Project project);
 
-        Report FindReportByUserAndMonth(User user, DateTime month);
+        Report FindReportByUserAndMonth(string username, DateTime month);
         HashSet<Report> FindReportByProject(Project project);
-        void FreezeReport(User user, DateTime month);
+        void FreezeReport(string username, DateTime month);
 
-        ReportEntry AddReportEntry(User user, ReportEntry reportEntry);
-        void DeleteReportEntry(User user, DateTime day, int id);
-        ReportEntry FindReportEntryByDayAndIndex(User user, DateTime day, int id);
-        HashSet<ReportEntry> FindReportEntriesByDay(User user, DateTime day);
-        HashSet<ReportEntry> FindReportEntriesByMonth(User user, DateTime month);
-        ReportEntry UpdateReportEntry(User user, DateTime day, int id, ReportEntry reportEntry);
+        void AddReportEntry(string username, ReportEntry reportEntry);
+        void DeleteReportEntry(string username, DateTime day, int id);
+        ReportEntry FindReportEntryByDayAndIndex(string username, DateTime day, int id);
+        HashSet<ReportEntry> FindReportEntriesByDay(string username, DateTime day);
+        HashSet<ReportEntry> FindReportEntriesByMonth(string username, DateTime month);
+        void UpdateReportEntry(string username, DateTime day, int id, ReportEntry reportEntry);
 
-        AcceptedTime AddAcceptedTime(User user, DateTime month, AcceptedTime acceptedTime);
-        AcceptedTime UpdateAcceptedTime(User user, DateTime month, AcceptedTime acceptedTime);
+        void AddAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime);
+        void UpdateAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime);
     }
 }

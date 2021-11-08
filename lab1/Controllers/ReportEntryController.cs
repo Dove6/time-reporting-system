@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
 using TRS.DataManager;
-using TRS.Models;
 using TRS.Models.DomainModels;
 using TRS.Models.ViewModels;
 
@@ -28,14 +27,14 @@ namespace TRS.Controllers
         public IActionResult Show(DateTime? date, int id)
         {
             var dateFilter = date ?? DateTime.Today;
-            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser, dateFilter, id);
+            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, dateFilter, id);
             return View(Mapper.Map<ReportEntryModel>(reportEntry));
         }
 
         public IActionResult Edit(DateTime? date, int id)
         {
             var dateFilter = date ?? DateTime.Today;
-            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser, dateFilter, id);
+            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, dateFilter, id);
             var project = DataManager.FindProjectByCode(reportEntry.Code);
             var categoryCodes = new List<SelectListItem> { new("nieokreślony", "") }.Concat(
                 project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
@@ -52,11 +51,11 @@ namespace TRS.Controllers
         {
 
             var dateFilter = date ?? DateTime.Today;
-            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser, dateFilter, id);
+            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, dateFilter, id);
             reportEntry.Subcode = reportEntryUpdate.Subcode;
             reportEntry.Time = reportEntryUpdate.Time;
             reportEntry.Description = reportEntryUpdate.Description;
-            DataManager.UpdateReportEntry(LoggedInUser, dateFilter, id, reportEntry);
+            DataManager.UpdateReportEntry(LoggedInUser.Name, dateFilter, id, reportEntry);
             return RedirectToAction("Index", "Home", new { Date = dateFilter.ToString("yyyy-MM-dd") });
         }
 
@@ -81,7 +80,7 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Add(ReportEntryModel reportEntry)
         {
-            DataManager.AddReportEntry(LoggedInUser, Mapper.Map<ReportEntry>(reportEntry));
+            DataManager.AddReportEntry(LoggedInUser.Name, Mapper.Map<ReportEntry>(reportEntry));
             return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToString("yyyy-MM-dd") });
         }
 
@@ -89,7 +88,7 @@ namespace TRS.Controllers
         public IActionResult Delete(DateTime? date, int id)
         {
             var dateFilter = date ?? DateTime.Today;
-            DataManager.DeleteReportEntry(LoggedInUser, dateFilter, id);
+            DataManager.DeleteReportEntry(LoggedInUser.Name, dateFilter, id);
             return RedirectToAction("Index", "Home", new { Date = dateFilter.ToString("yyyy-MM-dd") });
         }
 

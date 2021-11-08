@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
 using TRS.DataManager;
-using TRS.Models;
 using TRS.Models.ViewModels;
 
 namespace TRS.Controllers
@@ -26,8 +25,8 @@ namespace TRS.Controllers
         public IActionResult Index(DateTime? date)
         {
             var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(LoggedInUser, dateFilter);
-            var reportEntries = DataManager.FindReportEntriesByDay(LoggedInUser, dateFilter);
+            var report = DataManager.FindReportByUserAndMonth(LoggedInUser.Name, dateFilter);
+            var reportEntries = DataManager.FindReportEntriesByDay(LoggedInUser.Name, dateFilter);
             return View(new DailyReportModel
             {
                 Date = dateFilter,

@@ -31,6 +31,6 @@ namespace TRS.Models.ViewModels
         [Required]
         [Display(Name = "Kategorie")]
         [DataType(DataType.MultilineText)]
-        public string Subactivities { get; set; }
+        public string Categories { get; set; }
     }
 }

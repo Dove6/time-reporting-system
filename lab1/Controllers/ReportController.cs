@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
 using TRS.DataManager;
-using TRS.Models;
 using TRS.Models.ViewModels;
 
 namespace TRS.Controllers
@@ -24,10 +23,9 @@ namespace TRS.Controllers
 
         public IActionResult Index(DateTime? date)
         {
-            var user = LoggedInUser;
             var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
-            var reportEntries = DataManager.FindReportEntriesByMonth(user, dateFilter);
+            var report = DataManager.FindReportByUserAndMonth(LoggedInUser.Name, dateFilter);
+            var reportEntries = DataManager.FindReportEntriesByMonth(LoggedInUser.Name, dateFilter);
             var summaryEntries = reportEntries.GroupBy(x => x.Code)
                 .Select(x => new MonthlySummaryEntry
                 {
@@ -50,7 +48,7 @@ namespace TRS.Controllers
         public IActionResult Freeze(DateTime? date)
         {
             var dateFilter = date ?? DateTime.Today;
-            DataManager.FreezeReport(LoggedInUser, dateFilter);
+            DataManager.FreezeReport(LoggedInUser.Name, dateFilter);
             return RedirectToAction("Index");
         }
 

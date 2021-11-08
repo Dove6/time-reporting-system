@@ -10,22 +10,22 @@
             <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.Activities[0].Code)
+                    @Html.DisplayNameFor(model => model.Projects[0].Code)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Activities[0].Name)
+                    @Html.DisplayNameFor(model => model.Projects[0].Name)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Activities[0].Budget)
+                    @Html.DisplayNameFor(model => model.Projects[0].Budget)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Activities[0].BudgetLeft)
+                    @Html.DisplayNameFor(model => model.Projects[0].BudgetLeft)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Activities[0].Subactivities)
+                    @Html.DisplayNameFor(model => model.Projects[0].Categories)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Activities[0].Active)
+                    @Html.DisplayNameFor(model => model.Projects[0].Active)
                 </th>
                 <th>
                     Akcje
@@ -33,34 +33,34 @@
             </tr>
             </thead>
             <tbody>
-            @for (var i = 0; i < Model.Activities.Length; i++)
+            @for (var i = 0; i < Model.Projects.Length; i++)
             {
                 <tr>
                     <td>
-                        @Html.DisplayFor(model => model.Activities[i].Code)
+                        @Html.DisplayFor(model => model.Projects[i].Code)
                     </td>
                     <td>
-                        @Html.DisplayFor(model => model.Activities[i].Name)
+                        @Html.DisplayFor(model => model.Projects[i].Name)
                     </td>
                     <td>
-                        @Html.DisplayFor(model => model.Activities[i].Budget)
+                        @Html.DisplayFor(model => model.Projects[i].Budget)
                     </td>
                     <td>
-                        @Html.DisplayFor(model => model.Activities[i].BudgetLeft)
+                        @Html.DisplayFor(model => model.Projects[i].BudgetLeft)
                     </td>
                     <td>
-                        @Html.DisplayFor(model => model.Activities[i].Subactivities)
+                        @Html.DisplayFor(model => model.Projects[i].Categories)
                     </td>
                     <td>
-                        @Html.DisplayFor(model => model.Activities[i].Active)
+                        @Html.DisplayFor(model => model.Projects[i].Active)
                     </td>
                     <td>
-                        <a asp-controller="Project" asp-action="Show" asp-route-id="@Model.Activities[i].Code">Obejrzyj</a>
-                        @if (Model.Activities[i].Active)
+                        <a asp-controller="Project" asp-action="Show" asp-route-id="@Model.Projects[i].Code">Obejrzyj</a>
+                        @if (Model.Projects[i].Active)
                         {
-                            <a asp-controller="Project" asp-action="Edit" asp-route-id="@Model.Activities[i].Code">Zmień</a>
+                            <a asp-controller="Project" asp-action="Edit" asp-route-id="@Model.Projects[i].Code">Zmień</a>
                             <form method="POST">
-                                <button asp-controller="Project" asp-action="Close" asp-route-id="@Model.Activities[i].Code">Zamknij</button>
+                                <button asp-controller="Project" asp-action="Close" asp-route-id="@Model.Projects[i].Code">Zamknij</button>
                             </form>
                         }
                     </td>
