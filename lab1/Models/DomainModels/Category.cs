@@ -6,12 +6,7 @@ namespace TRS.Models.DomainModels
     public class Category : IEquatable<Category>
     {
         [Required]
-        public string Code { get; }
-
-        public Category(string code)
-        {
-            Code = code;
-        }
+        public string Code { get; set; }
 
         public bool Equals(Category other)
         {

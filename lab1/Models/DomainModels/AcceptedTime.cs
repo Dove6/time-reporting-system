@@ -3,20 +3,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TRS.Models.DomainModels
 {
-    public class AcceptedSummary : IEquatable<AcceptedSummary>
+    public class AcceptedTime : IEquatable<AcceptedTime>
     {
         [Required]
-        public string Code { get; }
+        public string Code { get; set; }
 
-        [Required]
         public int Time { get; set; }
 
-        public AcceptedSummary(string code)
-        {
-            Code = code;
-        }
-
-        public bool Equals(AcceptedSummary other)
+        public bool Equals(AcceptedTime other)
         {
             if (ReferenceEquals(null, other))
                 return false;
@@ -33,7 +27,7 @@ namespace TRS.Models.DomainModels
                 return true;
             if (obj.GetType() != this.GetType())
                 return false;
-            return Equals((AcceptedSummary)obj);
+            return Equals((AcceptedTime)obj);
         }
 
         public override int GetHashCode()

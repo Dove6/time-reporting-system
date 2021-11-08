@@ -52,7 +52,7 @@ namespace TRS.Controllers
                 var acceptedSummary = x.Accepted.FirstOrDefault(y => y.Code == project.Code);
                 return new UserProjectMonthlySummaryModel
                 {
-                    Username = x.Owner.Name,
+                    Username = x.Owner,
                     Month = x.Month,
                     DeclaredTime = x.Entries.Where(y => y.Code == project.Code).Sum(y => y.Time),
                     AcceptedTime = acceptedSummary?.Time
@@ -114,11 +114,12 @@ namespace TRS.Controllers
         {
             if (!acceptedTime.HasValue)
                 return RedirectToAction("Show", new { Id = id });
-            var report = DataManager.FindReportByUserAndMonth(new User(username), month);
-            var acceptedSummary = new AcceptedSummary(id) { Time = acceptedTime.Value };
-            report.Accepted.Remove(acceptedSummary);
-            report.Accepted.Add(acceptedSummary);
-            DataManager.UpdateReport(report);
+            var report = DataManager.FindReportByUserAndMonth(new User { Name = username }, month);
+            var accepted = new AcceptedTime { Code = id, Time = acceptedTime.Value };
+            if (report.Accepted.Contains(accepted))
+                DataManager.UpdateAcceptedTime(new User { Name = username }, month, accepted);
+            else
+                DataManager.AddAcceptedTime(new User { Name = username }, month, accepted);
             return RedirectToAction("Show", new { Id = id });
         }
 

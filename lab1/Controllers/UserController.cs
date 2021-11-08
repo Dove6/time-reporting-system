@@ -62,7 +62,7 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Register(string username)
         {
-            DataManager.AddUser(new User(username));
+            DataManager.AddUser(new User { Name = username });
             return Login(username);
         }
 

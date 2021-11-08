@@ -1,6 +1,6 @@
 ﻿namespace TRS.Models.JsonModels
 {
-    public class Category
+    public class Subactivity
     {
         public string Code { get; set; }
     }

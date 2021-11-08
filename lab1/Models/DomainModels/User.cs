@@ -6,12 +6,7 @@ namespace TRS.Models.DomainModels
     public class User : IEquatable<User>
     {
         [Required]
-        public string Name { get; }
-
-        public User(string name)
-        {
-            Name = name;
-        }
+        public string Name { get; set; }
 
         public bool Equals(User other)
         {

@@ -49,11 +49,8 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Freeze(DateTime? date)
         {
-            var user = LoggedInUser;
             var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(user, dateFilter);
-            report.Frozen = true;
-            DataManager.UpdateReport(report);
+            DataManager.FreezeReport(LoggedInUser, dateFilter);
             return RedirectToAction("Index");
         }
 

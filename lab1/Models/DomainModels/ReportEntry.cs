@@ -1,31 +1,27 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using TRS.Extensions;
 
 namespace TRS.Models.DomainModels
 {
-    public class ReportEntry : IEquatable<ReportEntry>, IComparable<ReportEntry>
+    public class ReportEntry : IEquatable<ReportEntry>
     {
-        [Display(Name = "Data")]
-        [DataType(DataType.Date)]
-        [Required]
-        public DateTime Date { get; set; }
+        public int MonthlyIndex { get; set; }
 
-        public int IndexForDate { get; set; }
+        public DateTime Date { get => _date; set => _date = value.Date; }
+        public DateTime Month => _date.TrimToMonth();
+        private DateTime _date;
 
-        [Display(Name = "Kod projektu")]
         [Required]
         public string Code { get; set; }
 
-        [Display(Name = "Kod kategorii")]
         [Required]
-        public string Subcode { get; set; }
+        public string Subcode { get; set; } = "";
 
-        [Display(Name = "Czas (w minutach)")]
-        [Required]
         public int Time { get; set; }
 
-        [Display(Name = "Opis")]
-        public string Description { get; set; }
+        [Required]
+        public string Description { get; set; } = "";
 
         public bool Equals(ReportEntry other)
         {
@@ -33,7 +29,7 @@ namespace TRS.Models.DomainModels
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            return Date.Date.Equals(other.Date.Date) && IndexForDate == other.IndexForDate;
+            return Month.Equals(other.Month) && MonthlyIndex == other.MonthlyIndex;
         }
 
         public override bool Equals(object obj)
@@ -49,19 +45,7 @@ namespace TRS.Models.DomainModels
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Date.Date, IndexForDate);
-        }
-
-        public int CompareTo(ReportEntry other)
-        {
-            if (ReferenceEquals(this, other))
-                return 0;
-            if (ReferenceEquals(null, other))
-                return 1;
-            var dateComparison = Date.Date.CompareTo(other.Date.Date);
-            if (dateComparison != 0)
-                return dateComparison;
-            return IndexForDate.CompareTo(other.IndexForDate);
+            return HashCode.Combine(Month, MonthlyIndex);
         }
     }
 }

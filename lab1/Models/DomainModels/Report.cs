@@ -1,17 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using TRS.Extensions;
 
 namespace TRS.Models.DomainModels
 {
-    public class Report : ReportWithoutEntries, IEquatable<Report>
+    public class Report : IEquatable<Report>
     {
         [Required]
-        public List<ReportEntry> Entries { get; set; } = new();
+        public string Owner { get; set; }
 
-        public Report(User owner, DateTime month)
-            : base(owner, month)
-        {}
+        [Required]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM}")]
+        public DateTime Month { get => _month; set => _month = value.TrimToMonth(); }
+        private DateTime _month;
+
+        [Required]
+        public bool Frozen { get; set; }
+
+        [Required]
+        public HashSet<ReportEntry> Entries { get; set; } = new();
+
+        [Required]
+        public HashSet<AcceptedTime> Accepted { get; set; } = new();
 
         public bool Equals(Report other)
         {
@@ -19,7 +31,7 @@ namespace TRS.Models.DomainModels
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            return base.Equals(other);
+            return Owner == other.Owner && Month.Equals(other.Month);
         }
 
         public override bool Equals(object obj)
@@ -35,7 +47,7 @@ namespace TRS.Models.DomainModels
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return HashCode.Combine(Owner, Month);
         }
     }
 }

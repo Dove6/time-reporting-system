@@ -29,7 +29,7 @@ namespace TRS.Controllers
         {
             var dateFilter = date ?? DateTime.Today;
             var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser, dateFilter, id);
-            return View(reportEntry);
+            return View(Mapper.Map<ReportEntryModel>(reportEntry));
         }
 
         public IActionResult Edit(DateTime? date, int id)
@@ -41,7 +41,7 @@ namespace TRS.Controllers
                 project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
             var model = new ReportEntryForEditingModel
             {
-                ReportEntry = reportEntry,
+                ReportEntry = Mapper.Map<ReportEntryModel>(reportEntry),
                 CategorySelectList = categoryCodes
             };
             return View(model);
@@ -56,14 +56,14 @@ namespace TRS.Controllers
             reportEntry.Subcode = reportEntryUpdate.Subcode;
             reportEntry.Time = reportEntryUpdate.Time;
             reportEntry.Description = reportEntryUpdate.Description;
-            DataManager.UpdateReportEntry(LoggedInUser, reportEntry);
+            DataManager.UpdateReportEntry(LoggedInUser, dateFilter, id, reportEntry);
             return RedirectToAction("Index", "Home", new { Date = dateFilter.ToString("yyyy-MM-dd") });
         }
 
         public IActionResult Add(DateTime? date)
         {
             var initialDate = date ?? DateTime.Today;
-            var availableProjects = DataManager.GetAllProjects().Where(x => x.Active);
+            var availableProjects = DataManager.GetAllProjects().Where(x => x.Active).ToHashSet();
             var projectCodes = availableProjects.Select(x => new SelectListItem(x.Name, x.Code)).ToList();
             var categoryCodes = availableProjects.ToDictionary(x => x.Code,
                 x => new List<SelectListItem> { new("nieokreślony", "") }.Concat(
@@ -71,7 +71,7 @@ namespace TRS.Controllers
                     ).ToList());
             var model = new ReportEntryForAddingModel
             {
-                ReportEntry = new ReportEntry { Date = initialDate },
+                ReportEntry = new ReportEntryModel { Date = initialDate },
                 ProjectSelectList = projectCodes,
                 ProjectCategorySelectList = categoryCodes
             };
@@ -79,9 +79,9 @@ namespace TRS.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add(ReportEntry reportEntry)
+        public IActionResult Add(ReportEntryModel reportEntry)
         {
-            DataManager.AddReportEntry(LoggedInUser, reportEntry);
+            DataManager.AddReportEntry(LoggedInUser, Mapper.Map<ReportEntry>(reportEntry));
             return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToString("yyyy-MM-dd") });
         }
 

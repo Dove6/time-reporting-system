@@ -7,7 +7,7 @@ namespace TRS.Models.DomainModels
     public class Project : IEquatable<Project>
     {
         [Required]
-        public string Code { get; }
+        public string Code { get; set; }
 
         [Required]
         public string Manager { get; set; }
@@ -15,19 +15,12 @@ namespace TRS.Models.DomainModels
         [Required]
         public string Name { get; set; }
 
-        [Required]
         public int Budget { get; set; }
 
-        [Required]
         public bool Active { get; set; }
 
         [Required]
         public HashSet<Category> Subactivities { get; set; } = new();
-
-        public Project(string code)
-        {
-            Code = code;
-        }
 
         public bool Equals(Project other)
         {

@@ -16,15 +16,18 @@ namespace TRS.DataManager
         HashSet<Project> GetAllProjects();
         Project UpdateProject(Project project);
 
-        ReportWithoutEntries FindReportByUserAndMonth(User user, DateTime month);
+        Report FindReportByUserAndMonth(User user, DateTime month);
         HashSet<Report> FindReportByProject(Project project);
-        ReportWithoutEntries UpdateReport(ReportWithoutEntries report);
+        void FreezeReport(User user, DateTime month);
 
         ReportEntry AddReportEntry(User user, ReportEntry reportEntry);
-        void DeleteReportEntry(User user, DateTime day, int indexForDate);
-        ReportEntry FindReportEntryByDayAndIndex(User user, DateTime day, int indexForDate);
+        void DeleteReportEntry(User user, DateTime day, int id);
+        ReportEntry FindReportEntryByDayAndIndex(User user, DateTime day, int id);
         HashSet<ReportEntry> FindReportEntriesByDay(User user, DateTime day);
         HashSet<ReportEntry> FindReportEntriesByMonth(User user, DateTime month);
-        ReportEntry UpdateReportEntry(User user, ReportEntry reportEntry);
+        ReportEntry UpdateReportEntry(User user, DateTime day, int id, ReportEntry reportEntry);
+
+        AcceptedTime AddAcceptedTime(User user, DateTime month, AcceptedTime acceptedTime);
+        AcceptedTime UpdateAcceptedTime(User user, DateTime month, AcceptedTime acceptedTime);
     }
 }

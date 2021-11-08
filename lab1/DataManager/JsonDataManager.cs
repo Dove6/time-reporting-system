@@ -22,9 +22,6 @@ namespace TRS.DataManager
         private static readonly string UserListPath = Path.Combine(StoragePath, UserListFilename);
         private static readonly string ProjectListPath = Path.Combine(StoragePath, ProjectListFilename);
 
-        private static string UserMonthEntryListPath(string username, DateTime month) =>
-            Path.Combine(StoragePath, $"{username}-{month.ToString(MonthDateFormat)}.json");
-
         private static readonly JsonSerializerOptions SerializerOptions = new()
         {
             AllowTrailingCommas = true,
@@ -39,15 +36,37 @@ namespace TRS.DataManager
             _mapper = mapper;
         }
 
-        private HashSet<User> ReadAllUsers()
+        public static string GetReportFilename(string username, DateTime month) =>
+            $"{username}-{month.ToString(MonthDateFormat)}.json";
+
+        private static string GetReportPath(string username, DateTime month) =>
+            Path.Combine(StoragePath, GetReportFilename(username, month));
+
+        private static (string, DateTime) ParseReportFilename(string reportPath)
+        {
+            var filename = new FileInfo(reportPath).Name;
+            var userRegex = new Regex(@"^(.+?)-(\d{4}-\d{2})\.json$", RegexOptions.Compiled);
+            return (
+                userRegex.Match(filename).Groups[1].Value,
+                DateTime.ParseExact(userRegex.Match(filename).Groups[2].Value,
+                    MonthDateFormat,
+                    CultureInfo.InvariantCulture)
+            );
+        }
+
+        public static string GetOwnerFromReportFilename(string reportPath) => ParseReportFilename(reportPath).Item1;
+
+        public static DateTime GetMonthFromReportFilename(string reportPath) => ParseReportFilename(reportPath).Item2;
+
+        private static HashSet<User> ReadAllUsers()
         {
             if (!File.Exists(UserListPath))
                 return new HashSet<User>();
 
-            var data = File.ReadAllText(UserListPath);
-            var userList = JsonSerializer.Deserialize<List<string>>(data, SerializerOptions);
-            var mappedUserList = userList.Select(x => new User(x));
-            return new HashSet<User>(mappedUserList);
+            var serializedUserList = File.ReadAllText(UserListPath);
+            var userList = JsonSerializer.Deserialize<List<string>>(serializedUserList, SerializerOptions);
+            var mappedUserList = userList.Select(x => new User { Name = x }).ToHashSet();
+            return mappedUserList;
         }
 
         private HashSet<Project> ReadAllProjects()
@@ -55,30 +74,37 @@ namespace TRS.DataManager
             if (!File.Exists(ProjectListPath))
                 return new HashSet<Project>();
 
-            var data = File.ReadAllText(ProjectListPath);
-            var projectList = JsonSerializer.Deserialize<Models.JsonModels.ProjectListModel>(data, SerializerOptions);
-            var mappedProjectList = _mapper.Map<ProjectList>(projectList);
-            return mappedProjectList.Projects.ToHashSet();
+            var serializedProjectList = File.ReadAllText(ProjectListPath);
+            var projectList =
+                JsonSerializer.Deserialize<Models.JsonModels.ActivityList>(serializedProjectList, SerializerOptions);
+            var mappedProjectList = _mapper.Map<HashSet<Project>>(projectList.Activities);
+            return mappedProjectList;
         }
 
         private HashSet<Report> ReadAllReports(User user = null, DateTime? month = null)
         {
-            var allReports = new HashSet<Report>();
+            var readReports = new HashSet<Report>();
             var userSearchPattern = user != null ? user.Name : "*?";
-            var monthSearchPattern = month?.ToString("yyyy-MM") ?? "????-??";
+            var monthSearchPattern = month?.ToString(MonthDateFormat) ?? "????-??";
             var searchPattern = $"{userSearchPattern}-{monthSearchPattern}.json";
             foreach (var reportPath in Directory.GetFiles(StoragePath, searchPattern))
             {
-                var data = File.ReadAllText(reportPath);
-                var report = JsonSerializer.Deserialize<Models.JsonModels.ReportModel>(data, SerializerOptions);
+                var serializedReport = File.ReadAllText(reportPath);
+                var report = JsonSerializer.Deserialize<Models.JsonModels.Report>(serializedReport, SerializerOptions);
                 report.Filename = reportPath;
                 var mappedReport = _mapper.Map<Report>(report);
-                allReports.Add(mappedReport);
+                mappedReport.Entries = report.Entries.Select((x, i) =>
+                {
+                    var mappedEntry = _mapper.Map<ReportEntry>(x);
+                    mappedEntry.MonthlyIndex = i;
+                    return mappedEntry;
+                }).ToHashSet();
+                readReports.Add(mappedReport);
             }
-            return allReports;
+            return readReports;
         }
 
-        private void WriteAllUsers(HashSet<User> users)
+        private static void WriteAllUsers(HashSet<User> users)
         {
             var mappedUserList = users.Select(x => x.Name)
                 .OrderBy(x => x).ToList();
@@ -88,20 +114,21 @@ namespace TRS.DataManager
 
         private void WriteAllProjects(HashSet<Project> projectList)
         {
-            var mappedProjectList = new Models.JsonModels.ProjectListModel
+            var mappedProjectList = new Models.JsonModels.ActivityList
             {
-                Activities = _mapper.Map<List<Models.JsonModels.Project>>(projectList)
+                Activities = _mapper.Map<List<Models.JsonModels.Activity>>(projectList)
             };
-            mappedProjectList.Activities.Sort((x, y) => string.Compare(x.Code, y.Code, StringComparison.InvariantCulture));
+            mappedProjectList.Activities.Sort((x, y) =>
+                string.Compare(x.Code, y.Code, StringComparison.InvariantCulture));
             var data = JsonSerializer.Serialize(mappedProjectList, SerializerOptions);
             File.WriteAllText(ProjectListPath, data);
         }
 
         private void WriteReportForUserInMonth(Report report)
         {
-            var mappedReport = _mapper.Map<Models.JsonModels.ReportModel>(report);
+            var mappedReport = _mapper.Map<Models.JsonModels.Report>(report);
             var data = JsonSerializer.Serialize(mappedReport, SerializerOptions);
-            var reportPath = UserMonthEntryListPath(report.Owner.Name, report.Month);
+            var reportPath = GetReportPath(report.Owner, report.Month);
             File.WriteAllText(reportPath, data);
         }
 
@@ -131,15 +158,11 @@ namespace TRS.DataManager
             return project;
         }
 
-        public Project FindProjectByCode(string code)
-        {
-            return ReadAllProjects().FirstOrDefault(x => x.Code == code);
-        }
+        public Project FindProjectByCode(string code) =>
+            ReadAllProjects().FirstOrDefault(x => x.Code == code);
 
-        public HashSet<Project> FindProjectsByManager(User manager)
-        {
-            return ReadAllProjects().Where(x => x.Manager == manager.Name).ToHashSet();
-        }
+        public HashSet<Project> FindProjectsByManager(User manager) =>
+            ReadAllProjects().Where(x => x.Manager == manager.Name).ToHashSet();
 
         public HashSet<Project> GetAllProjects()
         {
@@ -156,71 +179,49 @@ namespace TRS.DataManager
             return project;
         }
 
-        public ReportWithoutEntries FindReportByUserAndMonth(User user, DateTime month)
-        {
-            return _mapper.Map<ReportWithoutEntries>(ReadAllReports(user, month).FirstOrDefault() ?? new Report(user, month));
-        }
+        public Report FindReportByUserAndMonth(User user, DateTime month) =>
+            ReadAllReports(user, month).FirstOrDefault() ?? new Report { Owner = user.Name, Month = month };
 
-        private Report GetUserMonthlyReport(User user, DateTime month)
-        {
-            return ReadAllReports(user, month).FirstOrDefault() ?? new Report(user, month);
-        }
+        public HashSet<Report> FindReportByProject(Project project) =>
+            ReadAllReports().Where(x => x.Entries.Any(y => y.Code == project.Code)).ToHashSet();
 
-        public HashSet<Report> FindReportByProject(Project project)
+        public void FreezeReport(User user, DateTime month)
         {
-            return ReadAllReports().Where(x => x.Entries.Any(y => y.Code == project.Code)).ToHashSet();
-        }
-
-        public ReportWithoutEntries UpdateReport(ReportWithoutEntries reportWithoutEntries)
-        {
-            var report = GetUserMonthlyReport(reportWithoutEntries.Owner, reportWithoutEntries.Month);
-            _mapper.Map(reportWithoutEntries, report);
+            var report = FindReportByUserAndMonth(user, month);
+            report.Frozen = true;
             WriteReportForUserInMonth(report);
-            return reportWithoutEntries;
         }
 
         public ReportEntry AddReportEntry(User user, ReportEntry reportEntry)
         {
-            var report = ReadAllReports(user, reportEntry.Date).FirstOrDefault();
+            var report = FindReportByUserAndMonth(user, reportEntry.Date);
             if (report == null)
                 return null;
-            var maxDayId = report.Entries.Where(x => x.Date.Date == reportEntry.Date.Date)
-                .Max()?.IndexForDate ?? -1;
-            reportEntry.IndexForDate = maxDayId + 1;
+            reportEntry.MonthlyIndex = report.Entries.Count;
             report.Entries.Add(reportEntry);
             WriteReportForUserInMonth(report);
             return reportEntry;
         }
 
-        public void DeleteReportEntry(User user, DateTime day, int indexForDate)
+        public void DeleteReportEntry(User user, DateTime day, int id)
         {
             var report = ReadAllReports(user, day).FirstOrDefault();
             if (report == null)
                 return;
-            report.Entries.Remove(new ReportEntry { Date = day, IndexForDate = indexForDate });
+            report.Entries.RemoveWhere(x => x.Date == day.Date && x.MonthlyIndex == id);
             WriteReportForUserInMonth(report);
         }
 
-        public ReportEntry FindReportEntryByDayAndIndex(User user, DateTime day, int indexForDate)
-        {
-            var report = ReadAllReports(user, day).FirstOrDefault();
-            return report?.Entries.FirstOrDefault(x => x.Date.Date == day.Date && x.IndexForDate == indexForDate);
-        }
+        public ReportEntry FindReportEntryByDayAndIndex(User user, DateTime day, int id) =>
+            FindReportByUserAndMonth(user, day).Entries.FirstOrDefault(x => x.Date == day.Date && x.MonthlyIndex == id);
 
-        public HashSet<ReportEntry> FindReportEntriesByDay(User user, DateTime day)
-        {
-            var report = ReadAllReports(user, day).FirstOrDefault();
-            return report?.Entries.Where(x => x.Date.Date == day.Date)
-                .ToHashSet();
-        }
+        public HashSet<ReportEntry> FindReportEntriesByDay(User user, DateTime day) =>
+            FindReportByUserAndMonth(user, day)?.Entries.Where(x => x.Date == day.Date).ToHashSet() ?? new HashSet<ReportEntry>();
 
-        public HashSet<ReportEntry> FindReportEntriesByMonth(User user, DateTime month)
-        {
-            var report = ReadAllReports(user, month).FirstOrDefault();
-            return report?.Entries.ToHashSet();
-        }
+        public HashSet<ReportEntry> FindReportEntriesByMonth(User user, DateTime month) =>
+            ReadAllReports(user, month).FirstOrDefault()?.Entries.ToHashSet() ?? new HashSet<ReportEntry>();
 
-        public ReportEntry UpdateReportEntry(User user, ReportEntry reportEntry)
+        public ReportEntry UpdateReportEntry(User user, DateTime day, int id, ReportEntry reportEntry)
         {
             var report = ReadAllReports(user, reportEntry.Date).FirstOrDefault();
             if (report == null)
@@ -231,27 +232,21 @@ namespace TRS.DataManager
             return reportEntry;
         }
 
-        private static ParsedFilename ParseFilename(string reportPath)
+        public AcceptedTime AddAcceptedTime(User user, DateTime month, AcceptedTime acceptedTime)
         {
-            var filename = new FileInfo(reportPath).Name;
-            var userRegex = new Regex(@"^(.+?)-(\d{4}-\d{2})\.json$");
-            return new ParsedFilename
-            {
-                Owner = new User(userRegex.Match(filename).Groups[1].Value),
-                Month = DateTime.ParseExact(userRegex.Match(filename).Groups[2].Value,
-                    "yyyy-MM",
-                    CultureInfo.InvariantCulture)
-            };
+            var report = FindReportByUserAndMonth(user, month);
+            report.Accepted.Add(acceptedTime);
+            WriteReportForUserInMonth(report);
+            return acceptedTime;
         }
 
-        public static User GetUserFromFilename(string reportPath) => ParseFilename(reportPath).Owner;
-
-        public static DateTime GetMonthFromFilename(string reportPath) => ParseFilename(reportPath).Month;
-
-        private class ParsedFilename
+        public AcceptedTime UpdateAcceptedTime(User user, DateTime month, AcceptedTime acceptedTime)
         {
-            public User Owner;
-            public DateTime Month;
+            var report = FindReportByUserAndMonth(user, month);
+            report.Accepted.Remove(acceptedTime);
+            report.Accepted.Add(acceptedTime);
+            WriteReportForUserInMonth(report);
+            return acceptedTime;
         }
     }
 }
