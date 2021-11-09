@@ -21,11 +21,10 @@ namespace TRS.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index(DateTime? date)
+        public IActionResult Index()
         {
-            var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(LoggedInUser.Name, dateFilter);
-            var reportEntries = DataManager.FindReportEntriesByMonth(LoggedInUser.Name, dateFilter);
+            var report = DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate);
+            var reportEntries = DataManager.FindReportEntriesByMonth(LoggedInUser.Name, RequestedDate);
             var summaryEntries = reportEntries.GroupBy(x => x.Code)
                 .Select(x => new MonthlySummaryEntry
                 {
@@ -35,7 +34,7 @@ namespace TRS.Controllers
                 }).ToList();
             var model = new MonthlySummaryModel
             {
-                Month = dateFilter,
+                Month = RequestedDate,
                 Frozen = report.Frozen,
                 PerProject = summaryEntries,
                 TotalTime = summaryEntries.Sum(x => x.Time),
@@ -45,10 +44,9 @@ namespace TRS.Controllers
         }
 
         [HttpPost]
-        public IActionResult Freeze(DateTime? date)
+        public IActionResult Freeze()
         {
-            var dateFilter = date ?? DateTime.Today;
-            DataManager.FreezeReport(LoggedInUser.Name, dateFilter);
+            DataManager.FreezeReport(LoggedInUser.Name, RequestedDate);
             return RedirectToAction("Index");
         }
 

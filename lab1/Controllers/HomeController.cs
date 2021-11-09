@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using AutoMapper;
@@ -22,14 +21,12 @@ namespace TRS.Controllers
         }
 
         [ForLoggedInOnly]
-        public IActionResult Index(DateTime? date)
+        public IActionResult Index()
         {
-            var dateFilter = date ?? DateTime.Today;
-            var report = DataManager.FindReportByUserAndMonth(LoggedInUser.Name, dateFilter);
-            var reportEntries = DataManager.FindReportEntriesByDay(LoggedInUser.Name, dateFilter);
+            var report = DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate);
+            var reportEntries = report.Entries.Where(x => x.Date == RequestedDate).ToList();
             return View(new DailyReportModel
             {
-                Date = dateFilter,
                 Frozen = report.Frozen,
                 Entries = Mapper.Map<List<DailyReportEntry>>(reportEntries),
                 ProjectTimeSummary = reportEntries.GroupBy(x => x.Code)

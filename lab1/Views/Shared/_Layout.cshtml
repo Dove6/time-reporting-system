@@ -1,12 +1,15 @@
 ﻿@using TRS.Models.DomainModels
+@using TRS.Extensions
 
 @{
     User loggedInUser = null;
-    if (Context.Items.TryGetValue("user", out var contextUser))
+    if (ViewData.TryGetValue("user", out var contextUser))
         loggedInUser = (User)contextUser;
     string error = null;
-    if (Context.Items.TryGetValue("error", out var contextError))
+    if (ViewData.TryGetValue("error", out var contextError))
         error = (string)contextError;
+
+    var date = (DateTime)ViewData["date"];
 }
 
 <!DOCTYPE html>
@@ -30,12 +33,12 @@
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Strona główna</a>
+                        <a class="nav-link text-dark" asp-controller="Home" asp-action="Index" asp-route-date="@date.ToDateString()">Strona główna</a>
                     </li>
                     @if (loggedInUser != null)
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Report" asp-action="Index">Zestawienie miesięczne</a>
+                            <a class="nav-link text-dark" asp-controller="Report" asp-action="Index" asp-route-date="@date.ToDateString()">Zestawienie miesięczne</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Project" asp-action="Index">Zarządzane projekty</a>

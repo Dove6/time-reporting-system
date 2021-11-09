@@ -1,16 +1,17 @@
-﻿@model TRS.Models.ViewModels.DailyReportModel
+﻿@using TRS.Extensions
+@model TRS.Models.ViewModels.DailyReportModel
 
 @{
     ViewData["Title"] = "Strona główna";
-    var date = Model.Date.ToString("yyyy-MM-dd");
+    var date = (DateTime)ViewData["date"];
 }
 
 <main class="bd-main order-1 gap-3">
     <div class="d-md-flex align-items-center justify-content-between">
-        <h1 class="display-6">Raport czasu pracy na dzień @Html.DisplayFor(model => model.Date)</h1>
+        <h1 class="display-6">Raport czasu pracy na dzień @date.ToDateString()</h1>
         <form asp-action="Index" method="GET">
             <span>Przejdź do: </span>
-            <input asp-for="Date"/>
+            <input name="date" type="date" value="@date.ToDateString()"/>
             <input type="submit" value="Wyślij"/>
         </form>
     </div>
@@ -52,12 +53,12 @@
                         @Html.DisplayFor(model => entry.Description)
                     </td>
                     <td>
-                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date" asp-route-id="@entry.Id">Obejrzyj</a>
+                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Obejrzyj</a>
                         @if (!Model.Frozen)
                         {
-                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date" asp-route-id="@entry.Id">Zmień</a>
+                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Zmień</a>
                             <form method="POST">
-                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date" asp-route-id="@entry.Id">Skasuj</button>
+                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Skasuj</button>
                             </form>
                         }
                     </td>
@@ -69,7 +70,7 @@
     @if (!Model.Frozen)
     {
         <p>
-            <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date">Dodaj</a>
+            <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date.ToDateString()">Dodaj</a>
         </p>
     }
     <p>

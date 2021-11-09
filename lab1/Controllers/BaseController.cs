@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using TRS.Controllers.Attributes;
 using TRS.DataManager;
+using TRS.Extensions;
 using TRS.Models.DomainModels;
 
 namespace TRS.Controllers
@@ -15,8 +17,10 @@ namespace TRS.Controllers
         protected readonly IDataManager DataManager;
         protected readonly IMapper Mapper;
 
-        private const string UsernameCookieName = "username";
-        private const string UserItemName = "user";
+        private const string UsernameCookieKey = "username";
+        private const string UserViewDataKey = "user";
+        private const string DateViewDataKey = "date";
+        private const string DateQueryKey = "date";
 
         private User _loggedInUser;
         protected User LoggedInUser
@@ -27,20 +31,31 @@ namespace TRS.Controllers
                 _loggedInUser = value;
                 if (_loggedInUser == null)
                 {
-                    Response.Cookies.Delete(UsernameCookieName);
-                    HttpContext.Items.Remove(UserItemName);
+                    Response.Cookies.Delete(UsernameCookieKey);
+                    ViewData.Remove(UserViewDataKey);
                 }
                 else
                 {
-                    Response.Cookies.Append(UsernameCookieName,
+                    Response.Cookies.Append(UsernameCookieKey,
                         _loggedInUser.Name,
                         new CookieOptions
                         {
                             MaxAge = TimeSpan.FromHours(1),
                             HttpOnly = true
                         });
-                    HttpContext.Items[UserItemName] = _loggedInUser;
+                    ViewData[UserViewDataKey] = _loggedInUser;
                 }
+            }
+        }
+
+        private DateTime _requestedDate;
+        protected DateTime RequestedDate
+        {
+            get => _requestedDate;
+            private set
+            {
+                _requestedDate = value.Date;
+                ViewData[DateViewDataKey] = _requestedDate;
             }
         }
 
@@ -52,8 +67,13 @@ namespace TRS.Controllers
 
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            if (Request.Cookies.TryGetValue(UsernameCookieName, out var username))
+            if (Request.Cookies.TryGetValue(UsernameCookieKey, out var username))
                 LoggedInUser = DataManager.FindUserByName(username!);
+
+            if (Request.Query.TryGetValue(DateQueryKey, out var dateRouteValue) && (string)dateRouteValue != null)
+                RequestedDate = DateTime.ParseExact((string)dateRouteValue, DateTimeExtensions.DateFormat, CultureInfo.InvariantCulture);
+            else
+                RequestedDate = DateTime.Today;
 
             if (LoggedInUser == null &&
                 filterContext.ActionDescriptor.EndpointMetadata.OfType<ForLoggedInOnlyAttribute>().Any())

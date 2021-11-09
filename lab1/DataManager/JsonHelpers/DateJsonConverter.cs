@@ -8,7 +8,7 @@ namespace TRS.DataManager.JsonHelpers
 {
     public class DateJsonConverter : JsonConverter<DateTime>
     {
-        public const string DateFormat = "yyyy-MM-dd";
+        private const string DateFormat = "yyyy-MM-dd";
 
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

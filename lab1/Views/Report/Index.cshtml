@@ -1,8 +1,9 @@
-﻿@model TRS.Models.ViewModels.MonthlySummaryModel
+﻿@using TRS.Extensions
+@model TRS.Models.ViewModels.MonthlySummaryModel
 
 @{
     ViewData["Title"] = "Miesięczne zestawienie";
-    var date = Model.Month.ToString("yyyy-MM-dd");
+    var date = (DateTime)ViewData["date"];
 }
 
 <main class="bd-main order-1 gap-3">
@@ -51,7 +52,7 @@
     @if (!Model.Frozen)
     {
         <form method="POST">
-            <button asp-controller="Report" asp-action="Freeze" asp-route-date="@date">Zatwierdź</button>
+            <button asp-controller="Report" asp-action="Freeze" asp-route-date="@date.ToDateString()">Zatwierdź</button>
         </form>
     }
 </main>

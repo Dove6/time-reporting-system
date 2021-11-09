@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
 using TRS.DataManager;
+using TRS.Extensions;
 using TRS.Models.DomainModels;
 using TRS.Models.ViewModels;
 
@@ -24,17 +25,15 @@ namespace TRS.Controllers
             _logger = logger;
         }
 
-        public IActionResult Show(DateTime? date, int id)
+        public IActionResult Show(int id)
         {
-            var dateFilter = date ?? DateTime.Today;
-            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, dateFilter, id);
+            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
             return View(Mapper.Map<ReportEntryModel>(reportEntry));
         }
 
-        public IActionResult Edit(DateTime? date, int id)
+        public IActionResult Edit(int id)
         {
-            var dateFilter = date ?? DateTime.Today;
-            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, dateFilter, id);
+            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
             var project = DataManager.FindProjectByCode(reportEntry.Code);
             var categoryCodes = new List<SelectListItem> { new("nieokreślony", "") }.Concat(
                 project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
@@ -47,21 +46,18 @@ namespace TRS.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(DateTime? date, int id, ReportEntryUpdateModel reportEntryUpdate)
+        public IActionResult Edit(int id, ReportEntryUpdateModel reportEntryUpdate)
         {
-
-            var dateFilter = date ?? DateTime.Today;
-            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, dateFilter, id);
+            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
             reportEntry.Subcode = reportEntryUpdate.Subcode;
             reportEntry.Time = reportEntryUpdate.Time;
             reportEntry.Description = reportEntryUpdate.Description;
-            DataManager.UpdateReportEntry(LoggedInUser.Name, dateFilter, id, reportEntry);
-            return RedirectToAction("Index", "Home", new { Date = dateFilter.ToString("yyyy-MM-dd") });
+            DataManager.UpdateReportEntry(LoggedInUser.Name, RequestedDate, id, reportEntry);
+            return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
         }
 
-        public IActionResult Add(DateTime? date)
+        public IActionResult Add()
         {
-            var initialDate = date ?? DateTime.Today;
             var availableProjects = DataManager.GetAllProjects().Where(x => x.Active).ToHashSet();
             var projectCodes = availableProjects.Select(x => new SelectListItem(x.Name, x.Code)).ToList();
             var categoryCodes = availableProjects.ToDictionary(x => x.Code,
@@ -70,7 +66,7 @@ namespace TRS.Controllers
                     ).ToList());
             var model = new ReportEntryForAddingModel
             {
-                ReportEntry = new ReportEntryModel { Date = initialDate },
+                ReportEntry = new ReportEntryModel { Date = RequestedDate },
                 ProjectSelectList = projectCodes,
                 ProjectCategorySelectList = categoryCodes
             };
@@ -81,15 +77,14 @@ namespace TRS.Controllers
         public IActionResult Add(ReportEntryModel reportEntry)
         {
             DataManager.AddReportEntry(LoggedInUser.Name, Mapper.Map<ReportEntry>(reportEntry));
-            return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToString("yyyy-MM-dd") });
+            return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToDateString() });
         }
 
         [HttpPost]
-        public IActionResult Delete(DateTime? date, int id)
+        public IActionResult Delete(int id)
         {
-            var dateFilter = date ?? DateTime.Today;
-            DataManager.DeleteReportEntry(LoggedInUser.Name, dateFilter, id);
-            return RedirectToAction("Index", "Home", new { Date = dateFilter.ToString("yyyy-MM-dd") });
+            DataManager.DeleteReportEntry(LoggedInUser.Name, RequestedDate, id);
+            return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

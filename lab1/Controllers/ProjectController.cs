@@ -109,16 +109,16 @@ namespace TRS.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateAcceptedTime(string id, string username, DateTime month, int? acceptedTime)
+        public IActionResult UpdateAcceptedTime(string id, string username, int? acceptedTime)
         {
             if (!acceptedTime.HasValue)
                 return RedirectToAction("Show", new { Id = id });
-            var report = DataManager.FindReportByUserAndMonth(username, month);
+            var report = DataManager.FindReportByUserAndMonth(username, RequestedDate);
             var accepted = new AcceptedTime { Code = id, Time = acceptedTime.Value };
             if (report.Accepted.Contains(accepted))
-                DataManager.UpdateAcceptedTime(username, month, accepted);
+                DataManager.UpdateAcceptedTime(username, RequestedDate, accepted);
             else
-                DataManager.AddAcceptedTime(username, month, accepted);
+                DataManager.AddAcceptedTime(username, RequestedDate, accepted);
             return RedirectToAction("Show", new { Id = id });
         }
 
