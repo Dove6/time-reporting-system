@@ -180,7 +180,7 @@ namespace TRS.DataManager
         public void UpdateProject(Project project)
         {
             var projectSet = ReadAllProjects();
-            if (projectSet.Remove(project))
+            if (!projectSet.Remove(project))
                 throw new NotFoundException();
             projectSet.Add(project);
             WriteAllProjects(projectSet);
@@ -189,8 +189,8 @@ namespace TRS.DataManager
         public Report FindReportByUserAndMonth(string username, DateTime month) =>
             ReadAllReports(username, month).FirstOrDefault() ?? new Report { Owner = username, Month = month };
 
-        public HashSet<Report> FindReportByProject(Project project) =>
-            ReadAllReports().Where(x => x.Entries.Any(y => y.Code == project.Code)).ToHashSet();
+        public HashSet<Report> FindReportsByProject(string projectCode) =>
+            ReadAllReports().Where(x => x.Entries.Any(y => y.Code == projectCode)).ToHashSet();
 
         public void FreezeReport(string username, DateTime month)
         {

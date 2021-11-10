@@ -35,12 +35,8 @@ namespace TRS.Controllers
             });
         }
 
-        public IActionResult NotLoggedIn()
-        {
-            if (LoggedInUser != null)
-                return RedirectToAction("Index");
-            return View();
-        }
+        [ForNotLoggedInOnly]
+        public IActionResult NotLoggedIn() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

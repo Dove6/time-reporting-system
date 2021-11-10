@@ -1,4 +1,5 @@
-﻿@model TRS.Models.ViewModels.ProjectWithUserSummaryModel
+﻿@using TRS.Extensions
+@model TRS.Models.ViewModels.ProjectWithUserSummaryModel
 @{
     ViewData["Title"] = "Przegląd projektu";
 }
@@ -83,7 +84,6 @@
                     </td>
                     <td>
                         @Html.DisplayFor(model => model.UserSummaries[i].Month)
-                        <input id="Month-@i" form="form-@i" name="Month" type="hidden" asp-for="UserSummaries[i].Month"/>
                     </td>
                     <td>
                         @Html.DisplayFor(model => model.UserSummaries[i].DeclaredTime)
@@ -92,7 +92,7 @@
                         @if (Model.Project.Active)
                         {
                             <input id="AcceptedTime-@i" form="form-@i" name="AcceptedTime" asp-for="UserSummaries[i].AcceptedTime"/>
-                            <button type="submit" form="form-@i">Zatwierdź</button>
+                            <button type="submit" asp-action="UpdateAcceptedTime" asp-route-id="@Model.Project.Code" asp-route-date="@Model.UserSummaries[i].Month.ToDateString()" form="form-@i">Zatwierdź</button>
                         }
                         else
                         {
@@ -109,7 +109,7 @@
         </p>
         @for (var i = 0; i < Model.UserSummaries.Length; i++)
         {
-            <form id="form-@i" asp-action="UpdateAcceptedTime" asp-route-id="@Model.Project.Code">
+            <form id="form-@i" method="POST">
             </form>
         }
     }

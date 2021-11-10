@@ -5,9 +5,6 @@
     User loggedInUser = null;
     if (ViewData.TryGetValue("user", out var contextUser))
         loggedInUser = (User)contextUser;
-    string error = null;
-    if (ViewData.TryGetValue("error", out var contextError))
-        error = (string)contextError;
 
     var date = (DateTime)ViewData["date"];
 }
@@ -25,23 +22,36 @@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TRS</a>
+            @if (loggedInUser != null)
+            {
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TRS</a>
+            }
+            else
+            {
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="NotLoggedIn">TRS</a>
+            }
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-controller="Home" asp-action="Index" asp-route-date="@date.ToDateString()">Strona główna</a>
-                    </li>
                     @if (loggedInUser != null)
                     {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index" asp-route-date="@date.ToDateString()">Strona główna</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Report" asp-action="Index" asp-route-date="@date.ToDateString()">Zestawienie miesięczne</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Project" asp-action="Index">Zarządzane projekty</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="NotLoggedIn">Strona główna</a>
                         </li>
                     }
                 </ul>
@@ -72,6 +82,9 @@
 </header>
 <div class="container">
     <main role="main" class="pb-3">
+        <div id="error-container" class="container" style="background-color: mistyrose; border-radius: 2em;" hidden>
+            @Html.ValidationMessage("error")
+        </div>
         @RenderBody()
     </main>
 </div>
@@ -85,9 +98,12 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
-@if (error != null)
-{
-    <script type="text/javascript">alert("@error");</script>
-}
+<script type="text/javascript">
+    (function () {
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer.querySelector('.field-validation-error') != null)
+            errorContainer.hidden = false;
+    })();
+</script>
 </body>
 </html>

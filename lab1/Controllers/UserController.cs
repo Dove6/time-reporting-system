@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
+using TRS.Controllers.Constants;
 using TRS.DataManager;
+using TRS.DataManager.Exceptions;
 using TRS.Models.DomainModels;
 using TRS.Models.ViewModels;
 
@@ -27,6 +29,7 @@ namespace TRS.Controllers
             return View();
         }
 
+        [ForNotLoggedInOnly]
         public IActionResult Login()
         {
             var userSelectList = new UserSelectListModel
@@ -36,12 +39,17 @@ namespace TRS.Controllers
             return View(userSelectList);
         }
 
+        [ForNotLoggedInOnly]
         [HttpPost]
         public IActionResult Login(string username)
         {
             var user = DataManager.FindUserByName(username);
-            if (user != null)
-                LoggedInUser = user;
+            if (user == null)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetUserNotFoundMessage(username);
+                return RedirectToAction("Login");
+            }
+            LoggedInUser = user;
             return RedirectToAction("Index", "Home");
         }
 
@@ -50,18 +58,28 @@ namespace TRS.Controllers
         public IActionResult Logout()
         {
             LoggedInUser = null;
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("NotLoggedIn", "Home");
         }
 
+        [ForNotLoggedInOnly]
         public IActionResult Register()
         {
             return View();
         }
 
+        [ForNotLoggedInOnly]
         [HttpPost]
         public IActionResult Register(string username)
         {
-            DataManager.AddUser(new User { Name = username });
+            try
+            {
+                DataManager.AddUser(new User { Name = username });
+            }
+            catch (AlreadyExistingException)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetUserAlreadyExistingMessage(username);
+                return RedirectToAction("Register");
+            }
             return Login(username);
         }
 

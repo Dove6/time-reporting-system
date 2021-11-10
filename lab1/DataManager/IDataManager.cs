@@ -17,7 +17,7 @@ namespace TRS.DataManager
         void UpdateProject(Project project);
 
         Report FindReportByUserAndMonth(string username, DateTime month);
-        HashSet<Report> FindReportByProject(Project project);
+        HashSet<Report> FindReportsByProject(string projectCode);
         void FreezeReport(string username, DateTime month);
 
         void AddReportEntry(string username, ReportEntry reportEntry);

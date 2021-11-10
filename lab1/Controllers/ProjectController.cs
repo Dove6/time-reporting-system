@@ -1,11 +1,13 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
+using TRS.Controllers.Constants;
 using TRS.DataManager;
+using TRS.DataManager.Exceptions;
+using TRS.Extensions;
 using TRS.Models.DomainModels;
 using TRS.Models.ViewModels;
 
@@ -30,7 +32,7 @@ namespace TRS.Controllers
                 Projects = userProjectList.Select(x =>
                 {
                     var mappedProject = Mapper.Map<ProjectModel>(x);
-                    var totalAcceptedTime = DataManager.FindReportByProject(x)
+                    var totalAcceptedTime = DataManager.FindReportsByProject(x.Code)
                         .SelectMany(y => y.Accepted)
                         .Where(y => y.Code == x.Code)
                         .Sum(y => y.Time);
@@ -44,8 +46,13 @@ namespace TRS.Controllers
         public IActionResult Show(string id)
         {
             var project = DataManager.FindProjectByCode(id);
+            if (project == null)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(id);
+                return RedirectToAction("Index");
+            }
             var projectModel = Mapper.Map<ProjectModel>(project);
-            var reports = DataManager.FindReportByProject(project);
+            var reports = DataManager.FindReportsByProject(id);
             var userSummaries = reports.Where(x => x.Frozen).Select(x =>
             {
                 var acceptedSummary = x.Accepted.FirstOrDefault(y => y.Code == project.Code);
@@ -69,6 +76,11 @@ namespace TRS.Controllers
         public IActionResult Edit(string id)
         {
             var project = DataManager.FindProjectByCode(id);
+            if (project == null)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(id);
+                return RedirectToAction("Index");
+            }
             var projectModel = Mapper.Map<ProjectModel>(project);
             return View(projectModel);
         }
@@ -78,6 +90,11 @@ namespace TRS.Controllers
         {
             var inputProject = Mapper.Map<Project>(projectModel);
             var modifiedProject = DataManager.FindProjectByCode(projectModel.Code);
+            if (modifiedProject == null)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(projectModel.Code);
+                return RedirectToAction("Index");
+            }
             modifiedProject.Budget = inputProject.Budget;
             modifiedProject.Subactivities = inputProject.Subactivities;
             DataManager.UpdateProject(modifiedProject);
@@ -95,7 +112,15 @@ namespace TRS.Controllers
             projectModel.Manager = LoggedInUser.Name;
             projectModel.Active = true;
             var project = Mapper.Map<Project>(projectModel);
-            DataManager.AddProject(project);
+            try
+            {
+                DataManager.AddProject(project);
+            }
+            catch (AlreadyExistingException)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectAlreadyExistingMessage(projectModel.Code);
+                return RedirectToAction("Add");
+            }
             return RedirectToAction("Index");
         }
 
@@ -103,6 +128,11 @@ namespace TRS.Controllers
         public IActionResult Close(string id)
         {
             var project = DataManager.FindProjectByCode(id);
+            if (project == null)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(id);
+                return RedirectToAction("Index");
+            }
             project.Active = false;
             DataManager.UpdateProject(project);
             return RedirectToAction("Index");
@@ -113,12 +143,34 @@ namespace TRS.Controllers
         {
             if (!acceptedTime.HasValue)
                 return RedirectToAction("Show", new { Id = id });
+            var project = DataManager.FindProjectByCode(id);
+            if (project == null)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(id);
+                return RedirectToAction("Index");
+            }
             var report = DataManager.FindReportByUserAndMonth(username, RequestedDate);
+            if (project.Manager != LoggedInUser.Name || report.Entries.All(x => x.Code != id))
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString());
+                return RedirectToAction("Show", new { Id = id });
+            }
             var accepted = new AcceptedTime { Code = id, Time = acceptedTime.Value };
-            if (report.Accepted.Contains(accepted))
-                DataManager.UpdateAcceptedTime(username, RequestedDate, accepted);
-            else
-                DataManager.AddAcceptedTime(username, RequestedDate, accepted);
+            try
+            {
+                if (report.Accepted.Contains(accepted))
+                    DataManager.UpdateAcceptedTime(username, RequestedDate, accepted);
+                else
+                    DataManager.AddAcceptedTime(username, RequestedDate, accepted);
+            }
+            catch (NotFoundException)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetAcceptedTimeNotFoundMessage(id);
+            }
+            catch (AlreadyExistingException)
+            {
+                TempData[ErrorTempDataKey] = ErrorMessages.GetAcceptedTimeAlreadyExistingMessage(id);
+            }
             return RedirectToAction("Show", new { Id = id });
         }
 

@@ -1,11 +1,11 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
 using TRS.DataManager;
+using TRS.Extensions;
 using TRS.Models.ViewModels;
 
 namespace TRS.Controllers
@@ -47,7 +47,7 @@ namespace TRS.Controllers
         public IActionResult Freeze()
         {
             DataManager.FreezeReport(LoggedInUser.Name, RequestedDate);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { Date = RequestedDate.ToDateString() });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
