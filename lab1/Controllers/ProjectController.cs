@@ -47,10 +47,7 @@ namespace TRS.Controllers
         {
             var project = DataManager.FindProjectByCode(id);
             if (project == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(id);
-                return RedirectToAction("Index");
-            }
+                return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
             var projectModel = Mapper.Map<ProjectModel>(project);
             var reports = DataManager.FindReportsByProject(id);
             var userSummaries = reports.Where(x => x.Frozen).Select(x =>
@@ -77,10 +74,7 @@ namespace TRS.Controllers
         {
             var project = DataManager.FindProjectByCode(id);
             if (project == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(id);
-                return RedirectToAction("Index");
-            }
+                return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
             var projectModel = Mapper.Map<ProjectModel>(project);
             return View(projectModel);
         }
@@ -91,10 +85,7 @@ namespace TRS.Controllers
             var inputProject = Mapper.Map<Project>(projectModel);
             var modifiedProject = DataManager.FindProjectByCode(projectModel.Code);
             if (modifiedProject == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(projectModel.Code);
-                return RedirectToAction("Index");
-            }
+                return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(projectModel.Code));
             modifiedProject.Budget = inputProject.Budget;
             modifiedProject.Subactivities = inputProject.Subactivities;
             DataManager.UpdateProject(modifiedProject);
@@ -118,8 +109,7 @@ namespace TRS.Controllers
             }
             catch (AlreadyExistingException)
             {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectAlreadyExistingMessage(projectModel.Code);
-                return RedirectToAction("Add");
+                return RedirectToActionWithError("Add", ErrorMessages.GetProjectAlreadyExistingMessage(projectModel.Code));
             }
             return RedirectToAction("Index");
         }
@@ -129,10 +119,7 @@ namespace TRS.Controllers
         {
             var project = DataManager.FindProjectByCode(id);
             if (project == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(id);
-                return RedirectToAction("Index");
-            }
+                return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
             project.Active = false;
             DataManager.UpdateProject(project);
             return RedirectToAction("Index");
@@ -145,16 +132,10 @@ namespace TRS.Controllers
                 return RedirectToAction("Show", new { Id = id });
             var project = DataManager.FindProjectByCode(id);
             if (project == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(id);
-                return RedirectToAction("Index");
-            }
+                return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
             var report = DataManager.FindReportByUserAndMonth(username, RequestedDate);
             if (project.Manager != LoggedInUser.Name || report.Entries.All(x => x.Code != id))
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString());
-                return RedirectToAction("Show", new { Id = id });
-            }
+                return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString()));
             var accepted = new AcceptedTime { Code = id, Time = acceptedTime.Value };
             try
             {
@@ -165,11 +146,11 @@ namespace TRS.Controllers
             }
             catch (NotFoundException)
             {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetAcceptedTimeNotFoundMessage(id);
+                RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetAcceptedTimeNotFoundMessage(id));
             }
             catch (AlreadyExistingException)
             {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetAcceptedTimeAlreadyExistingMessage(id);
+                RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetAcceptedTimeAlreadyExistingMessage(id));
             }
             return RedirectToAction("Show", new { Id = id });
         }

@@ -68,6 +68,36 @@ namespace TRS.Controllers
             Mapper = mapper;
         }
 
+        protected RedirectToActionResult RedirectToActionWithError(string error)
+        {
+            TempData[ErrorTempDataKey] = error;
+            return RedirectToAction();
+        }
+
+        protected RedirectToActionResult RedirectToActionWithError(string actionName, string error)
+        {
+            TempData[ErrorTempDataKey] = error;
+            return RedirectToAction(actionName);
+        }
+
+        protected RedirectToActionResult RedirectToActionWithError(string actionName, object routeValues, string error)
+        {
+            TempData[ErrorTempDataKey] = error;
+            return RedirectToAction(actionName, routeValues);
+        }
+
+        private RedirectToActionResult RedirectToActionWithError(string actionName, string controllerName, string error)
+        {
+            TempData[ErrorTempDataKey] = error;
+            return RedirectToAction(actionName, controllerName);
+        }
+
+        protected RedirectToActionResult RedirectToActionWithError(string actionName, string controllerName, object routeValues, string error)
+        {
+            TempData[ErrorTempDataKey] = error;
+            return RedirectToAction(actionName, controllerName, routeValues);
+        }
+
         private DateTime ParseRouteDate()
         {
             if (Request.Query.TryGetValue(DateQueryKey, out var dateRouteValue) && (string)dateRouteValue != null)
@@ -82,15 +112,9 @@ namespace TRS.Controllers
                 LoggedInUser = DataManager.FindUserByName(username!);
 
             if (LoggedInUser == null && filterContext.ActionDescriptor.EndpointMetadata.OfType<ForLoggedInOnlyAttribute>().Any())
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.HasToBeLoggedIn;
-                filterContext.Result = RedirectToAction("NotLoggedIn", "Home");
-            }
+                filterContext.Result = RedirectToActionWithError("NotLoggedIn", "Home", ErrorMessages.HasToBeLoggedIn);
             if (LoggedInUser != null && filterContext.ActionDescriptor.EndpointMetadata.OfType<ForNotLoggedInOnlyAttribute>().Any())
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.MustNotBeLoggedIn;
-                filterContext.Result = RedirectToAction("Index", "Home");
-            }
+                filterContext.Result = RedirectToActionWithError("Index", "Home", ErrorMessages.MustNotBeLoggedIn);
 
             RequestedDate = ParseRouteDate();
 

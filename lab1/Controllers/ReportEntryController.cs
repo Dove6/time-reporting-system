@@ -30,32 +30,20 @@ namespace TRS.Controllers
         {
             var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
             if (reportEntry == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id);
-                return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
-            }
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
             return View(Mapper.Map<ReportEntryModel>(reportEntry));
         }
 
         public IActionResult Edit(int id)
         {
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate).Frozen)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString());
-                return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
-            }
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
             var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
             if (reportEntry == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id);
-                return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
-            }
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
             var project = DataManager.FindProjectByCode(reportEntry.Code);
             if (project == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(reportEntry.Code);
-                return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
-            }
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetProjectNotFoundMessage(reportEntry.Code));
             var categoryCodes = new List<SelectListItem> { new("nieokreślony", "") }.Concat(
                 project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
             var model = new ReportEntryForEditingModel
@@ -70,16 +58,10 @@ namespace TRS.Controllers
         public IActionResult Edit(int id, ReportEntryUpdateModel reportEntryUpdate)
         {
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate).Frozen)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString());
-                return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
-            }
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
             var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
             if (reportEntry == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id);
-                return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
-            }
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
             reportEntry.Subcode = reportEntryUpdate.Subcode;
             reportEntry.Time = reportEntryUpdate.Time;
             reportEntry.Description = reportEntryUpdate.Description;
@@ -90,12 +72,9 @@ namespace TRS.Controllers
         public IActionResult Add()
         {
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate).Frozen)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString());
-                return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
-            }
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
             var availableProjects = DataManager.GetAllProjects().Where(x => x.Active).ToHashSet();
-            var projectCodes = availableProjects.Select(x => new SelectListItem(x.Name, x.Code)).ToList();
+            var projectCodes = availableProjects.Select(x => new SelectListItem( $"{x.Name} ({x.Code})", x.Code)).ToList();
             var categoryCodes = availableProjects.ToDictionary(x => x.Code,
                 x => new List<SelectListItem> { new("nieokreślony", "") }.Concat(
                     x.Subactivities.Select(y => new SelectListItem(y.Code, y.Code)).ToList()
@@ -113,21 +92,12 @@ namespace TRS.Controllers
         public IActionResult Add(ReportEntryModel reportEntry)
         {
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, reportEntry.Date).Frozen)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetReportFrozenMessage(reportEntry.Date.ToMonthString());
-                return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToDateString() });
-            }
+                return RedirectToActionWithError("Index", "Home", new { Date = reportEntry.Date.ToDateString() }, ErrorMessages.GetReportFrozenMessage(reportEntry.Date.ToMonthString()));
             var project = DataManager.FindProjectByCode(reportEntry.Code);
             if (project == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNotFoundMessage(reportEntry.Code);
-                return RedirectToAction("Add", new { Date = reportEntry.Date.ToDateString() });
-            }
+                return RedirectToActionWithError("Add", new { Date = reportEntry.Date.ToDateString() }, ErrorMessages.GetProjectNotFoundMessage(reportEntry.Code));
             if (!project.Active)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetProjectNoLongerActiveMessage(reportEntry.Code);
-                return RedirectToAction("Add", new { Date = reportEntry.Date.ToDateString() });
-            }
+                return RedirectToActionWithError("Add", new { Date = reportEntry.Date.ToDateString() }, ErrorMessages.GetProjectNoLongerActiveMessage(reportEntry.Code));
             DataManager.AddReportEntry(LoggedInUser.Name, Mapper.Map<ReportEntry>(reportEntry));
             return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToDateString() });
         }
@@ -136,18 +106,14 @@ namespace TRS.Controllers
         public IActionResult Delete(int id)
         {
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate).Frozen)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString());
-                return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
-            }
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
             try
             {
                 DataManager.DeleteReportEntry(LoggedInUser.Name, RequestedDate, id);
             }
             catch (NotFoundException)
             {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id);
-                return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
             }
             return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
         }

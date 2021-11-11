@@ -45,10 +45,7 @@ namespace TRS.Controllers
         {
             var user = DataManager.FindUserByName(username);
             if (user == null)
-            {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetUserNotFoundMessage(username);
-                return RedirectToAction("Login");
-            }
+                return RedirectToActionWithError(ErrorMessages.GetUserNotFoundMessage(username));
             LoggedInUser = user;
             return RedirectToAction("Index", "Home");
         }
@@ -77,8 +74,7 @@ namespace TRS.Controllers
             }
             catch (AlreadyExistingException)
             {
-                TempData[ErrorTempDataKey] = ErrorMessages.GetUserAlreadyExistingMessage(username);
-                return RedirectToAction("Register");
+                return RedirectToActionWithError(ErrorMessages.GetUserAlreadyExistingMessage(username));
             }
             return Login(username);
         }
