@@ -68,12 +68,6 @@ namespace TRS.Controllers
             Mapper = mapper;
         }
 
-        protected RedirectToActionResult RedirectToActionWithError(string error)
-        {
-            TempData[ErrorTempDataKey] = error;
-            return RedirectToAction();
-        }
-
         protected RedirectToActionResult RedirectToActionWithError(string actionName, string error)
         {
             TempData[ErrorTempDataKey] = error;

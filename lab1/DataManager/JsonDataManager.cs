@@ -238,19 +238,10 @@ namespace TRS.DataManager
             WriteReportForUserInMonth(report);
         }
 
-        public void AddAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime)
+        public void SetAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime)
         {
             var report = FindReportByUserAndMonth(username, month);
-            if (!report.Accepted.Add(acceptedTime))
-                throw new AlreadyExistingException();
-            WriteReportForUserInMonth(report);
-        }
-
-        public void UpdateAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime)
-        {
-            var report = FindReportByUserAndMonth(username, month);
-            if (!report.Accepted.Remove(acceptedTime))
-                throw new NotFoundException();
+            report.Accepted.Remove(acceptedTime);
             report.Accepted.Add(acceptedTime);
             WriteReportForUserInMonth(report);
         }

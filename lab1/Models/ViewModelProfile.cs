@@ -30,6 +30,13 @@ namespace TRS.Models
             CreateMap<ReportEntry, ReportEntryModel>()
                 .ReverseMap();
             CreateMap<ReportEntry, ReportEntryForEditingModel>();
+
+            CreateMap<ReportEntryModel, ReportEntryForEditingModel>();
+            CreateMap<ReportEntryModel, ReportEntryForAddingModel>();
+            CreateMap<UserModel, UserSelectListModel>();
+
+            CreateMap<ReportEntryUpdatableModel, ReportEntryModel>();
+            CreateMap<ProjectUpdatableModel, ProjectModel>();
         }
     }
 }

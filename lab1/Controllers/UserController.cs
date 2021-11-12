@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
 using TRS.Controllers.Constants;
 using TRS.DataManager;
-using TRS.DataManager.Exceptions;
 using TRS.Models.DomainModels;
 using TRS.Models.ViewModels;
 
@@ -29,14 +28,18 @@ namespace TRS.Controllers
             return View();
         }
 
+        private void FillSelectListsInLoginModel(UserSelectListModel loginModel)
+        {
+            var usernames = DataManager.GetAllUsers().Select(x => new SelectListItem(x.Name, x.Name)).ToList();
+            loginModel.Usernames = usernames;
+        }
+
         [ForNotLoggedInOnly]
         public IActionResult Login()
         {
-            var userSelectList = new UserSelectListModel
-            {
-                Usernames = DataManager.GetAllUsers().Select(x => new SelectListItem(x.Name, x.Name)).ToList()
-            };
-            return View(userSelectList);
+            var model = new UserSelectListModel();
+            FillSelectListsInLoginModel(model);
+            return View(model);
         }
 
         [ForNotLoggedInOnly]
@@ -44,12 +47,19 @@ namespace TRS.Controllers
         public IActionResult Login(UserModel user)
         {
             if (!ModelState.IsValid)
-                return Login();
+                goto InvalidModelState;
             var foundUser = DataManager.FindUserByName(user.Name);
             if (foundUser == null)
-                return RedirectToActionWithError(ErrorMessages.GetUserNotFoundMessage(user.Name));
+                ModelState.AddModelError(nameof(user.Name), ErrorMessages.GetUserNotFoundMessage(user.Name));
+            if (!ModelState.IsValid)
+                goto InvalidModelState;
             LoggedInUser = foundUser;
             return RedirectToAction("Index", "Home");
+
+        InvalidModelState:
+            var loginModel = Mapper.Map<UserSelectListModel>(user);
+            FillSelectListsInLoginModel(loginModel);
+            return View(loginModel);
         }
 
         [ForLoggedInOnly]
@@ -72,14 +82,12 @@ namespace TRS.Controllers
         {
             if (!ModelState.IsValid)
                 return Register();
-            try
-            {
-                DataManager.AddUser(new User { Name = user.Name });
-            }
-            catch (AlreadyExistingException)
-            {
-                return RedirectToActionWithError(ErrorMessages.GetUserAlreadyExistingMessage(user.Name));
-            }
+            var existingUser = DataManager.FindUserByName(user.Name);
+            if (existingUser != null)
+                ModelState.AddModelError(nameof(user.Name), ErrorMessages.GetUserAlreadyExistingMessage(user.Name));
+            if (!ModelState.IsValid)
+                return Register();
+            DataManager.AddUser(new User { Name = user.Name });
             return Login(user);
         }
 

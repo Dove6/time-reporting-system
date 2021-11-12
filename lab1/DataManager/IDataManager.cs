@@ -27,7 +27,6 @@ namespace TRS.DataManager
         HashSet<ReportEntry> FindReportEntriesByMonth(string username, DateTime month);
         void UpdateReportEntry(string username, DateTime day, int id, ReportEntry reportEntry);
 
-        void AddAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime);
-        void UpdateAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime);
+        void SetAcceptedTime(string username, DateTime month, AcceptedTime acceptedTime);
     }
 }

@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using TRS.Controllers.Attributes;
 using TRS.Controllers.Constants;
 using TRS.DataManager;
-using TRS.DataManager.Exceptions;
 using TRS.Extensions;
 using TRS.Models.DomainModels;
 using TRS.Models.ViewModels;
@@ -79,7 +78,7 @@ namespace TRS.Controllers
         public IActionResult Edit(ProjectModel projectModel)
         {
             if (!ModelState.IsValid)
-                return Edit(projectModel.Code);
+                return View(projectModel);
             var inputProject = Mapper.Map<Project>(projectModel);
             var modifiedProject = DataManager.FindProjectByCode(projectModel.Code);
             if (modifiedProject == null)
@@ -99,18 +98,16 @@ namespace TRS.Controllers
         public IActionResult Add(ProjectModel projectModel)
         {
             if (!ModelState.IsValid)
-                return Add();
+                return View(projectModel);
+            var duplicatedProject = DataManager.FindProjectByCode(projectModel.Code);
+            if (duplicatedProject != null)
+                ModelState.AddModelError(nameof(projectModel.Code), ErrorMessages.GetProjectAlreadyExistingMessage(projectModel.Code));
+            if (!ModelState.IsValid)
+                return View(projectModel);
             projectModel.Manager = LoggedInUser.Name;
             projectModel.Active = true;
             var project = Mapper.Map<Project>(projectModel);
-            try
-            {
-                DataManager.AddProject(project);
-            }
-            catch (AlreadyExistingException)
-            {
-                return RedirectToActionWithError("Add", ErrorMessages.GetProjectAlreadyExistingMessage(projectModel.Code));
-            }
+            DataManager.AddProject(project);
             return RedirectToAction("Index");
         }
 
@@ -142,21 +139,7 @@ namespace TRS.Controllers
             if (project.Manager != LoggedInUser.Name || report.Entries.All(x => x.Code != id))
                 return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString()));
             var accepted = new AcceptedTime { Code = id, Time = acceptedTime.Value };
-            try
-            {
-                if (report.Accepted.Contains(accepted))
-                    DataManager.UpdateAcceptedTime(username, RequestedDate, accepted);
-                else
-                    DataManager.AddAcceptedTime(username, RequestedDate, accepted);
-            }
-            catch (NotFoundException)
-            {
-                RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetAcceptedTimeNotFoundMessage(id));
-            }
-            catch (AlreadyExistingException)
-            {
-                RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetAcceptedTimeAlreadyExistingMessage(id));
-            }
+            DataManager.SetAcceptedTime(username, RequestedDate, accepted);
             return RedirectToAction("Show", new { Id = id });
         }
 

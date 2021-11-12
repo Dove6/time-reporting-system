@@ -34,6 +34,14 @@ namespace TRS.Controllers
             return View(Mapper.Map<ReportEntryModel>(reportEntry));
         }
 
+        private void FillSelectListsInEditingModel(ReportEntryForEditingModel editingModel, string projectCode)
+        {
+            var project = DataManager.FindProjectByCode(projectCode);
+            var categoryCodes = new List<SelectListItem> { new("nieokreślony", "") }.Concat(
+                project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
+            editingModel.CategorySelectList = categoryCodes;
+        }
+
         public IActionResult Edit(int id)
         {
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate).Frozen)
@@ -41,13 +49,8 @@ namespace TRS.Controllers
             var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
             if (reportEntry == null)
                 return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
-            var project = DataManager.FindProjectByCode(reportEntry.Code);
-            if (project == null)
-                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetProjectNotFoundMessage(reportEntry.Code));
-            var categoryCodes = new List<SelectListItem> { new("nieokreślony", "") }.Concat(
-                project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
             var model = Mapper.Map<ReportEntryForEditingModel>(reportEntry);
-            model.CategorySelectList = categoryCodes;
+            FillSelectListsInEditingModel(model, reportEntry.Code);
             return View(model);
         }
 
@@ -55,7 +58,11 @@ namespace TRS.Controllers
         public IActionResult Edit(int id, ReportEntryModel reportEntry)
         {
             if (!ModelState.IsValid)
-                return Edit(id);
+            {
+                var editingModel = Mapper.Map<ReportEntryForEditingModel>(reportEntry);
+                FillSelectListsInEditingModel(editingModel, reportEntry.Code);
+                return View(editingModel);
+            }
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate).Frozen)
                 return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
             var updatedReportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
@@ -68,22 +75,24 @@ namespace TRS.Controllers
             return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
         }
 
-        public IActionResult Add()
+        private void FillSelectListsInAddingModel(ReportEntryForAddingModel addingModel)
         {
-            if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate).Frozen)
-                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
             var availableProjects = DataManager.GetAllProjects().Where(x => x.Active).ToHashSet();
             var projectCodes = availableProjects.Select(x => new SelectListItem( $"{x.Name} ({x.Code})", x.Code)).ToList();
             var categoryCodes = availableProjects.ToDictionary(x => x.Code,
                 x => new List<SelectListItem> { new("nieokreślony", "") }.Concat(
                     x.Subactivities.Select(y => new SelectListItem(y.Code, y.Code)).ToList()
-                    ).ToList());
-            var model = new ReportEntryForAddingModel
-            {
-                Date = RequestedDate,
-                ProjectSelectList = projectCodes,
-                ProjectCategorySelectList = categoryCodes
-            };
+                ).ToList());
+            addingModel.ProjectSelectList = projectCodes;
+            addingModel.ProjectCategorySelectList = categoryCodes;
+        }
+
+        public IActionResult Add()
+        {
+            if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate).Frozen)
+                return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
+            var model = new ReportEntryForAddingModel { Date = RequestedDate };
+            FillSelectListsInAddingModel(model);
             return View(model);
         }
 
@@ -91,16 +100,28 @@ namespace TRS.Controllers
         public IActionResult Add(ReportEntryModel reportEntry)
         {
             if (!ModelState.IsValid)
-                return Add();
+                goto InvalidModelState;
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, reportEntry.Date).Frozen)
                 return RedirectToActionWithError("Index", "Home", new { Date = reportEntry.Date.ToDateString() }, ErrorMessages.GetReportFrozenMessage(reportEntry.Date.ToMonthString()));
             var project = DataManager.FindProjectByCode(reportEntry.Code);
-            if (project == null)
-                return RedirectToActionWithError("Add", new { Date = reportEntry.Date.ToDateString() }, ErrorMessages.GetProjectNotFoundMessage(reportEntry.Code));
-            if (!project.Active)
-                return RedirectToActionWithError("Add", new { Date = reportEntry.Date.ToDateString() }, ErrorMessages.GetProjectNoLongerActiveMessage(reportEntry.Code));
+            switch (project)
+            {
+                case null:
+                    ModelState.AddModelError(nameof(reportEntry.Code), ErrorMessages.GetProjectNotFoundMessage(reportEntry.Code));
+                    break;
+                case { Active: false }:
+                    ModelState.AddModelError(nameof(reportEntry.Code), ErrorMessages.GetProjectNoLongerActiveMessage(reportEntry.Code));
+                    break;
+            }
+            if (!ModelState.IsValid)
+                goto InvalidModelState;
             DataManager.AddReportEntry(LoggedInUser.Name, Mapper.Map<ReportEntry>(reportEntry));
             return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToDateString() });
+
+        InvalidModelState:
+            var addingModel = Mapper.Map<ReportEntryForAddingModel>(reportEntry);
+            FillSelectListsInAddingModel(addingModel);
+            return View(addingModel);
         }
 
         [HttpPost]
