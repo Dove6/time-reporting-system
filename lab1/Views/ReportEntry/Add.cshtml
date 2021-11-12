@@ -38,6 +38,7 @@
                     </td>
                     <td>
                         <select id="ProjectCategorySelectList" name="Subcode">
+                            <option class="empty-value" value="">[nieokreślona]</option>
                         </select>
                     </td>
                     <td>
@@ -85,10 +86,10 @@
             function updateCategorySelect() {
                 if (projectSelect.selectedIndex !== -1) {
                     let currentData = categoryData[projectSelect.selectedOptions[0].value];
-                    while (categorySelect.options.length > currentData.length) categorySelect.remove(0);
-                    while (categorySelect.options.length < currentData.length) categorySelect.add(document.createElement('option'));
+                    while (categorySelect.options.length - 1 > currentData.length) categorySelect.remove(categorySelect.options.length - 1);
+                    while (categorySelect.options.length - 1 < currentData.length) categorySelect.add(document.createElement('option'));
                     for (let i = 0; i < currentData.length; i++)
-                        Object.assign(categorySelect.options[i], currentData[i]);
+                        Object.assign(categorySelect.options[i + 1], currentData[i]);
                     categorySelect.disabled = false;
                 } else {
                     categorySelect.disabled = true;

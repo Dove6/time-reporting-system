@@ -37,8 +37,7 @@ namespace TRS.Controllers
         private void FillSelectListsInEditingModel(ReportEntryForEditingModel editingModel, string projectCode)
         {
             var project = DataManager.FindProjectByCode(projectCode);
-            var categoryCodes = new List<SelectListItem> { new("nieokreślony", "") }.Concat(
-                project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
+            var categoryCodes = project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code)).ToList();
             editingModel.CategorySelectList = categoryCodes;
         }
 
@@ -80,9 +79,7 @@ namespace TRS.Controllers
             var availableProjects = DataManager.GetAllProjects().Where(x => x.Active).ToHashSet();
             var projectCodes = availableProjects.Select(x => new SelectListItem( $"{x.Name} ({x.Code})", x.Code)).ToList();
             var categoryCodes = availableProjects.ToDictionary(x => x.Code,
-                x => new List<SelectListItem> { new("nieokreślony", "") }.Concat(
-                    x.Subactivities.Select(y => new SelectListItem(y.Code, y.Code)).ToList()
-                ).ToList());
+                x => x.Subactivities.Select(y => new SelectListItem(y.Code, y.Code)).ToList());
             addingModel.ProjectSelectList = projectCodes;
             addingModel.ProjectCategorySelectList = categoryCodes;
         }
