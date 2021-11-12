@@ -1,10 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 
 namespace TRS.Models.ViewModels
 {
     public class ProjectListModel
     {
-        [Required]
-        public ProjectModel[] Projects { get; set; }
+        public List<ProjectModel> Projects = new();
     }
 }

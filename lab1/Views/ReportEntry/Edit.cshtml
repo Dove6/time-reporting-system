@@ -1,5 +1,4 @@
-﻿@using TRS.Models.DomainModels
-@using TRS.Extensions
+﻿@using TRS.Extensions
 @model TRS.Models.ViewModels.ReportEntryForEditingModel
 
 @{
@@ -14,44 +13,63 @@
                 <thead>
                 <tr>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Date)
+                        @Html.DisplayNameFor(model => model.Date)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Code)
+                        @Html.DisplayNameFor(model => model.Code)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Subcode)
+                        @Html.DisplayNameFor(model => model.Subcode)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Time)
+                        @Html.DisplayNameFor(model => model.Time)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Description)
+                        @Html.DisplayNameFor(model => model.Description)
                     </th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
                     <td>
-                        @Html.DisplayFor(model => model.ReportEntry.Date)
+                        @Html.DisplayFor(model => model.Date)
+                        <input asp-for="Date" type="hidden"/>
                     </td>
                     <td>
-                        @Html.DisplayFor(model => model.ReportEntry.Code)
+                        @Html.DisplayFor(model => model.Code)
+                        <input asp-for="Code" type="hidden"/>
                     </td>
                     <td>
-                        <select name="@nameof(ReportEntry.Subcode)" asp-items="Model.CategorySelectList" asp-for="ReportEntry.Subcode">
+                        <select asp-for="Subcode" asp-items="Model.CategorySelectList">
                         </select>
                     </td>
                     <td>
-                        <input name="@nameof(ReportEntry.Time)" asp-for="ReportEntry.Time"/>
+                        <input asp-for="Time"/>
                     </td>
                     <td>
-                        <input name="@nameof(ReportEntry.Description)" asp-for="ReportEntry.Description"/>
+                        <input asp-for="Description"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Date)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Code)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Subcode)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Time)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Description)
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
-        <button asp-action="Edit" asp-route-id="@id" asp-route-date="@Model.ReportEntry.Date.ToDateString()">Zatwierdź</button>
+        <button asp-action="Edit" asp-route-id="@id" asp-route-date="@Model.Date.ToDateString()">Zatwierdź</button>
     </form>
 </main>

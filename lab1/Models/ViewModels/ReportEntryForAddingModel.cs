@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TRS.Models.ViewModels
 {
-    public class ReportEntryForAddingModel
+    public class ReportEntryForAddingModel : ReportEntryModel
     {
-        public ReportEntryModel ReportEntry { get; set; }
-        public List<SelectListItem> ProjectSelectList { get; set; }
-        public Dictionary<string, List<SelectListItem>> ProjectCategorySelectList { get; set; }
+        public List<SelectListItem> ProjectSelectList = new();
+        public Dictionary<string, List<SelectListItem>> ProjectCategorySelectList = new();
     }
 }

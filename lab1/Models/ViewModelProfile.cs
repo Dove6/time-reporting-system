@@ -14,6 +14,10 @@ namespace TRS.Models
                 .ForMember(dest => dest.Categories,
                     dest => dest.MapFrom(src =>
                         string.Join('\n', src.Subactivities.Select(x => x.Code))));
+            CreateMap<Project, ProjectWithUserSummaryModel>()
+                .ForMember(dest => dest.Categories,
+                    dest => dest.MapFrom(src =>
+                        string.Join('\n', src.Subactivities.Select(x => x.Code))));
             CreateMap<ProjectModel, Project>()
                 .ForMember(dest => dest.Subactivities,
                     dest => dest.MapFrom(src =>
@@ -23,10 +27,9 @@ namespace TRS.Models
                             .Select(x => new CategoryModel { Code = x })));
             CreateMap<Category, CategoryModel>()
                 .ReverseMap();
-            CreateMap<ReportEntry, DailyReportEntry>()
-                .ForMember(dst => dst.Id, opts => opts.MapFrom(src => src.MonthlyIndex));
             CreateMap<ReportEntry, ReportEntryModel>()
                 .ReverseMap();
+            CreateMap<ReportEntry, ReportEntryForEditingModel>();
         }
     }
 }

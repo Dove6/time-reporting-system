@@ -24,9 +24,8 @@ namespace TRS.Controllers
         public IActionResult Index()
         {
             var report = DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate);
-            var reportEntries = DataManager.FindReportEntriesByMonth(LoggedInUser.Name, RequestedDate);
-            var summaryEntries = reportEntries.GroupBy(x => x.Code)
-                .Select(x => new MonthlySummaryEntry
+            var summaryEntries = report.Entries.GroupBy(x => x.Code)
+                .Select(x => new ProjectTimeSummaryEntry
                 {
                     ProjectCode = x.Key,
                     Time = x.Sum(y => y.Time),
@@ -36,7 +35,7 @@ namespace TRS.Controllers
             {
                 Month = RequestedDate,
                 Frozen = report.Frozen,
-                PerProject = summaryEntries,
+                ProjectTimeSummaries = summaryEntries,
                 TotalTime = summaryEntries.Sum(x => x.Time),
                 TotalAcceptedTime = summaryEntries.Sum(x => x.AcceptedTime ?? 0)
             };

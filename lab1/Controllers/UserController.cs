@@ -41,12 +41,14 @@ namespace TRS.Controllers
 
         [ForNotLoggedInOnly]
         [HttpPost]
-        public IActionResult Login(string username)
+        public IActionResult Login(UserModel user)
         {
-            var user = DataManager.FindUserByName(username);
-            if (user == null)
-                return RedirectToActionWithError(ErrorMessages.GetUserNotFoundMessage(username));
-            LoggedInUser = user;
+            if (!ModelState.IsValid)
+                return Login();
+            var foundUser = DataManager.FindUserByName(user.Name);
+            if (foundUser == null)
+                return RedirectToActionWithError(ErrorMessages.GetUserNotFoundMessage(user.Name));
+            LoggedInUser = foundUser;
             return RedirectToAction("Index", "Home");
         }
 
@@ -66,17 +68,19 @@ namespace TRS.Controllers
 
         [ForNotLoggedInOnly]
         [HttpPost]
-        public IActionResult Register(string username)
+        public IActionResult Register(UserModel user)
         {
+            if (!ModelState.IsValid)
+                return Register();
             try
             {
-                DataManager.AddUser(new User { Name = username });
+                DataManager.AddUser(new User { Name = user.Name });
             }
             catch (AlreadyExistingException)
             {
-                return RedirectToActionWithError(ErrorMessages.GetUserAlreadyExistingMessage(username));
+                return RedirectToActionWithError(ErrorMessages.GetUserAlreadyExistingMessage(user.Name));
             }
-            return Login(username);
+            return Login(user);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

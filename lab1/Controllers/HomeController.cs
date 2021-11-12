@@ -28,10 +28,14 @@ namespace TRS.Controllers
             return View(new DailyReportModel
             {
                 Frozen = report.Frozen,
-                Entries = Mapper.Map<List<DailyReportEntry>>(reportEntries),
-                ProjectTimeSummary = reportEntries.GroupBy(x => x.Code)
-                    .ToDictionary(x => x.Key, x => x.Sum(y => y.Time)),
-                TotalDailyTime = reportEntries.Sum(x => x.Time)
+                Entries = Mapper.Map<List<ReportEntryModel>>(reportEntries),
+                ProjectTimeSummaries = reportEntries.GroupBy(x => x.Code)
+                    .Select(x => new ProjectTimeSummaryEntry
+                    {
+                        ProjectCode = x.Key,
+                        Time = x.Sum(y => y.Time)
+                    }).ToList(),
+                TotalTime = reportEntries.Sum(x => x.Time)
             });
         }
 

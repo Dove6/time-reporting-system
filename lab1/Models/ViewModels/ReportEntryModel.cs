@@ -1,33 +1,20 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using TRS.Models.Constants;
 
 namespace TRS.Models.ViewModels
 {
-    public class ReportEntryModel
+    public class ReportEntryModel : ReportEntryUpdatableModel
     {
+        public int MonthlyIndex;
+
         [Display(Name = "Data")]
+        [Required(ErrorMessage = ErrorMessages.FieldRequired)]
         [DataType(DataType.Date)]
         public DateTime Date { get; set; }
 
-        [Required]
-        [Display(Name = "Kod projektu")]
-        [RegularExpression("^[a-z0-9-]+$")]
-        [StringLength(10)]
+        [Required(ErrorMessage = ErrorMessages.FieldRequired)]
+        [Display(Name = "Projekt")]
         public string Code { get; set; }
-
-        [Required]
-        [Display(Name = "Kod kategorii")]
-        [RegularExpression("^[a-z0-9-]*$")]
-        [StringLength(20)]
-        public string Subcode { get; set; } = "";
-
-        [Display(Name = "Czas (w minutach)")]
-        [Range(0, 31 * 24 * 60)]
-        public int Time { get; set; }
-
-        [Required]
-        [Display(Name = "Opis")]
-        [StringLength(200)]
-        public string Description { get; set; } = "";
     }
 }

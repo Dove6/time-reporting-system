@@ -46,26 +46,25 @@ namespace TRS.Controllers
                 return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetProjectNotFoundMessage(reportEntry.Code));
             var categoryCodes = new List<SelectListItem> { new("nieokreślony", "") }.Concat(
                 project.Subactivities.Select(y => new SelectListItem(y.Code, y.Code))).ToList();
-            var model = new ReportEntryForEditingModel
-            {
-                ReportEntry = Mapper.Map<ReportEntryModel>(reportEntry),
-                CategorySelectList = categoryCodes
-            };
+            var model = Mapper.Map<ReportEntryForEditingModel>(reportEntry);
+            model.CategorySelectList = categoryCodes;
             return View(model);
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, ReportEntryUpdateModel reportEntryUpdate)
+        public IActionResult Edit(int id, ReportEntryModel reportEntry)
         {
+            if (!ModelState.IsValid)
+                return Edit(id);
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, RequestedDate).Frozen)
                 return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
-            var reportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
-            if (reportEntry == null)
+            var updatedReportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser.Name, RequestedDate, id);
+            if (updatedReportEntry == null)
                 return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
-            reportEntry.Subcode = reportEntryUpdate.Subcode;
-            reportEntry.Time = reportEntryUpdate.Time;
-            reportEntry.Description = reportEntryUpdate.Description;
-            DataManager.UpdateReportEntry(LoggedInUser.Name, RequestedDate, id, reportEntry);
+            updatedReportEntry.Subcode = reportEntry.Subcode;
+            updatedReportEntry.Time = reportEntry.Time;
+            updatedReportEntry.Description = reportEntry.Description;
+            DataManager.UpdateReportEntry(LoggedInUser.Name, RequestedDate, id, updatedReportEntry);
             return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
         }
 
@@ -81,7 +80,7 @@ namespace TRS.Controllers
                     ).ToList());
             var model = new ReportEntryForAddingModel
             {
-                ReportEntry = new ReportEntryModel { Date = RequestedDate },
+                Date = RequestedDate,
                 ProjectSelectList = projectCodes,
                 ProjectCategorySelectList = categoryCodes
             };
@@ -91,6 +90,8 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Add(ReportEntryModel reportEntry)
         {
+            if (!ModelState.IsValid)
+                return Add();
             if (DataManager.FindReportByUserAndMonth(LoggedInUser.Name, reportEntry.Date).Frozen)
                 return RedirectToActionWithError("Index", "Home", new { Date = reportEntry.Date.ToDateString() }, ErrorMessages.GetReportFrozenMessage(reportEntry.Date.ToMonthString()));
             var project = DataManager.FindProjectByCode(reportEntry.Code);

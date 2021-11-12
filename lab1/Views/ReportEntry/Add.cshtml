@@ -11,29 +11,29 @@
                 <thead>
                 <tr>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Date)
+                        @Html.DisplayNameFor(model => model.Date)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Code)
+                        @Html.DisplayNameFor(model => model.Code)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Subcode)
+                        @Html.DisplayNameFor(model => model.Subcode)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Time)
+                        @Html.DisplayNameFor(model => model.Time)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.ReportEntry.Description)
+                        @Html.DisplayNameFor(model => model.Description)
                     </th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
                     <td>
-                        <input name="Date" asp-for="ReportEntry.Date" />
+                        <input name="Date" asp-for="Date" />
                     </td>
                     <td>
-                        <select id="ProjectSelectList" name="Code" asp-for="ReportEntry.Code" asp-items="Model.ProjectSelectList">
+                        <select id="ProjectSelectList" name="Code" asp-for="Code" asp-items="Model.ProjectSelectList">
                         </select>
                     </td>
                     <td>
@@ -41,10 +41,27 @@
                         </select>
                     </td>
                     <td>
-                        <input name="Time" asp-for="ReportEntry.Time" />
+                        <input name="Time" asp-for="Time" />
                     </td>
                     <td>
-                        <input name="Description" asp-for="ReportEntry.Description" />
+                        <input name="Description" asp-for="Description" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Date)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Code)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Subcode)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Time)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Description)
                     </td>
                 </tr>
                 </tbody>

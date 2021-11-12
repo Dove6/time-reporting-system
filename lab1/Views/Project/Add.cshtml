@@ -39,6 +39,20 @@
                         <textarea asp-for="Categories"></textarea>
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Code)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Name)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Budget)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Categories)
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>

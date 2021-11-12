@@ -7,9 +7,24 @@
 <div class="text-center">
     <h1 class="display-6">Wybierz swoją nazwę użytkownika:</h1>
     <form method="POST">
-        <select asp-for="Username" asp-items="Model.Usernames">
-        </select>
-        <button asp-action="Login">Zaloguj się</button>
+        <table class="table">
+            <tr>
+                <td>
+                    <select asp-for="Name" asp-items="Model.Usernames">
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.ValidationMessageFor(model => model.Name)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button asp-action="Login">Zaloguj się</button>
+                </td>
+            </tr>
+        </table>
     </form>
     <p>Nie posiadasz konta? <a asp-action="Register">Zarejestruj się!</a></p>
 </div>

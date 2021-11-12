@@ -12,6 +12,7 @@ namespace TRS.Controllers.Constants
         private const string AcceptedTimeNotFoundByCode = "Nie znaleziono zaakceptowanego czasu dla projektu z kodem \"{0}\".";
         private const string AcceptedTimeAlreadyExisting = "Zaakceptowany czas dla projektu z kodem \"{0}\" już istnieje.";
         private const string NoAccessToAcceptedTimeOfUserInMonth = "Brak uprawnień do zarządzania zaakceptowanym czasem pracy użytkownika \"{0}\" dla miesiąca {1}.";
+        public const string AcceptedTimeNegative = "Wartość zaakceptowanego czasu nie może być mniejsza od 0.";
 
         private const string ReportFrozenForMonth = "Raport na miesiąc {0} został już zatwierdzony.";
 

@@ -30,10 +30,12 @@
                 <tbody>
                 <tr>
                     <td>
-                        <input asp-for="Code" readonly />
+                        @Html.DisplayFor(model => model.Code)
+                        <input type="hidden" asp-for="Code"/>
                     </td>
                     <td>
                         @Html.DisplayFor(model => model.Name)
+                        <input type="hidden" asp-for="Name"/>
                     </td>
                     <td>
                         <input asp-for="Budget" />
@@ -43,6 +45,23 @@
                     </td>
                     <td>
                         @Html.DisplayFor(model => model.Active)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Code)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Name)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Budget)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Categories)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Active)
                     </td>
                 </tr>
                 </tbody>

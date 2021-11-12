@@ -53,12 +53,12 @@
                         @Html.DisplayFor(model => entry.Description)
                     </td>
                     <td>
-                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Obejrzyj</a>
+                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date.ToDateString()" asp-route-id="@entry.MonthlyIndex">Obejrzyj</a>
                         @if (!Model.Frozen)
                         {
-                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Zmień</a>
+                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date.ToDateString()" asp-route-id="@entry.MonthlyIndex">Zmień</a>
                             <form method="POST">
-                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Skasuj</button>
+                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date.ToDateString()" asp-route-id="@entry.MonthlyIndex">Skasuj</button>
                             </form>
                         }
                     </td>
@@ -78,14 +78,14 @@
     </p>
     <table class="table">
         <tbody>
-        @foreach (var (projectCode, time) in Model.ProjectTimeSummary)
+        @foreach (var summaryEntry in Model.ProjectTimeSummaries)
         {
             <tr>
                 <td>
-                    @projectCode
+                    @summaryEntry.ProjectCode
                 </td>
                 <td>
-                    @time
+                    @summaryEntry.Time
                 </td>
             </tr>
         }
@@ -95,7 +95,7 @@
                 Razem
             </td>
             <td>
-                @Model.TotalDailyTime
+                @Model.TotalTime
             </td>
         </tr>
         </tbody>

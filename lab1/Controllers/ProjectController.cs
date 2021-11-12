@@ -38,7 +38,7 @@ namespace TRS.Controllers
                         .Sum(y => y.Time);
                     mappedProject.BudgetLeft = x.Budget - totalAcceptedTime;
                     return mappedProject;
-                }).ToArray()
+                }).ToList()
             };
             return View(projectListModel);
         }
@@ -48,25 +48,21 @@ namespace TRS.Controllers
             var project = DataManager.FindProjectByCode(id);
             if (project == null)
                 return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
-            var projectModel = Mapper.Map<ProjectModel>(project);
+            var projectWithUsersModel = Mapper.Map<ProjectWithUserSummaryModel>(project);
             var reports = DataManager.FindReportsByProject(id);
             var userSummaries = reports.Where(x => x.Frozen).Select(x =>
             {
                 var acceptedSummary = x.Accepted.FirstOrDefault(y => y.Code == project.Code);
-                return new UserProjectMonthlySummaryModel
+                return new ProjectWithUserSummaryEntry
                 {
                     Username = x.Owner,
                     Month = x.Month,
                     DeclaredTime = x.Entries.Where(y => y.Code == project.Code).Sum(y => y.Time),
                     AcceptedTime = acceptedSummary?.Time
                 };
-            }).ToArray();
-            projectModel.BudgetLeft = projectModel.Budget - userSummaries.Sum(x => x.AcceptedTime ?? 0);
-            var projectWithUsersModel = new ProjectWithUserSummaryModel
-            {
-                Project = projectModel,
-                UserSummaries = userSummaries
-            };
+            }).ToList();
+            projectWithUsersModel.BudgetLeft = projectWithUsersModel.Budget - userSummaries.Sum(x => x.AcceptedTime ?? 0);
+            projectWithUsersModel.UserSummaries = userSummaries;
             return View(projectWithUsersModel);
         }
 
@@ -82,6 +78,8 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Edit(ProjectModel projectModel)
         {
+            if (!ModelState.IsValid)
+                return Edit(projectModel.Code);
             var inputProject = Mapper.Map<Project>(projectModel);
             var modifiedProject = DataManager.FindProjectByCode(projectModel.Code);
             if (modifiedProject == null)
@@ -100,6 +98,8 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult Add(ProjectModel projectModel)
         {
+            if (!ModelState.IsValid)
+                return Add();
             projectModel.Manager = LoggedInUser.Name;
             projectModel.Active = true;
             var project = Mapper.Map<Project>(projectModel);
@@ -128,11 +128,16 @@ namespace TRS.Controllers
         [HttpPost]
         public IActionResult UpdateAcceptedTime(string id, string username, int? acceptedTime)
         {
-            if (!acceptedTime.HasValue)
-                return RedirectToAction("Show", new { Id = id });
             var project = DataManager.FindProjectByCode(id);
             if (project == null)
                 return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
+            switch (acceptedTime)
+            {
+                case null:
+                    return RedirectToAction("Show", new { Id = id });
+                case < 0:
+                    return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.AcceptedTimeNegative);
+            }
             var report = DataManager.FindReportByUserAndMonth(username, RequestedDate);
             if (project.Manager != LoggedInUser.Name || report.Entries.All(x => x.Code != id))
                 return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString()));

@@ -1,13 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 
 namespace TRS.Models.ViewModels
 {
-    public class ProjectWithUserSummaryModel
+    public class ProjectWithUserSummaryModel : ProjectModel
     {
-        [Required]
-        public ProjectModel Project { get; set; }
-
-        [Required]
-        public UserProjectMonthlySummaryModel[] UserSummaries { get; set; }
+        public List<ProjectWithUserSummaryEntry> UserSummaries = new();
     }
 }
