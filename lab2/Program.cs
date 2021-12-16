@@ -1,10 +1,11 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using TRS.DataManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<TrsDbContext>(options => options.UseSqlite("Data Source=storage/trs.db"));
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IDataManager>(x => new JsonDataManager(x.GetRequiredService<IMapper>()));
@@ -32,5 +33,8 @@ app.MapFallback(httpContext =>
     httpContext.Response.Redirect("/Home/Index");
     return Task.CompletedTask;
 });
+
+using (var serviceScope = app.Services.CreateScope())
+    serviceScope.ServiceProvider.GetService<TrsDbContext>()!.Database.EnsureCreated();
 
 app.Run();
