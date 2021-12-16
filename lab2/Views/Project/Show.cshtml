@@ -1,0 +1,116 @@
+﻿@using TRS.Extensions
+@model TRS.Models.ViewModels.ProjectWithUserSummaryModel
+@{
+    ViewData["Title"] = "Przegląd projektu";
+}
+
+<main class="bd-main order-1 gap-3">
+    <h1 class="display-6">Przegląd projektu @Model!.Name</h1>
+    <div class="text-center">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Code)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Budget)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.BudgetLeft)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Categories)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Active)
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => model.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Budget)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.BudgetLeft)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Categories)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => model.Active)
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    @if (Model.UserSummaries.Count > 0)
+    {
+        <strong>Zestawienie czasu pracy dla pracowników:</strong>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].Username)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].Month)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].DeclaredTime)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserSummaries[0].AcceptedTime)
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @for (var i = 0; i < Model.UserSummaries.Count; i++)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(model => model.UserSummaries[i].Username)
+                        <input id="Username-@i" form="form-@i" name="Username" type="hidden" asp-for="UserSummaries[i].Username"/>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.UserSummaries[i].Month)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.UserSummaries[i].DeclaredTime)
+                    </td>
+                    <td>
+                        @if (Model.Active)
+                        {
+                            <input id="AcceptedTime-@i" form="form-@i" name="AcceptedTime" asp-for="UserSummaries[i].AcceptedTime"/>
+                            <button type="submit" asp-action="UpdateAcceptedTime" asp-route-id="@Model.Code" asp-route-date="@Model.UserSummaries[i].Month.ToDateString()" form="form-@i">Zatwierdź</button>
+                        }
+                        else
+                        {
+                            @Html.DisplayFor(model => model.UserSummaries[i].AcceptedTime)
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <p>
+            <strong>Zaakceptowany czas razem:</strong>
+            @Model.UserSummaries.Sum(x => x.AcceptedTime ?? 0)
+        </p>
+        @for (var i = 0; i < Model.UserSummaries.Count; i++)
+        {
+            <form id="form-@i" method="POST">
+            </form>
+        }
+    }
+</main>

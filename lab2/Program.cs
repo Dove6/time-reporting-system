@@ -1,7 +1,13 @@
+using AutoMapper;
+using TRS.DataManager;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<IDataManager>(x => new JsonDataManager(x.GetRequiredService<IMapper>()));
 
 var app = builder.Build();
 
@@ -20,8 +26,11 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+app.MapFallback(httpContext =>
+{
+    httpContext.Response.Redirect("/Home/Index");
+    return Task.CompletedTask;
+});
 
 app.Run();

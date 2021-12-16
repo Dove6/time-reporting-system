@@ -1,8 +1,103 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using TRS.Extensions
+@model TRS.Models.ViewModels.DailyReportModel
+
+@{
+    ViewData["Title"] = "Strona główna";
+    var date = (DateTime)ViewData["date"];
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<main class="bd-main order-1 gap-3">
+    <div class="d-md-flex align-items-center justify-content-between">
+        <h1 class="display-6">Raport czasu pracy na dzień @date.ToDateString()</h1>
+        <form asp-action="Index" method="GET">
+            <span>Przejdź do: </span>
+            <input name="date" type="date" value="@date.ToDateString()"/>
+            <input type="submit" value="Wyślij"/>
+        </form>
+    </div>
+    <div class="text-center">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Entries[0].Code)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Entries[0].Subcode)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Entries[0].Time)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Entries[0].Description)
+                </th>
+                <th>
+                    Akcje
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var entry in Model!.Entries)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(model => entry.Code)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => entry.Subcode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => entry.Time)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => entry.Description)
+                    </td>
+                    <td>
+                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date.ToDateString()" asp-route-id="@entry.MonthlyIndex">Obejrzyj</a>
+                        @if (!Model.Frozen)
+                        {
+                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date.ToDateString()" asp-route-id="@entry.MonthlyIndex">Zmień</a>
+                            <form method="POST">
+                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date.ToDateString()" asp-route-id="@entry.MonthlyIndex">Skasuj</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Frozen)
+    {
+        <p>
+            <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date.ToDateString()">Dodaj</a>
+        </p>
+    }
+    <p>
+        <strong>Podsumowanie dzienne</strong>
+    </p>
+    <table class="table">
+        <tbody>
+        @foreach (var summaryEntry in Model.ProjectTimeSummaries)
+        {
+            <tr>
+                <td>
+                    @summaryEntry.ProjectCode
+                </td>
+                <td>
+                    @summaryEntry.Time
+                </td>
+            </tr>
+        }
+        <tr><td></td><td></td></tr>
+        <tr>
+            <td>
+                Razem
+            </td>
+            <td>
+                @Model.TotalTime
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>

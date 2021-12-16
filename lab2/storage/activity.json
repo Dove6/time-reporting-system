@@ -1,0 +1,42 @@
+{
+  "activities": [
+    {
+      "code": "ARGUS-123",
+      "manager": "nowak",
+      "name": "Argus",
+      "budget": 125,
+      "active": true,
+      "subactivities": [
+        {
+          "code": "database"
+        },
+        {
+          "code": "other"
+        }
+      ]
+    },
+    {
+      "code": "NTR",
+      "manager": "kowalski",
+      "name": "strony",
+      "budget": 500,
+      "active": false,
+      "subactivities": [
+        {
+          "code": "kategoria1"
+        },
+        {
+          "code": "kategoria2"
+        }
+      ]
+    },
+    {
+      "code": "OTHER",
+      "manager": "smith",
+      "name": "Other",
+      "budget": -1,
+      "active": true,
+      "subactivities": []
+    }
+  ]
+}

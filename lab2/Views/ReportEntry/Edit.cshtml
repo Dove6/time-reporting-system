@@ -1,0 +1,76 @@
+﻿@using TRS.Extensions
+@model TRS.Models.ViewModels.ReportEntryForEditingModel
+
+@{
+    ViewData["Title"] = "Edycja wpisu";
+    var id = int.Parse((string)Url.ActionContext.RouteData.Values["id"]);
+}
+
+<main class="bd-main order-1 gap-3">
+    <form method="POST">
+        <div class="text-center">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Code)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Subcode)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Time)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        @Html.DisplayFor(model => model.Date)
+                        <input asp-for="Date" type="hidden"/>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(model => model.Code)
+                        <input asp-for="Code" type="hidden"/>
+                    </td>
+                    <td>
+                        <select asp-for="Subcode" asp-items="Model!.CategorySelectList">
+                            <option class="empty-value" value="">[nieokreślona]</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input asp-for="Time"/>
+                    </td>
+                    <td>
+                        <input asp-for="Description"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Date)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Code)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Subcode)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Time)
+                    </td>
+                    <td>
+                        @Html.ValidationMessageFor(model => model.Description)
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <button asp-action="Edit" asp-route-id="@id" asp-route-date="@Model.Date.ToDateString()">Zatwierdź</button>
+    </form>
+</main>

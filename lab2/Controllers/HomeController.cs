@@ -1,27 +1,43 @@
 ﻿using System.Diagnostics;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Trs.Models;
+using TRS.Controllers.Attributes;
+using TRS.DataManager;
+using TRS.Models.ViewModels;
 
-namespace Trs.Controllers;
+namespace TRS.Controllers;
 
-public class HomeController : Controller
+public class HomeController : BaseController
 {
-    private readonly ILogger<HomeController> _logger;
+    private ILogger<HomeController> _logger;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(IDataManager dataManager, IMapper mapper, ILogger<HomeController> logger)
+        : base(dataManager, mapper)
     {
         _logger = logger;
     }
 
+    [ForLoggedInOnly]
     public IActionResult Index()
     {
-        return View();
+        var report = DataManager.FindReportByUserAndMonth(LoggedInUser!.Name, RequestedDate);
+        var reportEntries = report.Entries.Where(x => x.Date == RequestedDate).ToList();
+        return View(new DailyReportModel
+        {
+            Frozen = report.Frozen,
+            Entries = Mapper.Map<List<ReportEntryModel>>(reportEntries),
+            ProjectTimeSummaries = reportEntries.GroupBy(x => x.Code)
+                .Select(x => new ProjectTimeSummaryEntry
+                {
+                    ProjectCode = x.Key,
+                    Time = x.Sum(y => y.Time)
+                }).ToList(),
+            TotalTime = reportEntries.Sum(x => x.Time)
+        });
     }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+    [ForNotLoggedInOnly]
+    public IActionResult NotLoggedIn() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
