@@ -36,6 +36,6 @@ app.MapFallback(httpContext =>
 });
 
 using (var serviceScope = app.Services.CreateScope())
-    serviceScope.ServiceProvider.GetService<TrsDbContext>()!.Database.EnsureCreated();
+    TrsDbInitializer.Initialize(serviceScope.ServiceProvider.GetService<TrsDbContext>()!);
 
 app.Run();
