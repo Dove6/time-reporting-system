@@ -34,7 +34,7 @@ public class ReportEntryController : BaseController
     private void FillSelectListsInEditingModel(ReportEntryForEditingModel editingModel, string projectCode)
     {
         var project = DataManager.FindProjectByCode(projectCode);
-        var categoryCodes = project?.Subactivities.Select(y => new SelectListItem(y.Code, y.Code)).ToList();
+        var categoryCodes = project?.Categories.Select(y => new SelectListItem(y.Code, y.Code)).ToList();
         editingModel.CategorySelectList = categoryCodes ?? new List<SelectListItem>();
     }
 
@@ -46,7 +46,7 @@ public class ReportEntryController : BaseController
         if (reportEntry == null)
             return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
         var model = Mapper.Map<ReportEntryForEditingModel>(reportEntry);
-        FillSelectListsInEditingModel(model, reportEntry.Code);
+        FillSelectListsInEditingModel(model, reportEntry.ProjectCode);
         return View(model);
     }
 
@@ -64,7 +64,7 @@ public class ReportEntryController : BaseController
         var updatedReportEntry = DataManager.FindReportEntryByDayAndIndex(LoggedInUser!.Name, RequestedDate, id);
         if (updatedReportEntry == null)
             return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
-        updatedReportEntry.Subcode = reportEntry.Subcode;
+        //updatedReportEntry.CategoryId = reportEntry.Subcode;
         updatedReportEntry.Time = reportEntry.Time;
         updatedReportEntry.Description = reportEntry.Description;
         DataManager.UpdateReportEntry(LoggedInUser!.Name, RequestedDate, id, updatedReportEntry);
@@ -76,7 +76,7 @@ public class ReportEntryController : BaseController
         var availableProjects = DataManager.GetAllProjects().Where(x => x.Active).ToHashSet();
         var projectCodes = availableProjects.Select(x => new SelectListItem( $"{x.Name} ({x.Code})", x.Code)).ToList();
         var categoryCodes = availableProjects.ToDictionary(x => x.Code,
-            x => x.Subactivities.Select(y => new SelectListItem(y.Code, y.Code)).ToList());
+            x => x.Categories.Select(y => new SelectListItem(y.ProjectCode, y.ProjectCode)).ToList());
         addingModel.ProjectSelectList = projectCodes;
         addingModel.ProjectCategorySelectList = categoryCodes;
     }

@@ -21,12 +21,12 @@ public class HomeController : BaseController
     public IActionResult Index()
     {
         var report = DataManager.FindReportByUserAndMonth(LoggedInUser!.Name, RequestedDate);
-        var reportEntries = report.Entries.Where(x => x.Date == RequestedDate).ToList();
+        var reportEntries = report.ReportEntries.Where(x => x.Date == RequestedDate).ToList();
         return View(new DailyReportModel
         {
             Frozen = report.Frozen,
             Entries = Mapper.Map<List<ReportEntryModel>>(reportEntries),
-            ProjectTimeSummaries = reportEntries.GroupBy(x => x.Code)
+            ProjectTimeSummaries = reportEntries.GroupBy(x => x.ProjectCode)
                 .Select(x => new ProjectTimeSummaryEntry
                 {
                     ProjectCode = x.Key,

@@ -17,7 +17,7 @@ public class DbDataManager : IDataManager
 
     public void AddUser(User user)
     {
-        var mappedUser = _mapper.Map<Trs.Models.DbModels.User>(user);
+        var mappedUser = _mapper.Map<User>(user);
         _dbContext.Users.Add(mappedUser);
         _dbContext.SaveChanges();
     }
@@ -35,7 +35,7 @@ public class DbDataManager : IDataManager
 
     public void AddProject(Project project)
     {
-        var mappedProject = _mapper.Map<Trs.Models.DbModels.Project>(project);
+        var mappedProject = _mapper.Map<Project>(project);
         _dbContext.Projects.Add(mappedProject);
         _dbContext.SaveChanges();
     }
@@ -62,7 +62,7 @@ public class DbDataManager : IDataManager
 
     public void UpdateProject(Project project)
     {
-        var mappedProject = _mapper.Map<Trs.Models.DbModels.Project>(project);
+        var mappedProject = _mapper.Map<Project>(project);
         _dbContext.Projects.Update(mappedProject);
         _dbContext.SaveChanges();
     }
@@ -99,25 +99,22 @@ public class DbDataManager : IDataManager
 
     public void AddReportEntry(string username, ReportEntry reportEntry)
     {
-        var mappedReportEntry = _mapper.Map<Trs.Models.DbModels.ReportEntry>(reportEntry);
+        var mappedReportEntry = _mapper.Map<ReportEntry>(reportEntry);
         var foundOwner = _dbContext.Users.FirstOrDefault(x => x.Name == username);
         if (foundOwner == null)
             return;
-        var foundReport = _dbContext.Reports.FirstOrDefault(x => x.OwnerId == foundOwner.Id && x.Month == reportEntry.Month.TrimToMonth());
+        var foundReport = _dbContext.Reports.FirstOrDefault(x => x.OwnerId == foundOwner.Id && x.Month == reportEntry.Date.TrimToMonth());
         if (foundReport == null)
             return;
         mappedReportEntry.ReportId = foundReport.Id;
-        var foundProject = _dbContext.Projects.FirstOrDefault(x => x.Code == reportEntry.Code);
+        var foundProject = _dbContext.Projects.FirstOrDefault(x => x.Code == reportEntry.ProjectCode);
         if (foundProject == null)
             return;
         mappedReportEntry.ProjectCode = foundProject.Code;
-        if (!string.IsNullOrEmpty(reportEntry.Subcode))
-        {
-            var foundCategory = _dbContext.Categories.FirstOrDefault(x => x.Name == reportEntry.Subcode);
-            if (foundCategory == null)
-                return;
-            mappedReportEntry.CategoryId = foundCategory.Id;
-        }
+        var foundCategory = _dbContext.Categories.FirstOrDefault(x => x.Id == reportEntry.CategoryId);
+        if (foundCategory == null)
+            return;
+        mappedReportEntry.CategoryId = foundCategory.Id;
         _dbContext.ReportEntries.Add(mappedReportEntry);
         _dbContext.SaveChanges();
     }
@@ -168,7 +165,7 @@ public class DbDataManager : IDataManager
             .FirstOrDefault();
         if (foundReportEntry == null)
             return;
-        var mappedReportEntry = _mapper.Map<Trs.Models.DbModels.ReportEntry>(reportEntry);
+        var mappedReportEntry = _mapper.Map<ReportEntry>(reportEntry);
         mappedReportEntry.Id = foundReportEntry.Id;
         mappedReportEntry.ReportId = foundReportEntry.ReportId;
         mappedReportEntry.ProjectCode = foundReportEntry.ProjectCode;
@@ -185,10 +182,10 @@ public class DbDataManager : IDataManager
         var foundReport = _dbContext.Reports.FirstOrDefault(x => x.OwnerId == foundOwner.Id && x.Month == month.TrimToMonth());
         if (foundReport == null)
             return;
-        var foundProject = _dbContext.Projects.FirstOrDefault(x => x.Code == acceptedTime.Code);
+        var foundProject = _dbContext.Projects.FirstOrDefault(x => x.Code == acceptedTime.ProjectCode);
         if (foundProject == null)
             return;
-        var mappedAcceptedTime = _mapper.Map<Trs.Models.DbModels.AcceptedTime>(acceptedTime);
+        var mappedAcceptedTime = _mapper.Map<AcceptedTime>(acceptedTime);
         mappedAcceptedTime.ProjectCode = foundProject.Code;
         mappedAcceptedTime.ReportId = foundReport.Id;
         if (_dbContext.AcceptedTime.FirstOrDefault(x => x.ReportId == foundReport.Id && x.ProjectCode == foundProject.Code) != null)

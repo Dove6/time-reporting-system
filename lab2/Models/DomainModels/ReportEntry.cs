@@ -1,49 +1,27 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Trs.Extensions;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Trs.Models.DomainModels;
 
-public class ReportEntry : IEquatable<ReportEntry>
+public class ReportEntry
 {
-    public int MonthlyIndex { get; set; }
-
-    public DateTime Date { get => _date; set => _date = value.Date; }
-    public DateTime Month => _date.TrimToMonth();
-    private DateTime _date;
-
-    [Required]
-    public string Code { get; set; }
-
-    [Required]
-    public string Subcode { get; set; }
-
+    [Key]
+    public int Id { get; set; }
+    [DataType(DataType.Date)]
+    public DateTime Date { get; set; }
+    [Range(1, int.MaxValue)]
     public int Time { get; set; }
+    [DefaultValue("")]
+    public string Description { get; set; } = "";
 
-    [Required]
-    public string Description { get; set; }
-
-    public bool Equals(ReportEntry? other)
-    {
-        if (ReferenceEquals(null, other))
-            return false;
-        if (ReferenceEquals(this, other))
-            return true;
-        return Month.Equals(other.Month) && MonthlyIndex == other.MonthlyIndex;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj))
-            return false;
-        if (ReferenceEquals(this, obj))
-            return true;
-        if (obj.GetType() != this.GetType())
-            return false;
-        return Equals((ReportEntry)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Month, MonthlyIndex);
-    }
+    [ForeignKey(nameof(Project))]
+    public string ProjectCode { get; set; } = "";
+    public virtual Project? Project { get; set; }
+    [ForeignKey(nameof(Category))]
+    public int? CategoryId { get; set; }
+    public virtual Category? Category { get; set; }
+    [ForeignKey(nameof(Report))]
+    public int ReportId { get; set; }
+    public virtual Report? Report { get; set; }
 }

@@ -1,5 +1,5 @@
 ﻿using Trs.Extensions;
-using Trs.Models.DbModels;
+using Trs.Models.DomainModels;
 
 namespace Trs.DataManager;
 
@@ -36,8 +36,8 @@ public static class TrsDbInitializer
 
         var categories = new List<Category>
         {
-            new() { Id = 1, Name = "database", ProjectCode = "ARGUS-123" },
-            new() { Id = 2, Name = "other", ProjectCode = "ARGUS-123" }
+            new() { Id = 1, Code = "database", ProjectCode = "ARGUS-123" },
+            new() { Id = 2, Code = "other", ProjectCode = "ARGUS-123" }
         };
         foreach (var category in categories)
             dbContext.Categories.Add(category);

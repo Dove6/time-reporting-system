@@ -22,12 +22,12 @@ public class ReportController : BaseController
     public IActionResult Index()
     {
         var report = DataManager.FindReportByUserAndMonth(LoggedInUser!.Name, RequestedDate);
-        var summaryEntries = report.Entries.GroupBy(x => x.Code)
+        var summaryEntries = report.ReportEntries.GroupBy(x => x.ProjectCode)
             .Select(x => new ProjectTimeSummaryEntry
             {
                 ProjectCode = x.Key,
                 Time = x.Sum(y => y.Time),
-                AcceptedTime = report.Accepted.FirstOrDefault(y => y.Code == x.Key)?.Time
+                AcceptedTime = report.AcceptedTime.FirstOrDefault(y => y.ProjectCode == x.Key)?.Time
             }).ToList();
         var model = new MonthlySummaryModel
         {

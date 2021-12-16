@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Trs.Models.DbModels;
+using Trs.Models.DomainModels;
 
 namespace Trs.DataManager;
 
@@ -17,6 +17,6 @@ public class TrsDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AcceptedTime>()
-            .HasKey(nameof(Trs.Models.DbModels.AcceptedTime.ReportId), nameof(Trs.Models.DbModels.AcceptedTime.ProjectCode));
+            .HasKey(nameof(Models.DomainModels.AcceptedTime.ReportId), nameof(Models.DomainModels.AcceptedTime.ProjectCode));
     }
 }

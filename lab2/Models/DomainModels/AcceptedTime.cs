@@ -1,35 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Trs.Models.DomainModels;
 
-public class AcceptedTime : IEquatable<AcceptedTime>
+public class AcceptedTime
 {
-    [Required] public string Code { get; set; }
-
+    [Range(0, int.MaxValue)]
     public int Time { get; set; }
 
-    public bool Equals(AcceptedTime? other)
-    {
-        if (ReferenceEquals(null, other))
-            return false;
-        if (ReferenceEquals(this, other))
-            return true;
-        return Code == other.Code;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj))
-            return false;
-        if (ReferenceEquals(this, obj))
-            return true;
-        if (obj.GetType() != this.GetType())
-            return false;
-        return Equals((AcceptedTime)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return Code.GetHashCode();
-    }
+    [ForeignKey(nameof(Report))]
+    public int ReportId { get; set; }
+    public virtual Report? Report { get; set; }
+    [ForeignKey(nameof(Project))]
+    public string ProjectCode { get; set; } = "";
+    public virtual Project? Project { get; set; }
 }

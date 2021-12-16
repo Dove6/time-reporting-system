@@ -1,34 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Trs.Models.DomainModels;
 
-public class User : IEquatable<User>
+[Index(nameof(Name), IsUnique = true)]
+public class User
 {
-    [Required]
-    public string Name { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
 
-    public bool Equals(User? other)
-    {
-        if (ReferenceEquals(null, other))
-            return false;
-        if (ReferenceEquals(this, other))
-            return true;
-        return Name == other.Name;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj))
-            return false;
-        if (ReferenceEquals(this, obj))
-            return true;
-        if (obj.GetType() != this.GetType())
-            return false;
-        return Equals((User)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return Name.GetHashCode();
-    }
+    public virtual ICollection<Report>? Reports { get; set; }
+    public virtual ICollection<Project>? Projects { get; set; }
 }

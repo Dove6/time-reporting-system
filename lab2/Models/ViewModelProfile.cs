@@ -11,13 +11,13 @@ public class ViewModelProfile : Profile
         CreateMap<Project, ProjectModel>()
             .ForMember(dest => dest.Categories,
                 dest => dest.MapFrom(src =>
-                    string.Join('\n', src.Subactivities.Select(x => x.Code))));
+                    string.Join('\n', src.Categories.Select(x => x.Code))));
         CreateMap<Project, ProjectWithUserSummaryModel>()
             .ForMember(dest => dest.Categories,
                 dest => dest.MapFrom(src =>
-                    string.Join('\n', src.Subactivities.Select(x => x.Code))));
+                    string.Join('\n', src.Categories.Select(x => x.Code))));
         CreateMap<ProjectModel, Project>()
-            .ForMember(dest => dest.Subactivities,
+            .ForMember(dest => dest.Categories,
                 dest => dest.MapFrom(src =>
                     src.Categories.Split('\n',
                             16,

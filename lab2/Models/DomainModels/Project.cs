@@ -1,46 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Trs.Models.DomainModels;
 
-public class Project : IEquatable<Project>
+public class Project
 {
-    [Required] public string Code { get; set; }
-
-    [Required]
-    public string Manager { get; set; }
-
-    [Required]
-    public string Name { get; set; }
-
+    [Key]
+    public string Code { get; set; } = "";
+    public string Name { get; set; } = "";
     public int Budget { get; set; }
-
+    [DefaultValue(true)]
     public bool Active { get; set; }
 
-    [Required]
-    public HashSet<Category> Subactivities { get; set; } = new();
-
-    public bool Equals(Project? other)
-    {
-        if (ReferenceEquals(null, other))
-            return false;
-        if (ReferenceEquals(this, other))
-            return true;
-        return Code == other.Code;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj))
-            return false;
-        if (ReferenceEquals(this, obj))
-            return true;
-        if (obj.GetType() != this.GetType())
-            return false;
-        return Equals((Project)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return Code.GetHashCode();
-    }
+    [ForeignKey(nameof(Manager))]
+    public int ManagerId { get; set; }
+    public virtual User? Manager { get; set; }
+    public virtual ICollection<Category>? Categories { get; set; }
+    public virtual ICollection<ReportEntry>? ReportEntries { get; set; }
+    public virtual ICollection<AcceptedTime>? AcceptedTime { get; set; }
 }

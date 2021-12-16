@@ -30,8 +30,8 @@ public class ProjectController : BaseController
             {
                 var mappedProject = Mapper.Map<ProjectModel>(x);
                 var totalAcceptedTime = DataManager.FindReportsByProject(x.Code)
-                    .SelectMany(y => y.Accepted)
-                    .Where(y => y.Code == x.Code)
+                    .SelectMany(y => y.AcceptedTime)
+                    .Where(y => y.ProjectCode == x.Code)
                     .Sum(y => y.Time);
                 mappedProject.BudgetLeft = x.Budget - totalAcceptedTime;
                 return mappedProject;
@@ -49,12 +49,12 @@ public class ProjectController : BaseController
         var reports = DataManager.FindReportsByProject(id);
         var userSummaries = reports.Where(x => x.Frozen).Select(x =>
         {
-            var acceptedSummary = x.Accepted.FirstOrDefault(y => y.Code == project.Code);
+            var acceptedSummary = x.AcceptedTime.FirstOrDefault(y => y.ProjectCode == project.Code);
             return new ProjectWithUserSummaryEntry
             {
-                Username = x.Owner,
+                Username = x.Owner.Name,
                 Month = x.Month,
-                DeclaredTime = x.Entries.Where(y => y.Code == project.Code).Sum(y => y.Time),
+                DeclaredTime = x.ReportEntries.Where(y => y.ProjectCode == project.Code).Sum(y => y.Time),
                 AcceptedTime = acceptedSummary?.Time
             };
         }).ToList();
@@ -82,7 +82,7 @@ public class ProjectController : BaseController
         if (modifiedProject == null)
             return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(projectModel.Code));
         modifiedProject.Budget = inputProject.Budget;
-        modifiedProject.Subactivities = inputProject.Subactivities;
+        modifiedProject.Categories = inputProject.Categories;
         DataManager.UpdateProject(modifiedProject);
         return RedirectToAction("Index");
     }
@@ -134,9 +134,9 @@ public class ProjectController : BaseController
                 return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.AcceptedTimeNegative);
         }
         var report = DataManager.FindReportByUserAndMonth(username, RequestedDate);
-        if (project.Manager != LoggedInUser!.Name || report.Entries.All(x => x.Code != id))
+        if (project.ManagerId != LoggedInUser!.Id || report.ReportEntries.All(x => x.ProjectCode != id))
             return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString()));
-        var accepted = new AcceptedTime { Code = id, Time = acceptedTime.Value };
+        var accepted = new AcceptedTime { ProjectCode = id, Time = acceptedTime.Value };
         DataManager.SetAcceptedTime(username, RequestedDate, accepted);
         return RedirectToAction("Show", new { Id = id });
     }

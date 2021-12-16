@@ -1,34 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Trs.Models.DomainModels;
 
-public class Category : IEquatable<Category>
+[Index(nameof(ProjectCode), nameof(Code), IsUnique = true)]
+public class Category
 {
-    [Required]
-    public string Code { get; set; }
+    [Key]
+    public int Id { get; set; }
+    public string Code { get; set; } = "";
 
-    public bool Equals(Category? other)
-    {
-        if (ReferenceEquals(null, other))
-            return false;
-        if (ReferenceEquals(this, other))
-            return true;
-        return Code == other.Code;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj))
-            return false;
-        if (ReferenceEquals(this, obj))
-            return true;
-        if (obj.GetType() != this.GetType())
-            return false;
-        return Equals((Category)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return Code.GetHashCode();
-    }
+    [ForeignKey(nameof(Project))]
+    public string ProjectCode { get; set; } = "";
+    public virtual Project? Project { get; set; }
 }
