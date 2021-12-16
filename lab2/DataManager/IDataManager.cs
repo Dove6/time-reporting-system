@@ -14,7 +14,7 @@ public interface IDataManager
     HashSet<Project> GetAllProjects();
     void UpdateProject(Project project);
 
-    Report FindReportByUserAndMonth(string username, DateTime month);
+    Report? FindReportByUserAndMonth(string username, DateTime month);
     HashSet<Report> FindReportsByProject(string projectCode);
     void FreezeReport(string username, DateTime month);
 

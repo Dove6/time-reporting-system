@@ -7,8 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<TrsDbContext>(options => options.UseSqlite("Data Source=storage/trs.db"));
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton<IDataManager>(x => new JsonDataManager(x.GetRequiredService<IMapper>()));
+builder.Services.AddScoped<IDataManager>(x => new DbDataManager(x.GetRequiredService<TrsDbContext>(), x.GetRequiredService<IMapper>()));
 
 var app = builder.Build();
 

@@ -181,7 +181,7 @@ public class JsonDataManager : IDataManager
         WriteAllProjects(projectSet);
     }
 
-    public Report FindReportByUserAndMonth(string username, DateTime month) =>
+    public Report? FindReportByUserAndMonth(string username, DateTime month) =>
         ReadAllReports(username, month).FirstOrDefault() ?? new Report { Owner = username, Month = month };
 
     public HashSet<Report> FindReportsByProject(string projectCode) =>
