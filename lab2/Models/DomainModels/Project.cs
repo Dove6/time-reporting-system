@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TRS.Models.DomainModels;
+namespace Trs.Models.DomainModels;
 
 public class Project : IEquatable<Project>
 {

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using TRS.DataManager.JsonHelpers;
+using Trs.DataManager.JsonHelpers;
 
-namespace TRS.Models.JsonModels;
+namespace Trs.Models.JsonModels;
 
 public class ReportEntry
 {

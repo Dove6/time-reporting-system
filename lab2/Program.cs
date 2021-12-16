@@ -1,6 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using TRS.DataManager;
+using Trs.DataManager;
 
 var builder = WebApplication.CreateBuilder(args);
 

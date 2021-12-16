@@ -1,4 +1,4 @@
-﻿namespace TRS.Models.Constants;
+﻿namespace Trs.Models.Constants;
 
 public static class ErrorMessages
 {

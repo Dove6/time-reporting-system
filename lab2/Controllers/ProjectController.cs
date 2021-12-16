@@ -1,14 +1,14 @@
 ﻿using System.Diagnostics;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using TRS.Controllers.Attributes;
-using TRS.Controllers.Constants;
-using TRS.DataManager;
-using TRS.Extensions;
-using TRS.Models.DomainModels;
-using TRS.Models.ViewModels;
+using Trs.Controllers.Attributes;
+using Trs.Controllers.Constants;
+using Trs.DataManager;
+using Trs.Extensions;
+using Trs.Models.DomainModels;
+using Trs.Models.ViewModels;
 
-namespace TRS.Controllers;
+namespace Trs.Controllers;
 
 [ForLoggedInOnly]
 public class ProjectController : BaseController

@@ -2,13 +2,13 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using TRS.Controllers.Attributes;
-using TRS.Controllers.Constants;
-using TRS.DataManager;
-using TRS.Models.DomainModels;
-using TRS.Models.ViewModels;
+using Trs.Controllers.Attributes;
+using Trs.Controllers.Constants;
+using Trs.DataManager;
+using Trs.Models.DomainModels;
+using Trs.Models.ViewModels;
 
-namespace TRS.Controllers;
+namespace Trs.Controllers;
 
 public class UserController : BaseController
 {

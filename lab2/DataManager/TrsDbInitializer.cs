@@ -1,7 +1,7 @@
-﻿using TRS.Extensions;
+﻿using Trs.Extensions;
 using Trs.Models.DbModels;
 
-namespace TRS.DataManager;
+namespace Trs.DataManager;
 
 public static class TrsDbInitializer
 {

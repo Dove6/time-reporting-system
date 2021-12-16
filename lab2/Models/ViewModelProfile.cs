@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using TRS.Models.DomainModels;
-using TRS.Models.ViewModels;
+using Trs.Models.DomainModels;
+using Trs.Models.ViewModels;
 
-namespace TRS.Models;
+namespace Trs.Models;
 
 public class ViewModelProfile : Profile
 {

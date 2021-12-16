@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace TRS.DataManager.JsonHelpers;
+namespace Trs.DataManager.JsonHelpers;
 
 public class LowerCaseNamingPolicy : JsonNamingPolicy
 {

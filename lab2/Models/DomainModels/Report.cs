@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TRS.Extensions;
+using Trs.Extensions;
 
-namespace TRS.Models.DomainModels;
+namespace Trs.Models.DomainModels;
 
 public class Report : IEquatable<Report>
 {

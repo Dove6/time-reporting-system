@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace TRS.Models.ViewModels;
+namespace Trs.Models.ViewModels;
 
 public class ReportEntryForAddingModel : ReportEntryModel
 {

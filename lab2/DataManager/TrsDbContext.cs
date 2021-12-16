@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Trs.Models.DbModels;
 
-namespace TRS.DataManager;
+namespace Trs.DataManager;
 
 public class TrsDbContext : DbContext
 {

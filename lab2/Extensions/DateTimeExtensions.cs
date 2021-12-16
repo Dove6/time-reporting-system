@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace TRS.Extensions;
+namespace Trs.Extensions;
 
 public static class DateTimeExtensions
 {

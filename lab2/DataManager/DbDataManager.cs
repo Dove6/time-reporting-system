@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using TRS.Extensions;
-using TRS.Models.DomainModels;
+using Trs.Extensions;
+using Trs.Models.DomainModels;
 
-namespace TRS.DataManager;
+namespace Trs.DataManager;
 
 public class DbDataManager : IDataManager
 {

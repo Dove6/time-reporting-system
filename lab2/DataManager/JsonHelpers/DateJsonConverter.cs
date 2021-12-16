@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TRS.DataManager.JsonHelpers;
+namespace Trs.DataManager.JsonHelpers;
 
 public class DateJsonConverter : JsonConverter<DateTime>
 {

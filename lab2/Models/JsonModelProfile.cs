@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using TRS.DataManager;
-using TRS.Models.DomainModels;
+using Trs.DataManager;
+using Trs.Models.DomainModels;
 
-namespace TRS.Models;
+namespace Trs.Models;
 
 public class JsonModelProfile : Profile
 {

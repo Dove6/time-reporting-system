@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace TRS.DataManager.Exceptions;
+namespace Trs.DataManager.Exceptions;
 
 [Serializable]
 public class AlreadyExistingException : Exception

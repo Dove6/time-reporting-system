@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TRS.Models.Constants;
+using Trs.Models.Constants;
 
-namespace TRS.Models.ViewModels;
+namespace Trs.Models.ViewModels;
 
 public class ProjectUpdatableModel
 {

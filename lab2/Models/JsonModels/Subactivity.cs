@@ -1,4 +1,4 @@
-﻿namespace TRS.Models.JsonModels;
+﻿namespace Trs.Models.JsonModels;
 
 public class Subactivity
 {

@@ -1,6 +1,6 @@
-﻿using TRS.Extensions;
+﻿using Trs.Extensions;
 
-namespace TRS.Controllers.Constants;
+namespace Trs.Controllers.Constants;
 
 public static class ErrorMessages
 {

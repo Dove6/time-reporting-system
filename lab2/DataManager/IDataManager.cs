@@ -1,6 +1,6 @@
-﻿using TRS.Models.DomainModels;
+﻿using Trs.Models.DomainModels;
 
-namespace TRS.DataManager;
+namespace Trs.DataManager;
 
 public interface IDataManager
 {

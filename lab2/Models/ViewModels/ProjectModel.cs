@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using TRS.Models.Constants;
+using Trs.Models.Constants;
 
-namespace TRS.Models.ViewModels;
+namespace Trs.Models.ViewModels;
 
 public class ProjectModel : ProjectUpdatableModel
 {

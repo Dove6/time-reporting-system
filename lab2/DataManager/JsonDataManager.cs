@@ -2,14 +2,14 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using AutoMapper;
-using TRS.DataManager.Exceptions;
-using TRS.DataManager.JsonHelpers;
-using TRS.Models.DomainModels;
-using TRS.Models.JsonModels;
-using Report = TRS.Models.DomainModels.Report;
-using ReportEntry = TRS.Models.DomainModels.ReportEntry;
+using Trs.DataManager.Exceptions;
+using Trs.DataManager.JsonHelpers;
+using Trs.Models.DomainModels;
+using Trs.Models.JsonModels;
+using Report = Trs.Models.DomainModels.Report;
+using ReportEntry = Trs.Models.DomainModels.ReportEntry;
 
-namespace TRS.DataManager;
+namespace Trs.DataManager;
 
 public class JsonDataManager : IDataManager
 {

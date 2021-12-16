@@ -2,13 +2,13 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using TRS.Controllers.Attributes;
-using TRS.Controllers.Constants;
-using TRS.DataManager;
-using TRS.Extensions;
-using TRS.Models.DomainModels;
+using Trs.Controllers.Attributes;
+using Trs.Controllers.Constants;
+using Trs.DataManager;
+using Trs.Extensions;
+using Trs.Models.DomainModels;
 
-namespace TRS.Controllers;
+namespace Trs.Controllers;
 
 public abstract class BaseController : Controller
 {
