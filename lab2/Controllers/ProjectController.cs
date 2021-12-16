@@ -133,11 +133,11 @@ public class ProjectController : BaseController
             case < 0:
                 return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.AcceptedTimeNegative);
         }
-        var report = DataManager.FindReportByUserAndMonth(username, RequestedDate);
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(username, RequestedDate);
         if (project.ManagerId != LoggedInUser!.Id || report.ReportEntries.All(x => x.ProjectCode != id))
             return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString()));
-        var accepted = new AcceptedTime { ProjectCode = id, Time = acceptedTime.Value };
-        DataManager.SetAcceptedTime(username, RequestedDate, accepted);
+        var accepted = new AcceptedTime { ProjectCode = id, Time = acceptedTime.Value, ReportId = report.Id};
+        DataManager.SetAcceptedTime(accepted);
         return RedirectToAction("Show", new { Id = id });
     }
 

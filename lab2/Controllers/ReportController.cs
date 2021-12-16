@@ -21,7 +21,7 @@ public class ReportController : BaseController
 
     public IActionResult Index()
     {
-        var report = DataManager.FindReportByUserAndMonth(LoggedInUser!.Name, RequestedDate);
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate);
         var summaryEntries = report.ReportEntries.GroupBy(x => x.ProjectCode)
             .Select(x => new ProjectTimeSummaryEntry
             {
@@ -43,7 +43,8 @@ public class ReportController : BaseController
     [HttpPost]
     public IActionResult Freeze()
     {
-        DataManager.FreezeReport(LoggedInUser!.Name, RequestedDate);
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate);
+        DataManager.FreezeReportById(report.Id);
         return RedirectToAction("Index", new { Date = RequestedDate.ToDateString() });
     }
 

@@ -20,7 +20,7 @@ public class HomeController : BaseController
     [ForLoggedInOnly]
     public IActionResult Index()
     {
-        var report = DataManager.FindReportByUserAndMonth(LoggedInUser!.Name, RequestedDate);
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate);
         var reportEntries = report.ReportEntries.Where(x => x.Date == RequestedDate).ToList();
         return View(new DailyReportModel
         {
