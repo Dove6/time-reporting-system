@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Trs.Models.DbModels;
 
-[Index(nameof(Name), IsUnique = true)]
-public class User
+[Index(nameof(ProjectCode), nameof(Name), IsUnique = true)]
+public class Category
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     public string Name { get; set; } = "";
 
-    public virtual ICollection<Report>? Reports { get; set; }
-    public virtual ICollection<Project>? Projects { get; set; }
+    [ForeignKey(nameof(Project))]
+    public string ProjectCode { get; set; } = "";
+    public virtual Project? Project { get; set; }
 }

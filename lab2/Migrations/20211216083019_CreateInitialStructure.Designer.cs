@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TRS.DataManager;
 
@@ -10,9 +11,10 @@ using TRS.DataManager;
 namespace Trs.Migrations
 {
     [DbContext(typeof(TrsDbContext))]
-    partial class TrsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211216083019_CreateInitialStructure")]
+    partial class CreateInitialStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
@@ -32,7 +34,7 @@ namespace Trs.Migrations
 
                     b.HasIndex("ProjectCode");
 
-                    b.ToTable("AcceptedTime", (string)null);
+                    b.ToTable("AcceptedTime");
                 });
 
             modelBuilder.Entity("Trs.Models.DbModels.Category", b =>
@@ -54,7 +56,7 @@ namespace Trs.Migrations
                     b.HasIndex("ProjectCode", "Name")
                         .IsUnique();
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Trs.Models.DbModels.Project", b =>
@@ -79,7 +81,7 @@ namespace Trs.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("Trs.Models.DbModels.Report", b =>
@@ -102,7 +104,7 @@ namespace Trs.Migrations
                     b.HasIndex("OwnerId", "Month")
                         .IsUnique();
 
-                    b.ToTable("Reports", (string)null);
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("Trs.Models.DbModels.ReportEntry", b =>
@@ -139,7 +141,7 @@ namespace Trs.Migrations
 
                     b.HasIndex("ReportId");
 
-                    b.ToTable("ReportEntries", (string)null);
+                    b.ToTable("ReportEntries");
                 });
 
             modelBuilder.Entity("Trs.Models.DbModels.User", b =>
@@ -157,7 +159,7 @@ namespace Trs.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Trs.Models.DbModels.AcceptedTime", b =>
