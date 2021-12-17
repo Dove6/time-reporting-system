@@ -19,7 +19,8 @@ public class Report
 
     [ForeignKey(nameof(Owner))]
     public int OwnerId { get; set; }
-    public virtual User? Owner { get; set; }
-    public virtual ICollection<ReportEntry>? ReportEntries { get; set; }
-    public virtual ICollection<AcceptedTime>? AcceptedTime { get; set; }
+
+    public User? Owner { get; set; }
+    public ICollection<ReportEntry>? ReportEntries { get; set; }
+    public ICollection<AcceptedTime>? AcceptedTime { get; set; }
 }

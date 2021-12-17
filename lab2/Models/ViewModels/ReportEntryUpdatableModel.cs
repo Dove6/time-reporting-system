@@ -6,7 +6,7 @@ namespace Trs.Models.ViewModels;
 public class ReportEntryUpdatableModel
 {
     [Display(Name = "Kategoria")]
-    public string Subcode { get; set; }
+    public string? Subcode { get; set; }
 
     [Display(Name = "Czas (w minutach)")]
     [Required(ErrorMessage = ErrorMessages.FieldRequired)]
@@ -15,5 +15,5 @@ public class ReportEntryUpdatableModel
 
     [Display(Name = "Opis")]
     [StringLength(200, ErrorMessage = "{0} może mieć maksymalnie {1} znaków długości.")]
-    public string Description { get; set; }
+    public string? Description { get; set; }
 }

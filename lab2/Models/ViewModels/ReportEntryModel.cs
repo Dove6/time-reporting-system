@@ -5,7 +5,7 @@ namespace Trs.Models.ViewModels;
 
 public class ReportEntryModel : ReportEntryUpdatableModel
 {
-    public int MonthlyIndex;
+    public int Id;
 
     [Display(Name = "Data")]
     [Required(ErrorMessage = ErrorMessages.FieldRequired)]

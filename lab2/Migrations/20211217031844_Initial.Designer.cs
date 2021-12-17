@@ -11,15 +11,15 @@ using Trs.DataManager;
 namespace Trs.Migrations
 {
     [DbContext(typeof(TrsDbContext))]
-    [Migration("20211216083019_CreateInitialStructure")]
-    partial class CreateInitialStructure
+    [Migration("20211217031844_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
 
-            modelBuilder.Entity("Trs.Models.DbModels.AcceptedTime", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.AcceptedTime", b =>
                 {
                     b.Property<int>("ReportId")
                         .HasColumnType("INTEGER");
@@ -37,29 +37,20 @@ namespace Trs.Migrations
                     b.ToTable("AcceptedTime");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.Category", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.Category", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("ProjectCode")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Code")
+                        .HasColumnType("TEXT");
 
-                    b.HasIndex("ProjectCode", "Name")
-                        .IsUnique();
+                    b.HasKey("ProjectCode", "Code");
 
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.Project", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.Project", b =>
                 {
                     b.Property<string>("Code")
                         .HasColumnType("TEXT");
@@ -84,7 +75,7 @@ namespace Trs.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.Report", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.Report", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -107,14 +98,14 @@ namespace Trs.Migrations
                     b.ToTable("Reports");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.ReportEntry", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.ReportEntry", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("CategoryCode")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
@@ -135,16 +126,14 @@ namespace Trs.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("ProjectCode");
-
                     b.HasIndex("ReportId");
+
+                    b.HasIndex("ProjectCode", "CategoryCode");
 
                     b.ToTable("ReportEntries");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.User", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -162,15 +151,15 @@ namespace Trs.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.AcceptedTime", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.AcceptedTime", b =>
                 {
-                    b.HasOne("Trs.Models.DbModels.Project", "Project")
+                    b.HasOne("Trs.Models.DomainModels.Project", "Project")
                         .WithMany("AcceptedTime")
                         .HasForeignKey("ProjectCode")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Trs.Models.DbModels.Report", "Report")
+                    b.HasOne("Trs.Models.DomainModels.Report", "Report")
                         .WithMany("AcceptedTime")
                         .HasForeignKey("ReportId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -181,9 +170,9 @@ namespace Trs.Migrations
                     b.Navigation("Report");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.Category", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.Category", b =>
                 {
-                    b.HasOne("Trs.Models.DbModels.Project", "Project")
+                    b.HasOne("Trs.Models.DomainModels.Project", "Project")
                         .WithMany("Categories")
                         .HasForeignKey("ProjectCode")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -192,9 +181,9 @@ namespace Trs.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.Project", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.Project", b =>
                 {
-                    b.HasOne("Trs.Models.DbModels.User", "Manager")
+                    b.HasOne("Trs.Models.DomainModels.User", "Manager")
                         .WithMany("Projects")
                         .HasForeignKey("ManagerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -203,9 +192,9 @@ namespace Trs.Migrations
                     b.Navigation("Manager");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.Report", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.Report", b =>
                 {
-                    b.HasOne("Trs.Models.DbModels.User", "Owner")
+                    b.HasOne("Trs.Models.DomainModels.User", "Owner")
                         .WithMany("Reports")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -214,23 +203,23 @@ namespace Trs.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.ReportEntry", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.ReportEntry", b =>
                 {
-                    b.HasOne("Trs.Models.DbModels.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
-
-                    b.HasOne("Trs.Models.DbModels.Project", "Project")
+                    b.HasOne("Trs.Models.DomainModels.Project", "Project")
                         .WithMany("ReportEntries")
                         .HasForeignKey("ProjectCode")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Trs.Models.DbModels.Report", "Report")
+                    b.HasOne("Trs.Models.DomainModels.Report", "Report")
                         .WithMany("ReportEntries")
                         .HasForeignKey("ReportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Trs.Models.DomainModels.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("ProjectCode", "CategoryCode");
 
                     b.Navigation("Category");
 
@@ -239,7 +228,7 @@ namespace Trs.Migrations
                     b.Navigation("Report");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.Project", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.Project", b =>
                 {
                     b.Navigation("AcceptedTime");
 
@@ -248,14 +237,14 @@ namespace Trs.Migrations
                     b.Navigation("ReportEntries");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.Report", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.Report", b =>
                 {
                     b.Navigation("AcceptedTime");
 
                     b.Navigation("ReportEntries");
                 });
 
-            modelBuilder.Entity("Trs.Models.DbModels.User", b =>
+            modelBuilder.Entity("Trs.Models.DomainModels.User", b =>
                 {
                     b.Navigation("Projects");
 

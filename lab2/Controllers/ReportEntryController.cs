@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Trs.Controllers.Attributes;
 using Trs.Controllers.Constants;
 using Trs.DataManager;
@@ -25,7 +26,8 @@ public class ReportEntryController : BaseController
 
     public IActionResult Show(int id)
     {
-        var reportEntry = DataManager.FindReportEntryById(id);
+        var reportEntry = DataManager.FindReportEntryById(id, x => x
+            .Include(y => y.Category));
         if (reportEntry == null)
             return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
         return View(Mapper.Map<ReportEntryModel>(reportEntry));
@@ -33,7 +35,8 @@ public class ReportEntryController : BaseController
 
     private void FillSelectListsInEditingModel(ReportEntryForEditingModel editingModel, string projectCode)
     {
-        var project = DataManager.FindProjectByCode(projectCode);
+        var project = DataManager.FindProjectByCode(projectCode, x => x
+            .Include(y => y.Categories));
         var categoryCodes = project?.Categories.Select(y => new SelectListItem(y.Code, y.Code)).ToList();
         editingModel.CategorySelectList = categoryCodes ?? new List<SelectListItem>();
     }
@@ -42,7 +45,8 @@ public class ReportEntryController : BaseController
     {
         if (DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate).Frozen)
             return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
-        var reportEntry = DataManager.FindReportEntryById(id);
+        var reportEntry = DataManager.FindReportEntryById(id, q => q
+            .Include(qn => qn.Category));
         if (reportEntry == null)
             return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
         var model = Mapper.Map<ReportEntryForEditingModel>(reportEntry);
@@ -65,19 +69,21 @@ public class ReportEntryController : BaseController
         if (updatedReportEntry == null)
             return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
         var category = DataManager.FindCategoryByProjectCodeAndCode(reportEntry.Code, reportEntry.Subcode);
-        updatedReportEntry.CategoryId = category.Id;
+        updatedReportEntry.CategoryCode = category.Code;
         updatedReportEntry.Time = reportEntry.Time;
-        updatedReportEntry.Description = reportEntry.Description;
+        updatedReportEntry.Description = reportEntry.Description ?? "";
         DataManager.UpdateReportEntry(updatedReportEntry);
         return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
     }
 
     private void FillSelectListsInAddingModel(ReportEntryForAddingModel addingModel)
     {
-        var availableProjects = DataManager.GetAllProjects().Where(x => x.Active).ToHashSet();
+        var availableProjects = DataManager.GetAllProjects(x => x
+            .Include(y => y.Categories)
+            .Where(y => y.Active));
         var projectCodes = availableProjects.Select(x => new SelectListItem( $"{x.Name} ({x.Code})", x.Code)).ToList();
         var categoryCodes = availableProjects.ToDictionary(x => x.Code,
-            x => x.Categories.Select(y => new SelectListItem(y.ProjectCode, y.ProjectCode)).ToList());
+            x => x.Categories.Select(y => new SelectListItem(y.Code, y.Code)).ToList());
         addingModel.ProjectSelectList = projectCodes;
         addingModel.ProjectCategorySelectList = categoryCodes;
     }
@@ -99,6 +105,8 @@ public class ReportEntryController : BaseController
         var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, reportEntry.Date);
         if (report.Frozen)
             return RedirectToActionWithError("Index", "Home", new { Date = reportEntry.Date.ToDateString() }, ErrorMessages.GetReportFrozenMessage(reportEntry.Date.ToMonthString()));
+        var mappedReport = Mapper.Map<ReportEntry>(reportEntry);
+        mappedReport.ReportId = report.Id;
         var project = DataManager.FindProjectByCode(reportEntry.Code);
         switch (project)
         {
@@ -111,8 +119,28 @@ public class ReportEntryController : BaseController
         }
         if (!ModelState.IsValid)
             goto InvalidModelState;
-        var mappedReport = Mapper.Map<ReportEntry>(reportEntry);
-        mappedReport.ReportId = report.Id;
+        mappedReport.ProjectCode = project.Code;
+        if (!string.IsNullOrEmpty(reportEntry.Subcode))
+        {
+            var category = DataManager.FindCategoryByProjectCodeAndCode(reportEntry.Code, reportEntry.Subcode);
+            if (category != null)
+                mappedReport.CategoryCode = category.Code;
+            else
+                ModelState.AddModelError(nameof(reportEntry.Code), ErrorMessages.GetCategoryNotFoundMessage(reportEntry.Code, reportEntry.Subcode));
+        }
+        if (!ModelState.IsValid)
+            goto InvalidModelState;
+        if (!string.IsNullOrEmpty(reportEntry.Subcode))
+        {
+            var category = DataManager.FindCategoryByProjectCodeAndCode(project!.Code, reportEntry.Subcode);
+            if (category != null)
+                mappedReport.CategoryCode = category.Code;
+            else
+                ModelState.AddModelError(nameof(reportEntry.Subcode), ErrorMessages.GetCategoryNotFoundMessage(reportEntry.Subcode, reportEntry.Code));
+        }
+        if (!ModelState.IsValid)
+            goto InvalidModelState;
+
         DataManager.AddReportEntry(mappedReport);
         return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToDateString() });
 

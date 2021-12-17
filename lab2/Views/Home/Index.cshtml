@@ -53,12 +53,12 @@
                         @Html.DisplayFor(model => entry.Description)
                     </td>
                     <td>
-                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date.ToDateString()" asp-route-id="@entry.MonthlyIndex">Obejrzyj</a>
+                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Obejrzyj</a>
                         @if (!Model.Frozen)
                         {
-                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date.ToDateString()" asp-route-id="@entry.MonthlyIndex">Zmień</a>
+                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Zmień</a>
                             <form method="POST">
-                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date.ToDateString()" asp-route-id="@entry.MonthlyIndex">Skasuj</button>
+                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Skasuj</button>
                             </form>
                         }
                     </td>

@@ -37,22 +37,13 @@ namespace Trs.Migrations
 
             modelBuilder.Entity("Trs.Models.DomainModels.Category", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ProjectCode")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ProjectCode")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectCode", "Code")
-                        .IsUnique();
+                    b.HasKey("ProjectCode", "Code");
 
                     b.ToTable("Categories");
                 });
@@ -111,8 +102,8 @@ namespace Trs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("CategoryCode")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
@@ -133,11 +124,9 @@ namespace Trs.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("ProjectCode");
-
                     b.HasIndex("ReportId");
+
+                    b.HasIndex("ProjectCode", "CategoryCode");
 
                     b.ToTable("ReportEntries");
                 });
@@ -214,10 +203,6 @@ namespace Trs.Migrations
 
             modelBuilder.Entity("Trs.Models.DomainModels.ReportEntry", b =>
                 {
-                    b.HasOne("Trs.Models.DomainModels.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
-
                     b.HasOne("Trs.Models.DomainModels.Project", "Project")
                         .WithMany("ReportEntries")
                         .HasForeignKey("ProjectCode")
@@ -229,6 +214,10 @@ namespace Trs.Migrations
                         .HasForeignKey("ReportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Trs.Models.DomainModels.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("ProjectCode", "CategoryCode");
 
                     b.Navigation("Category");
 

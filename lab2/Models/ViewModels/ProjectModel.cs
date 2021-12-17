@@ -11,10 +11,6 @@ public class ProjectModel : ProjectUpdatableModel
     [StringLength(10, ErrorMessage = ErrorMessages.StringMaxLength)]
     public string Code { get; set; }
 
-    [Display(Name = "Właściciel")]
-    [ValidateNever]
-    public string Manager { get; set; }
-
     [Display(Name = "Budżet pomniejszony o zaakceptowany czas")]
     [ValidateNever]
     public int BudgetLeft { get; set; }

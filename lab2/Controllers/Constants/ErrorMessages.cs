@@ -5,6 +5,7 @@ namespace Trs.Controllers.Constants;
 public static class ErrorMessages
 {
     private const string ProjectNotFoundByCode = "Nie znaleziono projektu z kodem \"{0}\".";
+    private const string CategoryNotFoundByProjectCodeAndCode = "Nie znaleziono kategorii z kodem \"{0}\" dla projektu \"{1}\".";
     private const string ProjectAlreadyExisting = "Projekt z kodem \"{0}\" już istnieje.";
     private const string ProjectNoLongerActive = "Projekt z kodem \"{0}\" jest zamknięty.";
 
@@ -25,6 +26,8 @@ public static class ErrorMessages
 
     public static string GetProjectNotFoundMessage(string code) =>
         string.Format(ProjectNotFoundByCode, code);
+    public static string GetCategoryNotFoundMessage(string projectCode, string code) =>
+        string.Format(CategoryNotFoundByProjectCodeAndCode, code, projectCode);
     public static string GetProjectAlreadyExistingMessage(string code) =>
         string.Format(ProjectAlreadyExisting, code);
     public static string GetProjectNoLongerActiveMessage(string code) =>

@@ -36,8 +36,8 @@ public static class TrsDbInitializer
 
         var categories = new List<Category>
         {
-            new() { Id = 1, Code = "database", ProjectCode = "ARGUS-123" },
-            new() { Id = 2, Code = "other", ProjectCode = "ARGUS-123" }
+            new() { Code = "database", ProjectCode = "ARGUS-123" },
+            new() { Code = "other", ProjectCode = "ARGUS-123" }
         };
         foreach (var category in categories)
             dbContext.Categories.Add(category);
@@ -53,11 +53,11 @@ public static class TrsDbInitializer
 
         var reportEntries = new List<ReportEntry>
         {
-            new() { Id = 1, Date = new DateTime(2021, 11, 7), Time = 45, Description = "data import", ProjectCode = "ARGUS-123", CategoryId = 1, ReportId = 1},
+            new() { Id = 1, Date = new DateTime(2021, 11, 7), Time = 45, Description = "data import", ProjectCode = "ARGUS-123", CategoryCode = "database", ReportId = 1},
             new() { Id = 2, Date = new DateTime(2021, 11, 7), Time = 120, Description = "picie kawy", ProjectCode = "OTHER", ReportId = 1 },
             new() { Id = 3, Date = new DateTime(2021, 11, 8), Time = 45, Description = "kompilacja", ProjectCode = "ARGUS-123", ReportId = 1 },
             new() { Id = 4, Date = new DateTime(2021, 11, 8), Time = 120, Description = "office arrangement", ProjectCode = "OTHER", ReportId = 1 },
-            new() { Id = 5, Date = new DateTime(2021, 11, 12), Time = 45, Description = "project meeting", ProjectCode = "ARGUS-123", CategoryId = 2, ReportId = 1 }
+            new() { Id = 5, Date = new DateTime(2021, 11, 12), Time = 45, Description = "project meeting", ProjectCode = "ARGUS-123", CategoryCode = "other", ReportId = 1 }
         };
         foreach (var reportEntry in reportEntries)
             dbContext.ReportEntries.Add(reportEntry);

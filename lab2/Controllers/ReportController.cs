@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Trs.Controllers.Attributes;
 using Trs.DataManager;
 using Trs.Extensions;
@@ -21,7 +22,9 @@ public class ReportController : BaseController
 
     public IActionResult Index()
     {
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate);
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate, x => x
+            .Include(y => y.ReportEntries)
+            .Include(y => y.AcceptedTime));
         var summaryEntries = report.ReportEntries.GroupBy(x => x.ProjectCode)
             .Select(x => new ProjectTimeSummaryEntry
             {

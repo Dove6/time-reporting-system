@@ -4,28 +4,55 @@ namespace Trs.DataManager;
 
 public interface IDataManager
 {
-    int AddUser(User user);
-    User? FindUserByName(string name);
-    HashSet<User> GetAllUsers();
-
-    string AddProject(Project project);
-    Project? FindProjectByCode(string code);
-    HashSet<Project> FindProjectsByManager(string managerName);
-    HashSet<Project> GetAllProjects();
-    void UpdateProject(Project project);
-
-    Report FindOrCreateReportByUsernameAndMonth(string username, DateTime month);
-    HashSet<Report> FindReportsByProject(string projectCode);
-    void FreezeReportById(int reportId);
-
-    int AddReportEntry(ReportEntry reportEntry);
-    void DeleteReportEntryById(int reportEntryId);
-    ReportEntry? FindReportEntryById(int reportEntryId);
-    HashSet<ReportEntry> FindReportEntriesByUsernameAndDay(string username, DateTime day);
-    HashSet<ReportEntry> FindReportEntriesByUsernameAndMonth(string username, DateTime month);
-    void UpdateReportEntry(ReportEntry reportEntry);
+    AcceptedTime? FindAcceptedTimeByReportIdAndProjectCode(int reportId, string projectCode,
+        Func<IQueryable<AcceptedTime>, IQueryable<AcceptedTime>>? modifierFunc = null);
 
     void SetAcceptedTime(AcceptedTime acceptedTime);
 
-    Category? FindCategoryByProjectCodeAndCode(string projectCode, string categoryCode);
+    Category? FindCategoryByProjectCodeAndCode(string projectCode, string categoryCode,
+        Func<IQueryable<Category>, IQueryable<Category>>? modifierFunc = null);
+    void AddCategory(Category category);
+    void DeleteCategory(Category category);
+
+    Project? FindProjectByCode(string code, Func<IQueryable<Project>, IQueryable<Project>>? modifierFunc = null);
+
+    List<Project> FindProjectsByManager(string managerName,
+        Func<IQueryable<Project>, IQueryable<Project>>? modifierFunc = null);
+
+    List<Project> GetAllProjects(Func<IQueryable<Project>, IQueryable<Project>>? modifierFunc = null);
+
+    void AddProject(Project project);
+
+    void UpdateProject(Project project);
+
+    Report FindOrCreateReportByUsernameAndMonth(string username, DateTime month,
+        Func<IQueryable<Report>, IQueryable<Report>>? modifierFunc = null);
+
+    List<Report> FindReportsByProject(string projectCode,
+        Func<IQueryable<Report>, IQueryable<Report>>? modifierFunc = null);
+
+    void FreezeReportById(int reportId);
+
+    ReportEntry? FindReportEntryById(int reportEntryId,
+        Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null);
+
+    List<ReportEntry> FindReportEntriesByUsernameAndDay(string username, DateTime day,
+        Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null);
+
+    List<ReportEntry> FindReportEntriesByUsernameAndMonth(string username, DateTime month,
+        Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null);
+
+    int AddReportEntry(ReportEntry reportEntry);
+
+    void DeleteReportEntryById(int reportEntryId);
+
+    void UpdateReportEntry(ReportEntry reportEntry);
+
+    User? FindUserById(int id, Func<IQueryable<User>, IQueryable<User>>? modifierFunc = null);
+
+    User? FindUserByName(string name, Func<IQueryable<User>, IQueryable<User>>? modifierFunc = null);
+
+    List<User> GetAllUsers(Func<IQueryable<User>, IQueryable<User>>? modifierFunc = null);
+
+    int AddUser(User user);
 }

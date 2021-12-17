@@ -5,10 +5,23 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Trs.Migrations
 {
-    public partial class CreateInitialStructure : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Projects",
                 columns: table => new
@@ -55,14 +68,12 @@ namespace Trs.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
                     ProjectCode = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.PrimaryKey("PK_Categories", x => new { x.ProjectCode, x.Code });
                     table.ForeignKey(
                         name: "FK_Categories_Projects_ProjectCode",
                         column: x => x.ProjectCode,
@@ -106,17 +117,17 @@ namespace Trs.Migrations
                     Time = table.Column<int>(type: "INTEGER", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     ProjectCode = table.Column<string>(type: "TEXT", nullable: false),
-                    CategoryId = table.Column<int>(type: "INTEGER", nullable: true),
+                    CategoryCode = table.Column<string>(type: "TEXT", nullable: true),
                     ReportId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ReportEntries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ReportEntries_Categories_CategoryId",
-                        column: x => x.CategoryId,
+                        name: "FK_ReportEntries_Categories_ProjectCode_CategoryCode",
+                        columns: x => new { x.ProjectCode, x.CategoryCode },
                         principalTable: "Categories",
-                        principalColumn: "Id");
+                        principalColumns: new[] { "ProjectCode", "Code" });
                     table.ForeignKey(
                         name: "FK_ReportEntries_Projects_ProjectCode",
                         column: x => x.ProjectCode,
@@ -137,25 +148,14 @@ namespace Trs.Migrations
                 column: "ProjectCode");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Categories_ProjectCode_Name",
-                table: "Categories",
-                columns: new[] { "ProjectCode", "Name" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Projects_ManagerId",
                 table: "Projects",
                 column: "ManagerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReportEntries_CategoryId",
+                name: "IX_ReportEntries_ProjectCode_CategoryCode",
                 table: "ReportEntries",
-                column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ReportEntries_ProjectCode",
-                table: "ReportEntries",
-                column: "ProjectCode");
+                columns: new[] { "ProjectCode", "CategoryCode" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReportEntries_ReportId",
@@ -166,6 +166,12 @@ namespace Trs.Migrations
                 name: "IX_Reports_OwnerId_Month",
                 table: "Reports",
                 columns: new[] { "OwnerId", "Month" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Name",
+                table: "Users",
+                column: "Name",
                 unique: true);
         }
 
@@ -185,6 +191,9 @@ namespace Trs.Migrations
 
             migrationBuilder.DropTable(
                 name: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

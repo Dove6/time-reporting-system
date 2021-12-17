@@ -10,8 +10,9 @@ public class AcceptedTime
 
     [ForeignKey(nameof(Report))]
     public int ReportId { get; set; }
-    public virtual Report? Report { get; set; }
     [ForeignKey(nameof(Project))]
     public string ProjectCode { get; set; } = "";
-    public virtual Project? Project { get; set; }
+
+    public Report? Report { get; set; }
+    public Project? Project { get; set; }
 }

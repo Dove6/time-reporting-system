@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Trs.Controllers.Attributes;
 using Trs.DataManager;
 using Trs.Models.ViewModels;
@@ -20,7 +21,11 @@ public class HomeController : BaseController
     [ForLoggedInOnly]
     public IActionResult Index()
     {
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate);
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate, x => x
+            .Include(y => y.ReportEntries)!
+                .ThenInclude(y => y.Project)
+            .Include(y => y.ReportEntries)!
+                .ThenInclude(y => y.Category));
         var reportEntries = report.ReportEntries.Where(x => x.Date == RequestedDate).ToList();
         return View(new DailyReportModel
         {

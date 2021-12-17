@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Trs.Controllers.Attributes;
 using Trs.Controllers.Constants;
 using Trs.DataManager;
@@ -23,13 +24,15 @@ public class ProjectController : BaseController
 
     public IActionResult Index()
     {
-        var userProjectList = DataManager.FindProjectsByManager(LoggedInUser!.Name);
+        var userProjectList = DataManager.FindProjectsByManager(LoggedInUser!.Name, q => q
+            .Include(qn => qn.Categories));
         var projectListModel = new ProjectListModel
         {
             Projects = userProjectList.Select(x =>
             {
                 var mappedProject = Mapper.Map<ProjectModel>(x);
-                var totalAcceptedTime = DataManager.FindReportsByProject(x.Code)
+                var totalAcceptedTime = DataManager.FindReportsByProject(x.Code, q => q
+                        .Include(y => y.AcceptedTime))
                     .SelectMany(y => y.AcceptedTime)
                     .Where(y => y.ProjectCode == x.Code)
                     .Sum(y => y.Time);
@@ -42,11 +45,15 @@ public class ProjectController : BaseController
 
     public IActionResult Show(string id)
     {
-        var project = DataManager.FindProjectByCode(id);
+        var project = DataManager.FindProjectByCode(id, q => q
+            .Include(qn => qn.Categories));
         if (project == null)
             return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
         var projectWithUsersModel = Mapper.Map<ProjectWithUserSummaryModel>(project);
-        var reports = DataManager.FindReportsByProject(id);
+        var reports = DataManager.FindReportsByProject(id, x => x
+            .Include(y => y.AcceptedTime)
+            .Include(y => y.Owner)
+            .Include(y => y.ReportEntries));
         var userSummaries = reports.Where(x => x.Frozen).Select(x =>
         {
             var acceptedSummary = x.AcceptedTime.FirstOrDefault(y => y.ProjectCode == project.Code);
@@ -65,7 +72,9 @@ public class ProjectController : BaseController
 
     public IActionResult Edit(string id)
     {
-        var project = DataManager.FindProjectByCode(id);
+        var project = DataManager.FindProjectByCode(id, q => q
+            .Include(qn => qn.Manager)
+            .Include(qn => qn.Categories));
         if (project == null)
             return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
         var projectModel = Mapper.Map<ProjectModel>(project);
@@ -78,11 +87,21 @@ public class ProjectController : BaseController
         if (!ModelState.IsValid)
             return View(projectModel);
         var inputProject = Mapper.Map<Project>(projectModel);
-        var modifiedProject = DataManager.FindProjectByCode(projectModel.Code);
+        var modifiedProject = DataManager.FindProjectByCode(projectModel.Code, q => q
+            .Include(qn => qn.Categories));
         if (modifiedProject == null)
             return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(projectModel.Code));
         modifiedProject.Budget = inputProject.Budget;
-        modifiedProject.Categories = inputProject.Categories;
+        // There shall be no deletions
+        // var deletedCategories = modifiedProject.Categories.Select(x => x.Code)
+        //     .Except(inputProject.Categories.Select(x => x.Code));
+        var addedCategories = inputProject.Categories.Select(x => x.Code)
+            .Except(modifiedProject.Categories.Select(x => x.Code));
+        // foreach (var deletedCategory in deletedCategories)
+        //     DataManager.DeleteCategory(new Category { ProjectCode = modifiedProject.Code, Code = deletedCategory });
+        foreach (var addedCategory in addedCategories)
+            DataManager.AddCategory(new Category { ProjectCode = modifiedProject.Code, Code = addedCategory });
+        modifiedProject.Categories = null;
         DataManager.UpdateProject(modifiedProject);
         return RedirectToAction("Index");
     }
@@ -102,9 +121,9 @@ public class ProjectController : BaseController
             ModelState.AddModelError(nameof(projectModel.Code), ErrorMessages.GetProjectAlreadyExistingMessage(projectModel.Code));
         if (!ModelState.IsValid)
             return View(projectModel);
-        projectModel.Manager = LoggedInUser!.Name;
         projectModel.Active = true;
         var project = Mapper.Map<Project>(projectModel);
+        project.ManagerId = LoggedInUser!.Id;
         DataManager.AddProject(project);
         return RedirectToAction("Index");
     }
@@ -133,7 +152,8 @@ public class ProjectController : BaseController
             case < 0:
                 return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.AcceptedTimeNegative);
         }
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(username, RequestedDate);
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(username, RequestedDate, q => q
+            .Include(qn => qn.ReportEntries));
         if (project.ManagerId != LoggedInUser!.Id || report.ReportEntries.All(x => x.ProjectCode != id))
             return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString()));
         var accepted = new AcceptedTime { ProjectCode = id, Time = acceptedTime.Value, ReportId = report.Id};

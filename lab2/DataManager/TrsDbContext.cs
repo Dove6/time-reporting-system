@@ -17,6 +17,17 @@ public class TrsDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AcceptedTime>()
-            .HasKey(nameof(Models.DomainModels.AcceptedTime.ReportId), nameof(Models.DomainModels.AcceptedTime.ProjectCode));
+            .HasKey(nameof(Models.DomainModels.AcceptedTime.ReportId),
+                nameof(Models.DomainModels.AcceptedTime.ProjectCode));
+
+        modelBuilder.Entity<Category>()
+            .HasKey(nameof(Category.ProjectCode),
+                nameof(Category.Code));
+
+        modelBuilder.Entity<ReportEntry>()
+            .HasOne(x => x.Category)
+            .WithMany()
+            .HasForeignKey(nameof(ReportEntry.ProjectCode),
+                nameof(ReportEntry.CategoryCode));
     }
 }

@@ -15,8 +15,9 @@ public class Project
 
     [ForeignKey(nameof(Manager))]
     public int ManagerId { get; set; }
-    public virtual User? Manager { get; set; }
-    public virtual ICollection<Category>? Categories { get; set; }
-    public virtual ICollection<ReportEntry>? ReportEntries { get; set; }
-    public virtual ICollection<AcceptedTime>? AcceptedTime { get; set; }
+
+    public User? Manager { get; set; }
+    public ICollection<Category>? Categories { get; set; }
+    public ICollection<ReportEntry>? ReportEntries { get; set; }
+    public ICollection<AcceptedTime>? AcceptedTime { get; set; }
 }

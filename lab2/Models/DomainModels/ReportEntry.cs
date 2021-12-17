@@ -17,11 +17,11 @@ public class ReportEntry
 
     [ForeignKey(nameof(Project))]
     public string ProjectCode { get; set; } = "";
-    public virtual Project? Project { get; set; }
-    [ForeignKey(nameof(Category))]
-    public int? CategoryId { get; set; }
-    public virtual Category? Category { get; set; }
+    public string? CategoryCode { get; set; }
     [ForeignKey(nameof(Report))]
     public int ReportId { get; set; }
-    public virtual Report? Report { get; set; }
+
+    public Project? Project { get; set; }
+    public Category? Category { get; set; }
+    public Report? Report { get; set; }
 }
