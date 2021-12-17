@@ -50,13 +50,6 @@ namespace Trs.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB")
-                        .HasDefaultValueSql("randomblob(8)");
-
                     b.HasKey("ProjectCode", "Code");
 
                     b.ToTable("Categories");
@@ -108,13 +101,6 @@ namespace Trs.Migrations
 
                     b.Property<int>("OwnerId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB")
-                        .HasDefaultValueSql("randomblob(8)");
 
                     b.HasKey("Id");
 
@@ -175,13 +161,6 @@ namespace Trs.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB")
-                        .HasDefaultValueSql("randomblob(8)");
 
                     b.HasKey("Id");
 

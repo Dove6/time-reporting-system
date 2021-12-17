@@ -63,7 +63,7 @@ public class ProjectController : BaseController
                 Month = x.Month,
                 DeclaredTime = x.ReportEntries.Where(y => y.ProjectCode == project.Code).Sum(y => y.Time),
                 AcceptedTime = acceptedSummary?.Time,
-                Timestamp = (acceptedSummary != null) ? Convert.ToBase64String(acceptedSummary.Timestamp) : null
+                Timestamp = acceptedSummary?.Timestamp
             };
         }).ToList();
         projectWithUsersModel.BudgetLeft = projectWithUsersModel.Budget - userSummaries.Sum(x => x.AcceptedTime ?? 0);
@@ -90,20 +90,25 @@ public class ProjectController : BaseController
         var inputProject = Mapper.Map<Project>(projectModel);
         var modifiedProject = DataManager.FindProjectByCode(projectModel.Code, q => q
             .Include(qn => qn.Categories));
+        modifiedProject.Timestamp = projectModel.Timestamp;
         if (modifiedProject == null)
             return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(projectModel.Code));
         modifiedProject.Budget = inputProject.Budget;
-        // There shall be no deletions
-        // var deletedCategories = modifiedProject.Categories.Select(x => x.Code)
-        //     .Except(inputProject.Categories.Select(x => x.Code));
         var addedCategories = inputProject.Categories.Select(x => x.Code)
             .Except(modifiedProject.Categories.Select(x => x.Code));
-        // foreach (var deletedCategory in deletedCategories)
-        //     DataManager.DeleteCategory(new Category { ProjectCode = modifiedProject.Code, Code = deletedCategory });
         foreach (var addedCategory in addedCategories)
             DataManager.AddCategory(new Category { ProjectCode = modifiedProject.Code, Code = addedCategory });
         modifiedProject.Categories = null;
-        DataManager.UpdateProject(modifiedProject);
+        try
+        {
+            DataManager.UpdateProject(modifiedProject);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            projectModel.Timestamp = DataManager.GetTimestampForProject(new Project { Code = projectModel.Code });
+            ModelState.AddModelError(nameof(DbUpdateConcurrencyException), ErrorMessages.ConcurrencyError);
+            return View(projectModel);
+        }
         return RedirectToAction("Index");
     }
 
@@ -157,8 +162,15 @@ public class ProjectController : BaseController
             .Include(qn => qn.ReportEntries));
         if (project.ManagerId != LoggedInUser!.Id || report.ReportEntries.All(x => x.ProjectCode != id))
             return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString()));
-        var accepted = new AcceptedTime { ProjectCode = id, Time = acceptedTime.Value, ReportId = report.Id};
-        DataManager.SetAcceptedTime(accepted);
+        var accepted = new AcceptedTime { ProjectCode = id, Time = acceptedTime.Value, ReportId = report.Id, Timestamp = timestamp };
+        try
+        {
+            DataManager.SetAcceptedTime(accepted);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.ConcurrencyError);
+        }
         return RedirectToAction("Show", new { Id = id });
     }
 

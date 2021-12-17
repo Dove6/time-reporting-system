@@ -11,9 +11,4 @@ public class Category
     public string ProjectCode { get; set; } = "";
 
     public Project? Project { get; set; }
-
-    [Timestamp]
-    [Required]
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public byte[] Timestamp { get; set; }
 }

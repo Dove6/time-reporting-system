@@ -71,6 +71,7 @@
                 </tbody>
             </table>
         </div>
+        <input type="hidden" asp-for="Timestamp"/>
         <button asp-action="Edit" asp-route-id="@id" asp-route-date="@Model.Date.ToDateString()">Zatwierdź</button>
     </form>
 </main>

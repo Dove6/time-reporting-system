@@ -11,8 +11,8 @@ using Trs.DataManager;
 namespace Trs.Migrations
 {
     [DbContext(typeof(TrsDbContext))]
-    [Migration("20211217043015_AddTimestamps")]
-    partial class AddTimestamps
+    [Migration("20211217070627_AddSqliteSpecificTriggers")]
+    partial class AddSqliteSpecificTriggers
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,7 +34,8 @@ namespace Trs.Migrations
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
+                        .HasColumnType("BLOB")
+                        .HasDefaultValueSql("randomblob(8)");
 
                     b.HasKey("ReportId", "ProjectCode");
 
@@ -50,12 +51,6 @@ namespace Trs.Migrations
 
                     b.Property<string>("Code")
                         .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
 
                     b.HasKey("ProjectCode", "Code");
 
@@ -84,7 +79,8 @@ namespace Trs.Migrations
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
+                        .HasColumnType("BLOB")
+                        .HasDefaultValueSql("randomblob(8)");
 
                     b.HasKey("Code");
 
@@ -107,12 +103,6 @@ namespace Trs.Migrations
 
                     b.Property<int>("OwnerId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
 
                     b.HasKey("Id");
 
@@ -152,7 +142,8 @@ namespace Trs.Migrations
                         .IsConcurrencyToken()
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
+                        .HasColumnType("BLOB")
+                        .HasDefaultValueSql("randomblob(8)");
 
                     b.HasKey("Id");
 
@@ -172,12 +163,6 @@ namespace Trs.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
 
                     b.HasKey("Id");
 

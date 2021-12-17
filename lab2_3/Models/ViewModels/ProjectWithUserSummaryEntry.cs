@@ -23,5 +23,5 @@ public class ProjectWithUserSummaryEntry
     public int? AcceptedTime { get; set; }
 
     [ValidateNever]
-    public string? Timestamp { get; set; }
+    public byte[]? Timestamp { get; set; }
 }

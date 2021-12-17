@@ -17,49 +17,6 @@ public static class TrsDbInitializer
             return; // DB already initialized
         }
 
-        // source: https://stackoverflow.com/questions/52684458/updating-entity-in-ef-core-application-with-sqlite-gives-dbupdateconcurrencyexce
-        // and: https://khalidabuhakmeh.com/raw-sql-queries-with-ef-core-5
-        var tables = dbContext.Model.GetEntityTypes();
-
-        foreach (var table in tables)
-        {
-            var props = table.GetProperties()
-                .Where(p => p.ClrType == typeof(byte[])
-                            && p.ValueGenerated == Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAddOrUpdate
-                            && p.IsConcurrencyToken);
-
-            var tableName = table.GetTableName();
-
-            foreach (var field in props)
-            {
-                var triggerScripts = new[] {
-                    $@"CREATE TRIGGER IF NOT EXISTS Set{tableName}_{field.Name}OnUpdate
-                    AFTER UPDATE ON {tableName}
-                    BEGIN
-                        UPDATE {tableName}
-                        SET {field.Name} = randomblob(8)
-                        WHERE rowid = NEW.rowid;
-                    END
-                    ",
-                    $@"CREATE TRIGGER IF NOT EXISTS Set{tableName}_{field.Name}OnInsert
-                    AFTER INSERT ON {tableName}
-                    BEGIN
-                        UPDATE {tableName}
-                        SET {field.Name} = randomblob(8)
-                        WHERE rowid = NEW.rowid;
-                    END
-                    "
-                };
-
-                foreach (var triggerScript in triggerScripts)
-                {
-                    using var connection = dbContext.Database.GetDbConnection();
-                    dbContext.Database.OpenConnection();
-                    connection.Query(triggerScript);
-                }
-            }
-        }
-
         var users = new List<User>
         {
             new() { Id = 1, Name = "nowak" },

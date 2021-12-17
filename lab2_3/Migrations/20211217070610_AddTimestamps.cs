@@ -11,27 +11,11 @@ namespace Trs.Migrations
         {
             migrationBuilder.AddColumn<byte[]>(
                 name: "Timestamp",
-                table: "Users",
-                type: "BLOB",
-                rowVersion: true,
-                nullable: false,
-                defaultValue: new byte[0]);
-
-            migrationBuilder.AddColumn<byte[]>(
-                name: "Timestamp",
-                table: "Reports",
-                type: "BLOB",
-                rowVersion: true,
-                nullable: false,
-                defaultValue: new byte[0]);
-
-            migrationBuilder.AddColumn<byte[]>(
-                name: "Timestamp",
                 table: "ReportEntries",
                 type: "BLOB",
                 rowVersion: true,
                 nullable: false,
-                defaultValue: new byte[0]);
+                defaultValueSql: "randomblob(8)");
 
             migrationBuilder.AddColumn<byte[]>(
                 name: "Timestamp",
@@ -39,15 +23,7 @@ namespace Trs.Migrations
                 type: "BLOB",
                 rowVersion: true,
                 nullable: false,
-                defaultValue: new byte[0]);
-
-            migrationBuilder.AddColumn<byte[]>(
-                name: "Timestamp",
-                table: "Categories",
-                type: "BLOB",
-                rowVersion: true,
-                nullable: false,
-                defaultValue: new byte[0]);
+                defaultValueSql: "randomblob(8)");
 
             migrationBuilder.AddColumn<byte[]>(
                 name: "Timestamp",
@@ -55,19 +31,11 @@ namespace Trs.Migrations
                 type: "BLOB",
                 rowVersion: true,
                 nullable: false,
-                defaultValue: new byte[0]);
+                defaultValueSql: "randomblob(8)");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Timestamp",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "Timestamp",
-                table: "Reports");
-
             migrationBuilder.DropColumn(
                 name: "Timestamp",
                 table: "ReportEntries");
@@ -75,10 +43,6 @@ namespace Trs.Migrations
             migrationBuilder.DropColumn(
                 name: "Timestamp",
                 table: "Projects");
-
-            migrationBuilder.DropColumn(
-                name: "Timestamp",
-                table: "Categories");
 
             migrationBuilder.DropColumn(
                 name: "Timestamp",

@@ -69,10 +69,21 @@ public class ReportEntryController : BaseController
         if (updatedReportEntry == null)
             return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
         var category = DataManager.FindCategoryByProjectCodeAndCode(reportEntry.Code, reportEntry.Subcode);
-        updatedReportEntry.CategoryCode = category.Code;
+        updatedReportEntry.CategoryCode = category?.Code;
         updatedReportEntry.Time = reportEntry.Time;
         updatedReportEntry.Description = reportEntry.Description ?? "";
-        DataManager.UpdateReportEntry(updatedReportEntry);
+        updatedReportEntry.Timestamp = reportEntry.Timestamp;
+        try
+        {
+            DataManager.UpdateReportEntry(updatedReportEntry);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            var editingModel = Mapper.Map<ReportEntryForEditingModel>(reportEntry);
+            FillSelectListsInEditingModel(editingModel, reportEntry.Code);
+            editingModel.Timestamp = DataManager.GetTimestampForReportEntryById(id);
+            return View(editingModel);
+        }
         return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
     }
 

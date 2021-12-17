@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Trs.Models.Constants;
 
 namespace Trs.Models.ViewModels;
@@ -17,5 +18,6 @@ public class ReportEntryUpdatableModel
     [StringLength(200, ErrorMessage = "{0} może mieć maksymalnie {1} znaków długości.")]
     public string? Description { get; set; }
 
-    public byte[] Timestamp { get; set; }
+    [ValidateNever]
+    public byte[]? Timestamp { get; set; }
 }

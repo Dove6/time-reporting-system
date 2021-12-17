@@ -11,8 +11,8 @@ using Trs.DataManager;
 namespace Trs.Migrations
 {
     [DbContext(typeof(TrsDbContext))]
-    [Migration("20211217045308_FixSqliteTimestamp")]
-    partial class FixSqliteTimestamp
+    [Migration("20211217070610_AddTimestamps")]
+    partial class AddTimestamps
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -51,13 +51,6 @@ namespace Trs.Migrations
 
                     b.Property<string>("Code")
                         .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB")
-                        .HasDefaultValueSql("randomblob(8)");
 
                     b.HasKey("ProjectCode", "Code");
 
@@ -110,13 +103,6 @@ namespace Trs.Migrations
 
                     b.Property<int>("OwnerId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB")
-                        .HasDefaultValueSql("randomblob(8)");
 
                     b.HasKey("Id");
 
@@ -177,13 +163,6 @@ namespace Trs.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB")
-                        .HasDefaultValueSql("randomblob(8)");
 
                     b.HasKey("Id");
 

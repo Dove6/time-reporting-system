@@ -11,7 +11,7 @@ using Trs.DataManager;
 namespace Trs.Migrations
 {
     [DbContext(typeof(TrsDbContext))]
-    [Migration("20211217031844_Initial")]
+    [Migration("20211217070436_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

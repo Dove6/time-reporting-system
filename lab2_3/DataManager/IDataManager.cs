@@ -9,6 +9,8 @@ public interface IDataManager
 
     void SetAcceptedTime(AcceptedTime acceptedTime);
 
+    byte[] GetTimestampForAcceptedTime(AcceptedTime acceptedTime);
+
     Category? FindCategoryByProjectCodeAndCode(string projectCode, string categoryCode,
         Func<IQueryable<Category>, IQueryable<Category>>? modifierFunc = null);
     void AddCategory(Category category);
@@ -24,6 +26,8 @@ public interface IDataManager
     void AddProject(Project project);
 
     void UpdateProject(Project project);
+
+    byte[] GetTimestampForProject(Project project);
 
     Report FindOrCreateReportByUsernameAndMonth(string username, DateTime month,
         Func<IQueryable<Report>, IQueryable<Report>>? modifierFunc = null);
@@ -47,6 +51,8 @@ public interface IDataManager
     void DeleteReportEntryById(int reportEntryId);
 
     void UpdateReportEntry(ReportEntry reportEntry);
+
+    byte[]? GetTimestampForReportEntryById(int id);
 
     User? FindUserById(int id, Func<IQueryable<User>, IQueryable<User>>? modifierFunc = null);
 

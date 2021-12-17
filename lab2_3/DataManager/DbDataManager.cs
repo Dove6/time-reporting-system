@@ -17,24 +17,6 @@ public class DbDataManager : IDataManager
         _mapper = mapper;
     }
 
-    // public User LoadUserRelationships(User user, string[] properties)
-    // {
-    //     var userEntry = _dbContext.Entry(user);
-    //     foreach (var property in properties)
-    //     {
-    //         switch (property)
-    //         {
-    //             case nameof(User.Reports):
-    //                 userEntry.Collection(x => x.Reports!).Load();
-    //                 break;
-    //             case nameof(User.Projects):
-    //                 userEntry.Collection(x => x.Projects!).Load();
-    //                 break;
-    //         }
-    //     }
-    //     return userEntry.Entity;
-    // }
-
     public int AddUser(User user)
     {
         var addedUser = _dbContext.Users.Add(user);
@@ -42,6 +24,11 @@ public class DbDataManager : IDataManager
         addedUser.State = EntityState.Detached;
         return addedUser.Entity.Id;
     }
+
+    public byte[]? GetTimestampForReportEntryById(int id) =>
+        _dbContext.ReportEntries
+            .FirstOrDefault(x => x.Id == id)?
+            .Timestamp;
 
     public User? FindUserById(int id, Func<IQueryable<User>, IQueryable<User>>? modifierFunc = null)
     {
@@ -70,51 +57,12 @@ public class DbDataManager : IDataManager
             .ToList();
     }
 
-    // public Project LoadProjectRelationships(Project project, string[] properties)
-    // {
-    //     var projectEntry = _dbContext.Entry(project);
-    //     foreach (var property in properties)
-    //     {
-    //         switch (property)
-    //         {
-    //             case nameof(Project.Manager):
-    //                 projectEntry.Reference(x => x.Manager!).Load();
-    //                 break;
-    //             case nameof(Project.Categories):
-    //                 projectEntry.Collection(x => x.Categories!).Load();
-    //                 break;
-    //             case nameof(Project.ReportEntries):
-    //                 projectEntry.Collection(x => x.ReportEntries!).Load();
-    //                 break;
-    //             case nameof(Project.AcceptedTime):
-    //                 projectEntry.Collection(x => x.AcceptedTime!).Load();
-    //                 break;
-    //         }
-    //     }
-    //     return projectEntry.Entity;
-    // }
-
     public void AddProject(Project project)
     {
         var addedProject = _dbContext.Projects.Add(project);
         _dbContext.SaveChanges();
         addedProject.State = EntityState.Detached;
     }
-
-    // public Category LoadCategoryRelationships(Category category, string[] properties)
-    // {
-    //     var categoryEntry = _dbContext.Entry(category);
-    //     foreach (var property in properties)
-    //     {
-    //         switch (property)
-    //         {
-    //             case nameof(Category.Project):
-    //                 categoryEntry.Reference(x => x.Project!).Load();
-    //                 break;
-    //         }
-    //     }
-    //     return categoryEntry.Entity;
-    // }
 
     public void DeleteCategory(Category category)
     {
@@ -160,6 +108,9 @@ public class DbDataManager : IDataManager
         _dbContext.SaveChanges();
     }
 
+    public byte[] GetTimestampForProject(Project project) =>
+        _dbContext.Entry(project).Entity.Timestamp;
+
     public Report FindOrCreateReportByUsernameAndMonth(string username, DateTime month, Func<IQueryable<Report>, IQueryable<Report>>? modifierFunc = null)
     {
         month = month.TrimToMonth();
@@ -196,27 +147,6 @@ public class DbDataManager : IDataManager
             .ToList();
     }
 
-    // public Report LoadReportRelationships(Report report, string[] properties)
-    // {
-    //     var reportEntry = _dbContext.Entry(report);
-    //     foreach (var property in properties)
-    //     {
-    //         switch (property)
-    //         {
-    //             case nameof(Report.Owner):
-    //                 reportEntry.Reference(x => x.Owner!).Load();
-    //                 break;
-    //             case nameof(Report.ReportEntries):
-    //                 reportEntry.Collection(x => x.ReportEntries!).Load();
-    //                 break;
-    //             case nameof(Report.AcceptedTime):
-    //                 reportEntry.Collection(x => x.AcceptedTime!).Load();
-    //                 break;
-    //         }
-    //     }
-    //     return reportEntry.Entity;
-    // }
-
     public void FreezeReportById(int reportId)
     {
         var foundReport = _dbContext.Reports
@@ -227,27 +157,6 @@ public class DbDataManager : IDataManager
         _dbContext.Update(foundReport);
         _dbContext.SaveChanges();
     }
-
-    // public ReportEntry LoadReportEntryRelationships(ReportEntry reportEntry, string[] properties)
-    // {
-    //     var reportEntryEntry = _dbContext.Entry(reportEntry);
-    //     foreach (var property in properties)
-    //     {
-    //         switch (property)
-    //         {
-    //             case nameof(ReportEntry.Project):
-    //                 reportEntryEntry.Reference(x => x.Project!).Load();
-    //                 break;
-    //             case nameof(ReportEntry.Category):
-    //                 reportEntryEntry.Reference(x => x.Category!).Load();
-    //                 break;
-    //             case nameof(ReportEntry.Report):
-    //                 reportEntryEntry.Reference(x => x.Report!).Load();
-    //                 break;
-    //         }
-    //     }
-    //     return reportEntryEntry.Entity;
-    // }
 
     public int AddReportEntry(ReportEntry reportEntry)
     {
@@ -315,24 +224,6 @@ public class DbDataManager : IDataManager
             .FirstOrDefault(x => x.ReportId == reportId && x.ProjectCode == projectCode);
     }
 
-    // public AcceptedTime LoadAcceptedTimeRelationships(AcceptedTime acceptedTime, string[] properties)
-    // {
-    //     var acceptedTimeEntry = _dbContext.Entry(acceptedTime);
-    //     foreach (var property in properties)
-    //     {
-    //         switch (property)
-    //         {
-    //             case nameof(AcceptedTime.Project):
-    //                 acceptedTimeEntry.Reference(x => x.Project!).Load();
-    //                 break;
-    //             case nameof(AcceptedTime.Report):
-    //                 acceptedTimeEntry.Reference(x => x.Report!).Load();
-    //                 break;
-    //         }
-    //     }
-    //     return acceptedTimeEntry.Entity;
-    // }
-
     public void SetAcceptedTime(AcceptedTime acceptedTime)
     {
         var foundAccepted = _dbContext.AcceptedTime
@@ -344,6 +235,9 @@ public class DbDataManager : IDataManager
             _dbContext.AcceptedTime.Add(acceptedTime);
         _dbContext.SaveChanges();
     }
+
+    public byte[] GetTimestampForAcceptedTime(AcceptedTime acceptedTime) =>
+        _dbContext.Entry(acceptedTime).Entity.Timestamp;
 
     public Category? FindCategoryByProjectCodeAndCode(string projectCode, string categoryCode, Func<IQueryable<Category>, IQueryable<Category>>? modifierFunc = null)
     {

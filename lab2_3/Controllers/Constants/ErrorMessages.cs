@@ -24,6 +24,8 @@ public static class ErrorMessages
     public const string HasToBeLoggedIn = "Wyświetlenie strony wymaga zalogowania.";
     public const string MustNotBeLoggedIn = "Strona nie może zostać wyświetlona przez zalogowanego użytkownika.";
 
+    public const string ConcurrencyError = "Dane zostały równolegle nadpisane. Zalecane jest zabezpieczenie danych z formularza i sprawdzenie zmian.";
+
     public static string GetProjectNotFoundMessage(string code) =>
         string.Format(ProjectNotFoundByCode, code);
     public static string GetCategoryNotFoundMessage(string projectCode, string code) =>
