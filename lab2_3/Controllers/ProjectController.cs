@@ -105,8 +105,9 @@ public class ProjectController : BaseController
         }
         catch (DbUpdateConcurrencyException)
         {
-            projectModel.Timestamp = DataManager.GetTimestampForProject(new Project { Code = projectModel.Code });
-            ModelState.AddModelError(nameof(DbUpdateConcurrencyException), ErrorMessages.ConcurrencyError);
+            ModelState.Clear();
+            projectModel.Timestamp = DataManager.FindProjectByCode(projectModel.Code)!.Timestamp;
+            ModelState.AddModelError(nameof(projectModel.Timestamp), ErrorMessages.ConcurrencyError);
             return View(projectModel);
         }
         return RedirectToAction("Index");

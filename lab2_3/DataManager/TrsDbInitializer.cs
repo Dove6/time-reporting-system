@@ -1,6 +1,4 @@
-﻿using Dapper;
-using Microsoft.EntityFrameworkCore;
-using Trs.Extensions;
+﻿using Trs.Extensions;
 using Trs.Models.DomainModels;
 
 namespace Trs.DataManager;

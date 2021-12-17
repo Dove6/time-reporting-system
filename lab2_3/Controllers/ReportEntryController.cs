@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Text.Json;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -76,15 +78,18 @@ public class ReportEntryController : BaseController
         try
         {
             DataManager.UpdateReportEntry(updatedReportEntry);
+            return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
         }
         catch (DbUpdateConcurrencyException)
         {
-            var editingModel = Mapper.Map<ReportEntryForEditingModel>(reportEntry);
-            FillSelectListsInEditingModel(editingModel, reportEntry.Code);
-            editingModel.Timestamp = DataManager.GetTimestampForReportEntryById(id);
-            return View(editingModel);
+            ModelState.Clear();
+            var newTimestamp = DataManager.FindReportEntryById(id)!.Timestamp;
+            var returnModel = Mapper.Map<ReportEntryForEditingModel>(updatedReportEntry);
+            returnModel.Timestamp = newTimestamp;
+            FillSelectListsInEditingModel(returnModel, reportEntry.Code);
+            ModelState.AddModelError(nameof(reportEntry.Timestamp), ErrorMessages.ConcurrencyError);
+            return View(returnModel);
         }
-        return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
     }
 
     private void FillSelectListsInAddingModel(ReportEntryForAddingModel addingModel)
