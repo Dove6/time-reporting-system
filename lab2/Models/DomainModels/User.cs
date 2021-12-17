@@ -14,4 +14,7 @@ public class User
 
     public ICollection<Report>? Reports { get; set; }
     public ICollection<Project>? Projects { get; set; }
+
+    [Timestamp]
+    public byte[] Timestamp { get; set; }
 }

@@ -23,4 +23,7 @@ public class Report
     public User? Owner { get; set; }
     public ICollection<ReportEntry>? ReportEntries { get; set; }
     public ICollection<AcceptedTime>? AcceptedTime { get; set; }
+
+    [Timestamp]
+    public byte[] Timestamp { get; set; }
 }

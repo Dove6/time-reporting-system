@@ -15,4 +15,7 @@ public class AcceptedTime
 
     public Report? Report { get; set; }
     public Project? Project { get; set; }
+
+    [Timestamp]
+    public byte[] Timestamp { get; set; }
 }

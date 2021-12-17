@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Trs.Models.DomainModels;
 
@@ -10,4 +11,7 @@ public class Category
     public string ProjectCode { get; set; } = "";
 
     public Project? Project { get; set; }
+
+    [Timestamp]
+    public byte[] Timestamp { get; set; }
 }

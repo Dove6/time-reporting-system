@@ -24,4 +24,7 @@ public class ReportEntry
     public Project? Project { get; set; }
     public Category? Category { get; set; }
     public Report? Report { get; set; }
+
+    [Timestamp]
+    public byte[] Timestamp { get; set; }
 }

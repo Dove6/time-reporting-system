@@ -20,4 +20,7 @@ public class Project
     public ICollection<Category>? Categories { get; set; }
     public ICollection<ReportEntry>? ReportEntries { get; set; }
     public ICollection<AcceptedTime>? AcceptedTime { get; set; }
+
+    [Timestamp]
+    public byte[] Timestamp { get; set; }
 }
