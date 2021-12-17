@@ -16,5 +16,7 @@ public class User
     public ICollection<Project>? Projects { get; set; }
 
     [Timestamp]
+    [Required]
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public byte[] Timestamp { get; set; }
 }

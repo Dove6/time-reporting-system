@@ -16,4 +16,6 @@ public class ReportEntryUpdatableModel
     [Display(Name = "Opis")]
     [StringLength(200, ErrorMessage = "{0} może mieć maksymalnie {1} znaków długości.")]
     public string? Description { get; set; }
+
+    public byte[] Timestamp { get; set; }
 }

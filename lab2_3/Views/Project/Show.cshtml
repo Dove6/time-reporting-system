@@ -91,6 +91,7 @@
                     <td>
                         @if (Model.Active)
                         {
+                            <input id="Timestamp-@i" type="hidden" form="form-@i" name="Timestamp" asp-for="UserSummaries[i].Timestamp"/>
                             <input id="AcceptedTime-@i" form="form-@i" name="AcceptedTime" asp-for="UserSummaries[i].AcceptedTime"/>
                             <button type="submit" asp-action="UpdateAcceptedTime" asp-route-id="@Model.Code" asp-route-date="@Model.UserSummaries[i].Month.ToDateString()" form="form-@i">Zatwierdź</button>
                         }

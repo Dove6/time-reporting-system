@@ -13,5 +13,7 @@ public class Category
     public Project? Project { get; set; }
 
     [Timestamp]
+    [Required]
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public byte[] Timestamp { get; set; }
 }

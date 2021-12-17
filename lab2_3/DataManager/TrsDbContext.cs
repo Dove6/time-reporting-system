@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Trs.Models.DomainModels;
 
 namespace Trs.DataManager;
@@ -16,6 +17,22 @@ public class TrsDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // source: https://stackoverflow.com/questions/52684458/updating-entity-in-ef-core-application-with-sqlite-gives-dbupdateconcurrencyexce
+        if (Database.IsSqlite())
+        {
+            var timestampProperties = modelBuilder.Model
+                .GetEntityTypes()
+                .SelectMany(t => t.GetProperties())
+                .Where(p => p.ClrType == typeof(byte[])
+                            && p.ValueGenerated == ValueGenerated.OnAddOrUpdate
+                            && p.IsConcurrencyToken);
+
+            foreach (var property in timestampProperties)
+            {
+                property.SetDefaultValueSql("randomblob(8)");
+            }
+        }
+
         modelBuilder.Entity<AcceptedTime>()
             .HasKey(nameof(Models.DomainModels.AcceptedTime.ReportId),
                 nameof(Models.DomainModels.AcceptedTime.ProjectCode));

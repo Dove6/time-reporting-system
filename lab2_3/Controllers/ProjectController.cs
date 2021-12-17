@@ -62,7 +62,8 @@ public class ProjectController : BaseController
                 Username = x.Owner.Name,
                 Month = x.Month,
                 DeclaredTime = x.ReportEntries.Where(y => y.ProjectCode == project.Code).Sum(y => y.Time),
-                AcceptedTime = acceptedSummary?.Time
+                AcceptedTime = acceptedSummary?.Time,
+                Timestamp = (acceptedSummary != null) ? Convert.ToBase64String(acceptedSummary.Timestamp) : null
             };
         }).ToList();
         projectWithUsersModel.BudgetLeft = projectWithUsersModel.Budget - userSummaries.Sum(x => x.AcceptedTime ?? 0);
@@ -140,7 +141,7 @@ public class ProjectController : BaseController
     }
 
     [HttpPost]
-    public IActionResult UpdateAcceptedTime(string id, string username, int? acceptedTime)
+    public IActionResult UpdateAcceptedTime(string id, string username, int? acceptedTime, byte[] timestamp)
     {
         var project = DataManager.FindProjectByCode(id);
         if (project == null)

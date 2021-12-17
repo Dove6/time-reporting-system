@@ -21,4 +21,7 @@ public class ProjectWithUserSummaryEntry
     [Display(Name = "Zaakceptowany czas pracy (w minutach)", Prompt = "Uzupełnij...")]
     [ValidateNever]
     public int? AcceptedTime { get; set; }
+
+    [ValidateNever]
+    public string? Timestamp { get; set; }
 }

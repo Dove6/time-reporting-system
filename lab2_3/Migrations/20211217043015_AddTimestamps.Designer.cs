@@ -11,7 +11,7 @@ using Trs.DataManager;
 namespace Trs.Migrations
 {
     [DbContext(typeof(TrsDbContext))]
-    [Migration("20211217034537_AddTimestamps")]
+    [Migration("20211217043015_AddTimestamps")]
     partial class AddTimestamps
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

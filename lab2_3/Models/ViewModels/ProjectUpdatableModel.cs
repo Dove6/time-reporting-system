@@ -16,4 +16,6 @@ public class ProjectUpdatableModel
     [Display(Name = "Kategorie")]
     [DataType(DataType.MultilineText)]
     public string? Categories { get; set; }
+
+    public byte[] Timestamp { get; set; }
 }

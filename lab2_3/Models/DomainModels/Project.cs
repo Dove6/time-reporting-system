@@ -22,5 +22,7 @@ public class Project
     public ICollection<AcceptedTime>? AcceptedTime { get; set; }
 
     [Timestamp]
+    [Required]
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public byte[] Timestamp { get; set; }
 }

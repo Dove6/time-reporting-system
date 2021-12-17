@@ -26,5 +26,7 @@ public class ReportEntry
     public Report? Report { get; set; }
 
     [Timestamp]
+    [Required]
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public byte[] Timestamp { get; set; }
 }
