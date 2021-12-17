@@ -71,8 +71,9 @@
                 </tbody>
             </table>
         </div>
-        @Html.ValidationMessageFor(model => model.Timestamp)
-        <br/>
+        <p class="text-danger">
+            @Html.ValidationMessageFor(model => model.Timestamp)
+        </p>
         <input type="hidden" asp-for="Timestamp"/>
         <button asp-action="Edit" asp-route-id="@id" asp-route-date="@Model.Date.ToDateString()">Zatwierdź</button>
     </form>

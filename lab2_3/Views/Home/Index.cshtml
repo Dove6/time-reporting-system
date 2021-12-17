@@ -53,12 +53,16 @@
                         @Html.DisplayFor(model => entry.Description)
                     </td>
                     <td>
-                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Obejrzyj</a>
+                        <a asp-controller="ReportEntry" asp-action="Show" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">
+                            <button type="button" class="btn btn-primary" style="display: inline-block; margin-right: 5px;">Obejrzyj</button>
+                        </a>
                         @if (!Model.Frozen)
                         {
-                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Zmień</a>
-                            <form method="POST">
-                                <button asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Skasuj</button>
+                            <a asp-controller="ReportEntry" asp-action="Edit" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">
+                                <button type="button" class="btn btn-primary" style="display: inline-block; margin-right: 5px;">Zmień</button>
+                            </a>
+                            <form method="POST" style="display: inline-block; margin-right: 5px;">
+                                <button class="btn btn-primary" asp-controller="ReportEntry" asp-action="Delete" asp-route-date="@date.ToDateString()" asp-route-id="@entry.Id">Skasuj</button>
                             </form>
                         }
                     </td>
@@ -67,12 +71,18 @@
             </tbody>
         </table>
     </div>
-    @if (!Model.Frozen)
-    {
-        <p>
-            <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date.ToDateString()">Dodaj</a>
-        </p>
-    }
+    <p>
+        @if (!Model.Frozen)
+        {
+            <a asp-controller="ReportEntry" asp-action="Add" asp-route-date="@date.ToDateString()">
+                <button type="button" class="btn btn-primary">Dodaj</button>
+            </a>
+        }
+        else
+        {
+            <span>Miesiąc został zatwierdzony, modyfikacja nie jest dłużej możliwa.</span>
+        }
+    </p>
     <p>
         <strong>Podsumowanie dzienne</strong>
     </p>
@@ -89,7 +99,9 @@
                 </td>
             </tr>
         }
-        <tr><td></td><td></td></tr>
+        <tr>
+            <td></td><td></td>
+        </tr>
         <tr>
             <td>
                 Razem
