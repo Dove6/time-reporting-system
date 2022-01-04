@@ -3,10 +3,15 @@ import { Collapse, Container, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLi
 import { Link } from 'react-router-dom';
 import './NavMenu.css';
 
-export class NavMenu extends Component {
+type NavMenuProps = {};
+type NavMenuState = {
+  collapsed: boolean;
+};
+
+export class NavMenu extends Component<NavMenuProps, NavMenuState> {
   static displayName = NavMenu.name;
 
-  constructor (props) {
+  constructor (props: NavMenuProps) {
     super(props);
 
     this.toggleNavbar = this.toggleNavbar.bind(this);
