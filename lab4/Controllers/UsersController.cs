@@ -8,11 +8,11 @@ using Trs.Models.ViewModels;
 namespace Trs.Controllers;
 
 [Route("[controller]")]
-public class UserController : BaseController
+public class UsersController : BaseController
 {
-    private ILogger<UserController> _logger;
+    private ILogger<UsersController> _logger;
 
-    public UserController(IDataManager dataManager, IMapper mapper, ILogger<UserController> logger)
+    public UsersController(IDataManager dataManager, IMapper mapper, ILogger<UsersController> logger)
         : base(dataManager, mapper)
     {
         _logger = logger;

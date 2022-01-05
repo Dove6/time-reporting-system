@@ -11,11 +11,11 @@ namespace Trs.Controllers;
 
 [ForLoggedInOnly]
 [Route("[controller]")]
-public class ProjectController : BaseController
+public class ProjectsController : BaseController
 {
-    private ILogger<ProjectController> _logger;
+    private ILogger<ProjectsController> _logger;
 
-    public ProjectController(IDataManager dataManager, IMapper mapper, ILogger<ProjectController> logger)
+    public ProjectsController(IDataManager dataManager, IMapper mapper, ILogger<ProjectsController> logger)
         : base(dataManager, mapper)
     {
         _logger = logger;

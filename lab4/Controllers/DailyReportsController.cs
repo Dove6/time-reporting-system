@@ -11,11 +11,11 @@ namespace Trs.Controllers;
 
 [ForLoggedInOnly]
 [Route("[controller]")]
-public class DailyReportController : BaseController
+public class DailyReportsController : BaseController
 {
-    private ILogger<DailyReportController> _logger;
+    private ILogger<DailyReportsController> _logger;
 
-    public DailyReportController(IDataManager dataManager, IMapper mapper, ILogger<DailyReportController> logger)
+    public DailyReportsController(IDataManager dataManager, IMapper mapper, ILogger<DailyReportsController> logger)
         : base(dataManager, mapper)
     {
         _logger = logger;

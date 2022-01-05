@@ -12,11 +12,11 @@ namespace Trs.Controllers;
 
 [ForLoggedInOnly]
 [Route("[controller]")]
-public class ReportEntryController : BaseController
+public class ReportEntriesController : BaseController
 {
-    private ILogger<ReportEntryController> _logger;
+    private ILogger<ReportEntriesController> _logger;
 
-    public ReportEntryController(IDataManager dataManager, IMapper mapper, ILogger<ReportEntryController> logger)
+    public ReportEntriesController(IDataManager dataManager, IMapper mapper, ILogger<ReportEntriesController> logger)
         : base(dataManager, mapper)
     {
         _logger = logger;
