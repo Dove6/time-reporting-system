@@ -167,6 +167,7 @@ public class DbDataManager : IDataManager
 
     public void DeleteReportEntryById(int reportEntryId)
     {
+        // TODO: Throw if report has been frozen
         var foundReportEntry = _dbContext.ReportEntries
             .FirstOrDefault(x => x.Id == reportEntryId);
         if (foundReportEntry == null)

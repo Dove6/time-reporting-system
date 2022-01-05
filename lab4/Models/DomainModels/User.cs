@@ -15,6 +15,4 @@ public class User
 
     public ICollection<Report>? Reports { get; set; }
     public ICollection<Project>? Projects { get; set; }
-
-    [DefaultValue(5)] public int TestInt { get; set; } = 5;
 }

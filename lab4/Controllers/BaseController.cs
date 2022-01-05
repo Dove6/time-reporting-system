@@ -1,15 +1,13 @@
-﻿using System.Globalization;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Trs.Controllers.Attributes;
-using Trs.Controllers.Constants;
 using Trs.DataManager;
-using Trs.Extensions;
 using Trs.Models.DomainModels;
 
 namespace Trs.Controllers;
 
+[ApiController]
 public abstract class BaseController : Controller
 {
     protected readonly IDataManager DataManager;
@@ -48,17 +46,6 @@ public abstract class BaseController : Controller
         }
     }
 
-    private DateTime _requestedDate;
-    protected DateTime RequestedDate
-    {
-        get => _requestedDate;
-        private set
-        {
-            _requestedDate = value.Date;
-            ViewData[DateViewDataKey] = _requestedDate;
-        }
-    }
-
     protected BaseController(IDataManager dataManager, IMapper mapper)
     {
         DataManager = dataManager;
@@ -89,25 +76,15 @@ public abstract class BaseController : Controller
         return RedirectToAction(actionName, controllerName, routeValues);
     }
 
-    private DateTime ParseRouteDate()
-    {
-        if (Request.Query.TryGetValue(DateQueryKey, out var dateRouteValue) && (string)dateRouteValue != null)
-            if (DateTime.TryParseExact((string)dateRouteValue, DateTimeExtensions.DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
-                return parsedDate;
-        return DateTime.Today;
-    }
-
     public override void OnActionExecuting(ActionExecutingContext filterContext)
     {
         if (Request.Cookies.TryGetValue(UsernameCookieKey, out var username))
             LoggedInUser = DataManager.FindUserByName(username!);
 
         if (LoggedInUser == null && filterContext.ActionDescriptor.EndpointMetadata.OfType<ForLoggedInOnlyAttribute>().Any())
-            filterContext.Result = RedirectToActionWithError("NotLoggedIn", "Home", ErrorMessages.HasToBeLoggedIn);
+            filterContext.Result = Unauthorized();
         if (LoggedInUser != null && filterContext.ActionDescriptor.EndpointMetadata.OfType<ForNotLoggedInOnlyAttribute>().Any())
-            filterContext.Result = RedirectToActionWithError("Index", "Home", ErrorMessages.MustNotBeLoggedIn);
-
-        RequestedDate = ParseRouteDate();
+            filterContext.Result = Forbid();
 
         if (TempData.ContainsKey(ErrorTempDataKey))
             ModelState.AddModelError(ErrorModelStateKey, (string)TempData[ErrorTempDataKey]!);

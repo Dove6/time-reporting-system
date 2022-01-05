@@ -1,21 +1,17 @@
-﻿using System;
-using System.Diagnostics;
-using System.Text.Json;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Trs.Controllers.Attributes;
 using Trs.Controllers.Constants;
 using Trs.DataManager;
 using Trs.DataManager.Exceptions;
-using Trs.Extensions;
 using Trs.Models.DomainModels;
 using Trs.Models.ViewModels;
 
 namespace Trs.Controllers;
 
 [ForLoggedInOnly]
+[Route("[controller]")]
 public class ReportEntryController : BaseController
 {
     private ILogger<ReportEntryController> _logger;
@@ -26,50 +22,27 @@ public class ReportEntryController : BaseController
         _logger = logger;
     }
 
+    [HttpGet]
+    [Route("{id}")]
     public IActionResult Show(int id)
     {
         var reportEntry = DataManager.FindReportEntryById(id, x => x
             .Include(y => y.Category));
         if (reportEntry == null)
-            return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
-        return View(Mapper.Map<ReportEntryModel>(reportEntry));
+            return NotFound();
+        return Ok(Mapper.Map<ReportEntryModel>(reportEntry));
     }
 
-    private void FillSelectListsInEditingModel(ReportEntryForEditingModel editingModel, string projectCode)
+    [HttpPatch]
+    [Route("{id}")]
+    public IActionResult Edit(int id, [FromBody] ReportEntryModel reportEntry)
     {
-        var project = DataManager.FindProjectByCode(projectCode, x => x
-            .Include(y => y.Categories));
-        var categoryCodes = project?.Categories.Select(y => new SelectListItem(y.Code, y.Code)).ToList();
-        editingModel.CategorySelectList = categoryCodes ?? new List<SelectListItem>();
-    }
-
-    public IActionResult Edit(int id)
-    {
-        if (DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate).Frozen)
-            return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
-        var reportEntry = DataManager.FindReportEntryById(id, q => q
-            .Include(qn => qn.Category));
-        if (reportEntry == null)
-            return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
-        var model = Mapper.Map<ReportEntryForEditingModel>(reportEntry);
-        FillSelectListsInEditingModel(model, reportEntry.ProjectCode);
-        return View(model);
-    }
-
-    [HttpPost]
-    public IActionResult Edit(int id, ReportEntryModel reportEntry)
-    {
-        if (!ModelState.IsValid)
-        {
-            var editingModel = Mapper.Map<ReportEntryForEditingModel>(reportEntry);
-            FillSelectListsInEditingModel(editingModel, reportEntry.Code);
-            return View(editingModel);
-        }
-        if (DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate).Frozen)
-            return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
-        var updatedReportEntry = DataManager.FindReportEntryById(id);
+        var updatedReportEntry = DataManager.FindReportEntryById(id, x => x
+            .Include(y => y.Report));
         if (updatedReportEntry == null)
-            return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
+            return NotFound();
+        if (updatedReportEntry.Report!.Frozen)
+            return Forbid();
         var category = DataManager.FindCategoryByProjectCodeAndCode(reportEntry.Code, reportEntry.Subcode);
         updatedReportEntry.CategoryCode = category?.Code;
         updatedReportEntry.Time = reportEntry.Time;
@@ -78,7 +51,7 @@ public class ReportEntryController : BaseController
         try
         {
             DataManager.UpdateReportEntry(updatedReportEntry);
-            return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
+            return Ok();
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -86,41 +59,16 @@ public class ReportEntryController : BaseController
             var newTimestamp = DataManager.FindReportEntryById(id)!.Timestamp;
             var returnModel = Mapper.Map<ReportEntryForEditingModel>(updatedReportEntry);
             returnModel.Timestamp = newTimestamp;
-            FillSelectListsInEditingModel(returnModel, reportEntry.Code);
-            ModelState.AddModelError(nameof(reportEntry.Timestamp), ErrorMessages.ConcurrencyError);
-            return View(returnModel);
+            return Conflict(returnModel);
         }
-    }
-
-    private void FillSelectListsInAddingModel(ReportEntryForAddingModel addingModel)
-    {
-        var availableProjects = DataManager.GetAllProjects(x => x
-            .Include(y => y.Categories)
-            .Where(y => y.Active));
-        var projectCodes = availableProjects.Select(x => new SelectListItem( $"{x.Name} ({x.Code})", x.Code)).ToList();
-        var categoryCodes = availableProjects.ToDictionary(x => x.Code,
-            x => x.Categories.Select(y => new SelectListItem(y.Code, y.Code)).ToList());
-        addingModel.ProjectSelectList = projectCodes;
-        addingModel.ProjectCategorySelectList = categoryCodes;
-    }
-
-    public IActionResult Add()
-    {
-        if (DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate).Frozen)
-            return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
-        var model = new ReportEntryForAddingModel { Date = RequestedDate };
-        FillSelectListsInAddingModel(model);
-        return View(model);
     }
 
     [HttpPost]
     public IActionResult Add(ReportEntryModel reportEntry)
     {
-        if (!ModelState.IsValid)
-            goto InvalidModelState;
         var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, reportEntry.Date);
         if (report.Frozen)
-            return RedirectToActionWithError("Index", "Home", new { Date = reportEntry.Date.ToDateString() }, ErrorMessages.GetReportFrozenMessage(reportEntry.Date.ToMonthString()));
+            return Forbid();
         var mappedReport = Mapper.Map<ReportEntry>(reportEntry);
         mappedReport.ReportId = report.Id;
         var project = DataManager.FindProjectByCode(reportEntry.Code);
@@ -135,7 +83,7 @@ public class ReportEntryController : BaseController
         }
         if (!ModelState.IsValid)
             goto InvalidModelState;
-        mappedReport.ProjectCode = project.Code;
+        mappedReport.ProjectCode = project!.Code;
         if (!string.IsNullOrEmpty(reportEntry.Subcode))
         {
             var category = DataManager.FindCategoryByProjectCodeAndCode(reportEntry.Code, reportEntry.Subcode);
@@ -158,33 +106,25 @@ public class ReportEntryController : BaseController
             goto InvalidModelState;
 
         DataManager.AddReportEntry(mappedReport);
-        return RedirectToAction("Index", "Home", new { Date = reportEntry.Date.ToDateString() });
+        return Ok();
 
         InvalidModelState:
         var addingModel = Mapper.Map<ReportEntryForAddingModel>(reportEntry);
-        FillSelectListsInAddingModel(addingModel);
-        return View(addingModel);
+        return BadRequest(addingModel);
     }
 
-    [HttpPost]
+    [HttpDelete]
+    [Route("{id}")]
     public IActionResult Delete(int id)
     {
-        if (DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, RequestedDate).Frozen)
-            return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportFrozenMessage(RequestedDate.ToMonthString()));
         try
         {
             DataManager.DeleteReportEntryById(id);
         }
         catch (NotFoundException)
         {
-            return RedirectToActionWithError("Index", "Home", new { Date = RequestedDate.ToDateString() }, ErrorMessages.GetReportEntryNotFoundMessage(RequestedDate, id));
+            return NotFound();
         }
-        return RedirectToAction("Index", "Home", new { Date = RequestedDate.ToDateString() });
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return Ok();
     }
 }

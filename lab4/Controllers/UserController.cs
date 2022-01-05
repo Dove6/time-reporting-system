@@ -1,15 +1,13 @@
-﻿using System.Diagnostics;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Trs.Controllers.Attributes;
-using Trs.Controllers.Constants;
 using Trs.DataManager;
 using Trs.Models.DomainModels;
 using Trs.Models.ViewModels;
 
 namespace Trs.Controllers;
 
+[Route("[controller]")]
 public class UserController : BaseController
 {
     private ILogger<UserController> _logger;
@@ -21,77 +19,49 @@ public class UserController : BaseController
     }
 
     [ForLoggedInOnly]
-    public IActionResult Index()
+    public IActionResult Current()
     {
-        return View();
-    }
-
-    private void FillSelectListsInLoginModel(UserSelectListModel loginModel)
-    {
-        var usernames = DataManager.GetAllUsers().Select(x => new SelectListItem(x.Name, x.Name)).ToList();
-        loginModel.Usernames = usernames;
+        return Ok(LoggedInUser);
     }
 
     [ForNotLoggedInOnly]
-    public IActionResult Login()
+    [HttpGet]
+    public IActionResult Index()
     {
-        var model = new UserSelectListModel();
-        FillSelectListsInLoginModel(model);
-        return View(model);
+        var users = DataManager.GetAllUsers();
+        return Ok(Mapper.Map<List<UserModel>>(users));
     }
 
     [ForNotLoggedInOnly]
     [HttpPost]
-    public IActionResult Login(UserModel user)
+    [Route("login")]
+    public IActionResult Login([FromBody] UserModel user)
     {
-        if (!ModelState.IsValid)
-            goto InvalidModelState;
         var foundUser = DataManager.FindUserByName(user.Name);
         if (foundUser == null)
-            ModelState.AddModelError(nameof(user.Name), ErrorMessages.GetUserNotFoundMessage(user.Name));
-        if (!ModelState.IsValid)
-            goto InvalidModelState;
+            return NotFound();
         LoggedInUser = foundUser;
-        return RedirectToAction("Index", "Home");
-
-        InvalidModelState:
-        var loginModel = Mapper.Map<UserSelectListModel>(user);
-        FillSelectListsInLoginModel(loginModel);
-        return View(loginModel);
+        return Ok();
     }
 
     [ForLoggedInOnly]
     [HttpPost]
+    [Route("logout")]
     public IActionResult Logout()
     {
         LoggedInUser = null;
-        return RedirectToAction("NotLoggedIn", "Home");
-    }
-
-    [ForNotLoggedInOnly]
-    public IActionResult Register()
-    {
-        return View();
+        return Ok();
     }
 
     [ForNotLoggedInOnly]
     [HttpPost]
-    public IActionResult Register(UserModel user)
+    [Route("register")]
+    public IActionResult Register([FromBody] UserModel user)
     {
-        if (!ModelState.IsValid)
-            return Register();
         var existingUser = DataManager.FindUserByName(user.Name);
         if (existingUser != null)
-            ModelState.AddModelError(nameof(user.Name), ErrorMessages.GetUserAlreadyExistingMessage(user.Name));
-        if (!ModelState.IsValid)
-            return Register();
+            return Conflict();
         DataManager.AddUser(new User { Name = user.Name });
         return Login(user);
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

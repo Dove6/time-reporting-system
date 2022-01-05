@@ -1,17 +1,16 @@
-﻿using System.Diagnostics;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Trs.Controllers.Attributes;
 using Trs.Controllers.Constants;
 using Trs.DataManager;
-using Trs.Extensions;
 using Trs.Models.DomainModels;
 using Trs.Models.ViewModels;
 
 namespace Trs.Controllers;
 
 [ForLoggedInOnly]
+[Route("[controller]")]
 public class ProjectController : BaseController
 {
     private ILogger<ProjectController> _logger;
@@ -22,6 +21,7 @@ public class ProjectController : BaseController
         _logger = logger;
     }
 
+    [HttpGet]
     public IActionResult Index()
     {
         var userProjectList = DataManager.FindProjectsByManager(LoggedInUser!.Name, q => q
@@ -40,15 +40,17 @@ public class ProjectController : BaseController
                 return mappedProject;
             }).ToList()
         };
-        return View(projectListModel);
+        return Ok(projectListModel);
     }
 
+    [HttpGet]
+    [Route("{id}")]
     public IActionResult Show(string id)
     {
         var project = DataManager.FindProjectByCode(id, q => q
             .Include(qn => qn.Categories));
         if (project == null)
-            return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
+            return NotFound();
         var projectWithUsersModel = Mapper.Map<ProjectWithUserSummaryModel>(project);
         var reports = DataManager.FindReportsByProject(id, x => x
             .Include(y => y.AcceptedTime)
@@ -68,31 +70,22 @@ public class ProjectController : BaseController
         }).ToList();
         projectWithUsersModel.BudgetLeft = projectWithUsersModel.Budget - userSummaries.Sum(x => x.AcceptedTime ?? 0);
         projectWithUsersModel.UserSummaries = userSummaries;
-        return View(projectWithUsersModel);
+        return Ok(projectWithUsersModel);
     }
 
-    public IActionResult Edit(string id)
+    [HttpPatch]
+    [Route("{id}")]
+    public IActionResult Edit(string id, [FromBody] ProjectModel projectModel)
     {
-        var project = DataManager.FindProjectByCode(id, q => q
-            .Include(qn => qn.Manager)
-            .Include(qn => qn.Categories));
-        if (project == null)
-            return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
-        var projectModel = Mapper.Map<ProjectModel>(project);
-        return View(projectModel);
-    }
-
-    [HttpPost]
-    public IActionResult Edit(ProjectModel projectModel)
-    {
-        if (!ModelState.IsValid)
-            return View(projectModel);
         var inputProject = Mapper.Map<Project>(projectModel);
         var modifiedProject = DataManager.FindProjectByCode(projectModel.Code, q => q
             .Include(qn => qn.Categories));
         modifiedProject.Timestamp = projectModel.Timestamp;
         if (modifiedProject == null)
-            return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(projectModel.Code));
+        {
+            ModelState.AddModelError(nameof(projectModel.Code), ErrorMessages.GetProjectNotFoundMessage(projectModel.Code));
+            return BadRequest();
+        }
         modifiedProject.Budget = inputProject.Budget;
         var addedCategories = inputProject.Categories.Select(x => x.Code)
             .Except(modifiedProject.Categories.Select(x => x.Code));
@@ -108,76 +101,36 @@ public class ProjectController : BaseController
             ModelState.Clear();
             projectModel.Timestamp = DataManager.FindProjectByCode(projectModel.Code)!.Timestamp;
             ModelState.AddModelError(nameof(projectModel.Timestamp), ErrorMessages.ConcurrencyError);
-            return View(projectModel);
+            return Conflict(projectModel);
         }
-        return RedirectToAction("Index");
-    }
-
-    public IActionResult Add()
-    {
-        return View(new ProjectModel());
+        return Ok();
     }
 
     [HttpPost]
-    public IActionResult Add(ProjectModel projectModel)
+    public IActionResult Add([FromBody] ProjectModel projectModel)
     {
-        if (!ModelState.IsValid)
-            return View(projectModel);
         var duplicatedProject = DataManager.FindProjectByCode(projectModel.Code);
         if (duplicatedProject != null)
+        {
             ModelState.AddModelError(nameof(projectModel.Code), ErrorMessages.GetProjectAlreadyExistingMessage(projectModel.Code));
-        if (!ModelState.IsValid)
-            return View(projectModel);
+            return BadRequest();
+        }
         projectModel.Active = true;
         var project = Mapper.Map<Project>(projectModel);
         project.ManagerId = LoggedInUser!.Id;
         DataManager.AddProject(project);
-        return RedirectToAction("Index");
+        return Ok();
     }
 
     [HttpPost]
+    [Route("{id}/close")]
     public IActionResult Close(string id)
     {
         var project = DataManager.FindProjectByCode(id);
         if (project == null)
-            return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
+            return NotFound();
         project.Active = false;
         DataManager.UpdateProject(project);
-        return RedirectToAction("Index");
-    }
-
-    [HttpPost]
-    public IActionResult UpdateAcceptedTime(string id, string username, int? acceptedTime, byte[] timestamp)
-    {
-        var project = DataManager.FindProjectByCode(id);
-        if (project == null)
-            return RedirectToActionWithError("Index", ErrorMessages.GetProjectNotFoundMessage(id));
-        switch (acceptedTime)
-        {
-            case null:
-                return RedirectToAction("Show", new { Id = id });
-            case < 0:
-                return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.AcceptedTimeNegative);
-        }
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(username, RequestedDate, q => q
-            .Include(qn => qn.ReportEntries));
-        if (project.ManagerId != LoggedInUser!.Id || report.ReportEntries.All(x => x.ProjectCode != id))
-            return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.GetNoAccessToAcceptedTimeMessage(username, RequestedDate.ToMonthString()));
-        var accepted = new AcceptedTime { ProjectCode = id, Time = acceptedTime.Value, ReportId = report.Id, Timestamp = timestamp };
-        try
-        {
-            DataManager.SetAcceptedTime(accepted);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return RedirectToActionWithError("Show", new { Id = id }, ErrorMessages.ConcurrencyError);
-        }
-        return RedirectToAction("Show", new { Id = id });
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return Ok();
     }
 }
