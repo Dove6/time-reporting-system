@@ -55,15 +55,16 @@ public class ProjectsController : BaseController
         var reports = DataManager.FindReportsByProject(id, x => x
             .Include(y => y.AcceptedTime)
             .Include(y => y.Owner)
-            .Include(y => y.ReportEntries));
+            .Include(y => y.Entries));
         var userSummaries = reports.Where(x => x.Frozen).Select(x =>
         {
             var acceptedSummary = x.AcceptedTime.FirstOrDefault(y => y.ProjectCode == project.Code);
             return new ProjectWithUserSummaryEntry
             {
                 Username = x.Owner.Name,
-                Month = x.Month,
-                DeclaredTime = x.ReportEntries.Where(y => y.ProjectCode == project.Code).Sum(y => y.Time),
+                // TODO: Month = x.Month,
+                Month = DateTime.Today,
+                DeclaredTime = x.Entries.Where(y => y.ProjectCode == project.Code).Sum(y => y.Time),
                 AcceptedTime = acceptedSummary?.Time,
                 Timestamp = acceptedSummary?.Timestamp
             };

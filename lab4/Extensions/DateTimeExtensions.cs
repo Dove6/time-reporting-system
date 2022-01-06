@@ -6,6 +6,7 @@ public static class DateTimeExtensions
 {
     public const string DateFormat = "yyyy-MM-dd";
     public const string MonthFormat = "yyyy-MM";
+    public const string DayOfMonthFormat = "dd";
 
     public static DateTime TrimToMonth(this DateTime dateTime) =>
         new(dateTime.Year, dateTime.Month, 1);

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Globalization;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Trs.DataManager.Exceptions;
 using Trs.Extensions;
@@ -111,9 +112,8 @@ public class DbDataManager : IDataManager
     public byte[] GetTimestampForProject(Project project) =>
         _dbContext.Entry(project).Entity.Timestamp;
 
-    public Report FindOrCreateReportByUsernameAndMonth(string username, DateTime month, Func<IQueryable<Report>, IQueryable<Report>>? modifierFunc = null)
+    public Report FindOrCreateReportByUsernameAndMonth(string username, string month, Func<IQueryable<Report>, IQueryable<Report>>? modifierFunc = null)
     {
-        month = month.TrimToMonth();
         var foundOwner = _dbContext.Users
             .FirstOrDefault(x => x.Name == username);
         if (foundOwner == null)
@@ -139,18 +139,18 @@ public class DbDataManager : IDataManager
         if (modifierFunc != null)
             query = modifierFunc(query);
         var foundReports = query.AsNoTracking()
-            .Include(x => x.ReportEntries)!
+            .Include(x => x.Entries)!
                 .ThenInclude(x => x.Project)
-            .Where(x => x.ReportEntries!.Any(y => y.ProjectCode == projectCode));
+            .Where(x => x.Entries!.Any(y => y.ProjectCode == projectCode));
         return foundReports
             .Distinct()
             .ToList();
     }
 
-    public void FreezeReportById(int reportId)
+    public void FreezeReportByOwnerIdAndMonth(int ownerId, string month)
     {
         var foundReport = _dbContext.Reports
-            .FirstOrDefault(x => x.Id == reportId);
+            .FirstOrDefault(x => x.OwnerId == ownerId && x.Month == month);
         if (foundReport == null)
             throw new NotFoundException();
         foundReport.Frozen = true;
@@ -185,19 +185,21 @@ public class DbDataManager : IDataManager
             .FirstOrDefault(x => x.Id == reportEntryId);
     }
 
-    public List<ReportEntry> FindReportEntriesByUsernameAndDay(string username, DateTime day, Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null)
+    public List<ReportEntry> FindReportEntriesByUsernameAndDate(string username, DateTime date, Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null)
     {
+        var month = date.ToString(DateTimeExtensions.MonthFormat, DateTimeFormatInfo.InvariantInfo);
+        var day = date.ToString(DateTimeExtensions.DayOfMonthFormat, DateTimeFormatInfo.InvariantInfo);
         var query = _dbContext.ReportEntries.AsQueryable();
         if (modifierFunc != null)
             query = modifierFunc(query);
         return query.AsNoTracking()
             .Include(x => x.Report)
                 .ThenInclude(x => x!.Owner)
-            .Where(x => x.Date == day.Date && x.Report!.Owner!.Name == username)
+            .Where(x => x.Report!.Owner!.Name == username && x.ReportMonth == month && x.DayOfMonth == day)
             .ToList();
     }
 
-    public List<ReportEntry> FindReportEntriesByUsernameAndMonth(string username, DateTime month, Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null)
+    public List<ReportEntry> FindReportEntriesByUsernameAndMonth(string username, string month, Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null)
     {
         var query = _dbContext.ReportEntries.AsQueryable();
         if (modifierFunc != null)
@@ -205,7 +207,7 @@ public class DbDataManager : IDataManager
         return query.AsNoTracking()
             .Include(x => x.Report)
                 .ThenInclude(x => x!.Owner)
-            .Where(x => x.Date.TrimToMonth() == month.TrimToMonth() && x.Report!.Owner!.Name == username)
+            .Where(x => x.Report!.Owner!.Name == username && x.ReportMonth == month)
             .ToList();
     }
 
@@ -216,20 +218,21 @@ public class DbDataManager : IDataManager
         updatedReportEntry.State = EntityState.Detached;
     }
 
-    public AcceptedTime? FindAcceptedTimeByReportIdAndProjectCode(int reportId, string projectCode, Func<IQueryable<AcceptedTime>, IQueryable<AcceptedTime>>? modifierFunc = null)
+    public AcceptedTime? FindAcceptedTimeByOwnerIdAndReportMonthAndProjectCode(int ownerId, string month, string projectCode, Func<IQueryable<AcceptedTime>, IQueryable<AcceptedTime>>? modifierFunc = null)
     {
         var query = _dbContext.AcceptedTime.AsQueryable();
         if (modifierFunc != null)
             query = modifierFunc(query);
         return query.AsNoTracking()
-            .FirstOrDefault(x => x.ReportId == reportId && x.ProjectCode == projectCode);
+            .FirstOrDefault(x => x.OwnerId == ownerId && x.ReportMonth == month && x.ProjectCode == projectCode);
     }
 
     public void SetAcceptedTime(AcceptedTime acceptedTime)
     {
         var foundAccepted = _dbContext.AcceptedTime
             .AsNoTracking()
-            .FirstOrDefault(x => x.ReportId == acceptedTime.ReportId && x.ProjectCode == acceptedTime.ProjectCode);
+            .FirstOrDefault(x => x.OwnerId == acceptedTime.OwnerId && x.ReportMonth == acceptedTime.ReportMonth
+                && x.ProjectCode == acceptedTime.ProjectCode);
         if (foundAccepted != null)
             _dbContext.AcceptedTime.Update(acceptedTime);
         else

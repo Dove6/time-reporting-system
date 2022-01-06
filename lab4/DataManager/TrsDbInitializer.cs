@@ -1,5 +1,4 @@
-﻿using Trs.Extensions;
-using Trs.Models.DomainModels;
+﻿using Trs.Models.DomainModels;
 
 namespace Trs.DataManager;
 
@@ -36,8 +35,10 @@ public static class TrsDbInitializer
 
         var categories = new List<Category>
         {
+            new() { Code = "", ProjectCode = "ARGUS-123" },
             new() { Code = "database", ProjectCode = "ARGUS-123" },
-            new() { Code = "other", ProjectCode = "ARGUS-123" }
+            new() { Code = "other", ProjectCode = "ARGUS-123" },
+            new() { Code = "", ProjectCode = "OTHER" }
         };
         foreach (var category in categories)
             dbContext.Categories.Add(category);
@@ -45,7 +46,7 @@ public static class TrsDbInitializer
 
         var reports = new List<Report>
         {
-            new() { Id = 1, Month = new DateTime(2021, 11, 1).TrimToMonth(), Frozen = true, OwnerId = 3}
+            new() { OwnerId = 3, Month = "2021-11", Frozen = true }
         };
         foreach (var report in reports)
             dbContext.Reports.Add(report);
@@ -53,11 +54,11 @@ public static class TrsDbInitializer
 
         var reportEntries = new List<ReportEntry>
         {
-            new() { Id = 1, Date = new DateTime(2021, 11, 7), Time = 45, Description = "data import", ProjectCode = "ARGUS-123", CategoryCode = "database", ReportId = 1},
-            new() { Id = 2, Date = new DateTime(2021, 11, 7), Time = 120, Description = "picie kawy", ProjectCode = "OTHER", ReportId = 1 },
-            new() { Id = 3, Date = new DateTime(2021, 11, 8), Time = 45, Description = "kompilacja", ProjectCode = "ARGUS-123", ReportId = 1 },
-            new() { Id = 4, Date = new DateTime(2021, 11, 8), Time = 120, Description = "office arrangement", ProjectCode = "OTHER", ReportId = 1 },
-            new() { Id = 5, Date = new DateTime(2021, 11, 12), Time = 45, Description = "project meeting", ProjectCode = "ARGUS-123", CategoryCode = "other", ReportId = 1 }
+            new() { Id = 1, DayOfMonth = "07", Time = 45, Description = "data import", ProjectCode = "ARGUS-123", CategoryCode = "database", OwnerId = 3, ReportMonth = "2021-11" },
+            new() { Id = 2, DayOfMonth = "07", Time = 120, Description = "picie kawy", ProjectCode = "OTHER", OwnerId = 3, ReportMonth = "2021-11" },
+            new() { Id = 3, DayOfMonth = "08", Time = 45, Description = "kompilacja", ProjectCode = "ARGUS-123", OwnerId = 3, ReportMonth = "2021-11" },
+            new() { Id = 4, DayOfMonth = "08", Time = 120, Description = "office arrangement", ProjectCode = "OTHER", OwnerId = 3, ReportMonth = "2021-11" },
+            new() { Id = 5, DayOfMonth = "12", Time = 45, Description = "project meeting", ProjectCode = "ARGUS-123", CategoryCode = "other", OwnerId = 3, ReportMonth = "2021-11" }
         };
         foreach (var reportEntry in reportEntries)
             dbContext.ReportEntries.Add(reportEntry);
@@ -65,8 +66,8 @@ public static class TrsDbInitializer
 
         var acceptedTime = new List<AcceptedTime>
         {
-            new() { Time = 100, ReportId = 1, ProjectCode = "ARGUS-123" },
-            new() { Time = 110, ReportId = 1, ProjectCode = "OTHER" }
+            new() { Time = 100, OwnerId = 3, ReportMonth = "2021-11", ProjectCode = "ARGUS-123" },
+            new() { Time = 110, OwnerId = 3, ReportMonth = "2021-11", ProjectCode = "OTHER" }
         };
         foreach (var acceptedTimeEntry in acceptedTime)
             dbContext.AcceptedTime.Add(acceptedTimeEntry);

@@ -13,9 +13,9 @@ public class Project
     [DefaultValue(true)]
     public bool Active { get; set; }
 
-    [ForeignKey(nameof(Manager))]
     public int ManagerId { get; set; }
 
+    [ForeignKey(nameof(ManagerId))]
     public User? Manager { get; set; }
     public ICollection<Category>? Categories { get; set; }
     public ICollection<ReportEntry>? ReportEntries { get; set; }

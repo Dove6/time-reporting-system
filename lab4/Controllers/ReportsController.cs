@@ -23,18 +23,6 @@ public class ReportsController : BaseController
         _logger = logger;
     }
 
-    private DateTime ParseMonthString(string? monthString)
-    {
-        if (!string.IsNullOrEmpty(monthString)
-            && DateTime.TryParseExact(monthString,
-                DateTimeExtensions.MonthFormat,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out var parsedMonth))
-            return parsedMonth;
-        return DateTime.Today.TrimToMonth();
-    }
-
     [HttpGet]
     [Route("{monthString?}")]
     public IActionResult Index(string? monthString)
@@ -47,10 +35,11 @@ public class ReportsController : BaseController
                 DateTimeStyles.None,
                 out month))
             return NotFound();
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, month, x => x
-            .Include(y => y.ReportEntries)
-            .Include(y => y.AcceptedTime));
-        var summaryEntries = report.ReportEntries.GroupBy(x => x.ProjectCode)
+        // TODO: var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, month, x => x
+        //     .Include(y => y.Entries)
+        //     .Include(y => y.AcceptedTime));
+        var report = new Report();
+        var summaryEntries = report.Entries.GroupBy(x => x.ProjectCode)
             .Select(x => new ProjectTimeSummaryEntry
             {
                 ProjectCode = x.Key,
@@ -80,8 +69,9 @@ public class ReportsController : BaseController
                 DateTimeStyles.None,
                 out month))
             return NotFound();
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, month);
-        DataManager.FreezeReportById(report.Id);
+        // TODO: var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, month);
+        var report = new Report();
+        // TODO: DataManager.FreezeReportById(report.Id);
         return Ok();
     }
 
@@ -100,11 +90,13 @@ public class ReportsController : BaseController
         var project = DataManager.FindProjectByCode(code);
         if (project == null)
             return NotFound();
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(username, month, q => q
-            .Include(qn => qn.ReportEntries));
-        if (project.ManagerId != LoggedInUser!.Id || report.ReportEntries.All(x => x.ProjectCode != code))
+        // TODO: var report = DataManager.FindOrCreateReportByUsernameAndMonth(username, month, q => q
+        //     .Include(qn => qn.Entries));
+        var report = new Report();
+        if (project.ManagerId != LoggedInUser!.Id || report.Entries.All(x => x.ProjectCode != code))
             return Forbid();
-        var accepted = new AcceptedTime { ProjectCode = code, Time = acceptedTime, ReportId = report.Id, Timestamp = timestamp };
+        // TODO: var accepted = new AcceptedTime { ProjectCode = code, Time = acceptedTime, ReportId = report.Id, Timestamp = timestamp };
+        var accepted = new AcceptedTime();
         try
         {
             DataManager.SetAcceptedTime(accepted);

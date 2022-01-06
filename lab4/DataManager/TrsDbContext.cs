@@ -17,9 +17,10 @@ public class TrsDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // source: https://stackoverflow.com/questions/52684458/updating-entity-in-ef-core-application-with-sqlite-gives-dbupdateconcurrencyexce
         if (Database.IsSqlite())
         {
+            // source: https://stackoverflow.com/questions/52684458/updating-entity-in-ef-core-application-with-sqlite-gives-dbupdateconcurrencyexce
+            // {
             var timestampProperties = modelBuilder.Model
                 .GetEntityTypes()
                 .SelectMany(t => t.GetProperties())
@@ -31,20 +32,24 @@ public class TrsDbContext : DbContext
             {
                 property.SetDefaultValueSql("randomblob(8)");
             }
+            // }
+
+            modelBuilder.Entity<Report>()
+                .HasCheckConstraint("CK_Report_Month",
+                    "[Month] LIKE '____-__' AND strftime('%s', [Month] || '-01') IS NOT NULL");
+
+            modelBuilder.Entity<ReportEntry>()
+                .HasCheckConstraint("CK_ReportEntry_DayOfMonth",
+                    "[DayOfMonth] LIKE '__' AND strftime('%s', [ReportMonth] || '-' || [DayOfMonth]) IS NOT NULL");
         }
 
         modelBuilder.Entity<AcceptedTime>()
-            .HasKey(nameof(Models.DomainModels.AcceptedTime.ReportId),
-                nameof(Models.DomainModels.AcceptedTime.ProjectCode));
+            .HasKey(e => new { e.ProjectCode, e.OwnerId, e.ReportMonth });
 
         modelBuilder.Entity<Category>()
-            .HasKey(nameof(Category.ProjectCode),
-                nameof(Category.Code));
+            .HasKey(e => new { e.ProjectCode, e.Code });
 
-        modelBuilder.Entity<ReportEntry>()
-            .HasOne(x => x.Category)
-            .WithMany()
-            .HasForeignKey(nameof(ReportEntry.ProjectCode),
-                nameof(ReportEntry.CategoryCode));
+        modelBuilder.Entity<Report>()
+            .HasKey(e => new { e.OwnerId, e.Month });
     }
 }

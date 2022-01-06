@@ -4,7 +4,7 @@ namespace Trs.DataManager;
 
 public interface IDataManager
 {
-    AcceptedTime? FindAcceptedTimeByReportIdAndProjectCode(int reportId, string projectCode,
+    AcceptedTime? FindAcceptedTimeByOwnerIdAndReportMonthAndProjectCode(int ownerId, string month, string projectCode,
         Func<IQueryable<AcceptedTime>, IQueryable<AcceptedTime>>? modifierFunc = null);
 
     void SetAcceptedTime(AcceptedTime acceptedTime);
@@ -29,21 +29,21 @@ public interface IDataManager
 
     byte[] GetTimestampForProject(Project project);
 
-    Report FindOrCreateReportByUsernameAndMonth(string username, DateTime month,
+    Report FindOrCreateReportByUsernameAndMonth(string username, string month,
         Func<IQueryable<Report>, IQueryable<Report>>? modifierFunc = null);
 
     List<Report> FindReportsByProject(string projectCode,
         Func<IQueryable<Report>, IQueryable<Report>>? modifierFunc = null);
 
-    void FreezeReportById(int reportId);
+    void FreezeReportByOwnerIdAndMonth(int ownerId, string month);
 
     ReportEntry? FindReportEntryById(int reportEntryId,
         Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null);
 
-    List<ReportEntry> FindReportEntriesByUsernameAndDay(string username, DateTime day,
+    List<ReportEntry> FindReportEntriesByUsernameAndDate(string username, DateTime date,
         Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null);
 
-    List<ReportEntry> FindReportEntriesByUsernameAndMonth(string username, DateTime month,
+    List<ReportEntry> FindReportEntriesByUsernameAndMonth(string username, string month,
         Func<IQueryable<ReportEntry>, IQueryable<ReportEntry>>? modifierFunc = null);
 
     int AddReportEntry(ReportEntry reportEntry);

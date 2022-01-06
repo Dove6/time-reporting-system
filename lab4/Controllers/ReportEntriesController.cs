@@ -66,11 +66,12 @@ public class ReportEntriesController : BaseController
     [HttpPost]
     public IActionResult Add(ReportEntryModel reportEntry)
     {
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, reportEntry.Date);
+        // TODO: var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, reportEntry.Date);
+        var report = new Report();
         if (report.Frozen)
             return Forbid();
         var mappedReport = Mapper.Map<ReportEntry>(reportEntry);
-        mappedReport.ReportId = report.Id;
+        // TODO: mappedReport.ReportId = report.Id;
         var project = DataManager.FindProjectByCode(reportEntry.Code);
         switch (project)
         {

@@ -1,10 +1,14 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Trs.DataManager;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddDbContext<TrsDbContext>(options => options.UseSqlite("Data Source=storage/trs.db"));
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddControllers();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddScoped<IDataManager>(x => new DbDataManager(x.GetRequiredService<TrsDbContext>(), x.GetRequiredService<IMapper>()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -28,5 +32,8 @@ app.UseRouting();
 
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+
+using (var serviceScope = app.Services.CreateScope())
+    TrsDbInitializer.Initialize(serviceScope.ServiceProvider.GetService<TrsDbContext>()!);
 
 app.Run();

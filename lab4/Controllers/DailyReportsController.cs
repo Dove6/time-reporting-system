@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Trs.Controllers.Attributes;
 using Trs.DataManager;
 using Trs.Extensions;
+using Trs.Models.DomainModels;
 using Trs.Models.ViewModels;
 
 namespace Trs.Controllers;
@@ -33,12 +34,14 @@ public class DailyReportsController : BaseController
                 DateTimeStyles.None,
                 out date))
             return NotFound();
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, date, x => x
-            .Include(y => y.ReportEntries)!
-                .ThenInclude(y => y.Project)
-            .Include(y => y.ReportEntries)!
-                .ThenInclude(y => y.Category));
-        var reportEntries = report.ReportEntries.Where(x => x.Date == date).ToList();
+        var report = new Report();
+        // TODO: var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, date, x => x
+        //     .Include(y => y.Entries)!
+        //         .ThenInclude(y => y.Project)
+        //     .Include(y => y.Entries)!
+        //         .ThenInclude(y => y.Category));
+        // TODO: var reportEntries = report.Entries.Where(x => x.Date == date).ToList();
+        var reportEntries = new List<ReportEntry>();
         return Ok(new DailyReportModel
         {
             Frozen = report.Frozen,

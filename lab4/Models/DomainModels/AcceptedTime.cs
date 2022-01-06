@@ -8,12 +8,15 @@ public class AcceptedTime
     [Range(0, int.MaxValue)]
     public int Time { get; set; }
 
-    [ForeignKey(nameof(Report))]
-    public int ReportId { get; set; }
-    [ForeignKey(nameof(Project))]
     public string ProjectCode { get; set; } = "";
+    public int OwnerId { get; set; }
+    public string ReportMonth { get; set; } = "";
 
+    [ForeignKey(nameof(OwnerId))]
+    public User? Owner { get; set; }
+    [ForeignKey($"{nameof(OwnerId)}, {nameof(ReportMonth)}")]
     public Report? Report { get; set; }
+    [ForeignKey(nameof(ProjectCode))]
     public Project? Project { get; set; }
 
     [Timestamp]
