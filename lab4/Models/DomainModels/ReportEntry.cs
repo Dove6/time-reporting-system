@@ -17,7 +17,7 @@ public class ReportEntry
     public string Description { get; set; } = "";
 
     public string ProjectCode { get; set; } = "";
-    public string? CategoryCode { get; set; }
+    public string CategoryCode { get; set; } = "";
     public int OwnerId { get; set; }
     public string ReportMonth { get; set; } = "";
 

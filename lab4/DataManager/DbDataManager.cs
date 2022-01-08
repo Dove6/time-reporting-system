@@ -65,12 +65,6 @@ public class DbDataManager : IDataManager
         addedProject.State = EntityState.Detached;
     }
 
-    public void DeleteCategory(Category category)
-    {
-        _dbContext.Categories.Remove(category);
-        _dbContext.SaveChanges();
-    }
-
     public Project? FindProjectByCode(string code, Func<IQueryable<Project>, IQueryable<Project>>? modifierFunc = null)
     {
         var query = _dbContext.Projects.AsQueryable();
@@ -139,12 +133,9 @@ public class DbDataManager : IDataManager
         if (modifierFunc != null)
             query = modifierFunc(query);
         var foundReports = query.AsNoTracking()
-            .Include(x => x.Entries)!
-                .ThenInclude(x => x.Project)
+            .Include(x => x.Entries)
             .Where(x => x.Entries!.Any(y => y.ProjectCode == projectCode));
-        return foundReports
-            .Distinct()
-            .ToList();
+        return foundReports.ToList();
     }
 
     public void FreezeReportByOwnerIdAndMonth(int ownerId, string month)
@@ -218,13 +209,14 @@ public class DbDataManager : IDataManager
         updatedReportEntry.State = EntityState.Detached;
     }
 
-    public AcceptedTime? FindAcceptedTimeByOwnerIdAndReportMonthAndProjectCode(int ownerId, string month, string projectCode, Func<IQueryable<AcceptedTime>, IQueryable<AcceptedTime>>? modifierFunc = null)
+    public AcceptedTime? FindAcceptedTimeByUsernameAndReportMonthAndProjectCode(string username, string month, string projectCode, Func<IQueryable<AcceptedTime>, IQueryable<AcceptedTime>>? modifierFunc = null)
     {
         var query = _dbContext.AcceptedTime.AsQueryable();
         if (modifierFunc != null)
             query = modifierFunc(query);
         return query.AsNoTracking()
-            .FirstOrDefault(x => x.OwnerId == ownerId && x.ReportMonth == month && x.ProjectCode == projectCode);
+            .Include(t => t.Owner)
+            .FirstOrDefault(x => x.Owner!.Name == username && x.ReportMonth == month && x.ProjectCode == projectCode);
     }
 
     public void SetAcceptedTime(AcceptedTime acceptedTime)

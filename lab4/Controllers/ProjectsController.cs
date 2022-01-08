@@ -5,7 +5,7 @@ using Trs.Controllers.Attributes;
 using Trs.Controllers.Constants;
 using Trs.DataManager;
 using Trs.Models.DomainModels;
-using Trs.Models.ViewModels;
+using Trs.Models.RestModels;
 
 namespace Trs.Controllers;
 
@@ -22,116 +22,145 @@ public class ProjectsController : BaseController
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public IActionResult GetAll()
     {
-        var userProjectList = DataManager.FindProjectsByManager(LoggedInUser!.Name, q => q
-            .Include(qn => qn.Categories));
-        var projectListModel = new ProjectListModel
-        {
-            Projects = userProjectList.Select(x =>
-            {
-                var mappedProject = Mapper.Map<ProjectModel>(x);
-                var totalAcceptedTime = DataManager.FindReportsByProject(x.Code, q => q
-                        .Include(y => y.AcceptedTime))
-                    .SelectMany(y => y.AcceptedTime)
-                    .Where(y => y.ProjectCode == x.Code)
-                    .Sum(y => y.Time);
-                mappedProject.BudgetLeft = x.Budget - totalAcceptedTime;
-                return mappedProject;
-            }).ToList()
-        };
-        return Ok(projectListModel);
+        var projectList = DataManager.GetAllProjects(q => q
+            .Include(p => p.Categories));
+        return Ok(Mapper.Map<List<ProjectListResponseEntry>>(projectList));
     }
 
     [HttpGet]
-    [Route("{id}")]
-    public IActionResult Show(string id)
+    [Route("managed")]
+    public IActionResult GetManaged()
     {
-        var project = DataManager.FindProjectByCode(id, q => q
-            .Include(qn => qn.Categories));
+        var managedProjectList = DataManager.FindProjectsByManager(LoggedInUser!.Name, q => q
+            .Include(p => p.Categories)
+            .Include(p => p.AcceptedTime));
+        return Ok(Mapper.Map<List<ManagedProjectListResponseEntry>>(managedProjectList));
+    }
+
+    [HttpPut]
+    [Route("{projectCode}")]
+    public IActionResult Put(string projectCode, [FromBody] ProjectCreationRequest creationRequest)
+    {
+        var duplicatedProject = DataManager.FindProjectByCode(projectCode);
+        if (duplicatedProject != null)
+            return Conflict(ErrorMessages.GetProjectAlreadyExistingMessage(projectCode));
+        var createdProject = Mapper.Map<Project>(creationRequest);
+        createdProject.Code = projectCode;
+        createdProject.Active = true;
+        createdProject.ManagerId = LoggedInUser!.Id;
+        DataManager.AddProject(createdProject);
+        Mapper.Map<List<Category>>(creationRequest.Categories.Prepend(new CategoryModel { Code = "" }))
+            .ForEach(c =>
+            {
+                c.ProjectCode = projectCode;
+                DataManager.AddCategory(c);
+            });
+        return CreatedAtAction(nameof(Get), new { projectCode });
+    }
+
+    [HttpGet]
+    [Route("{projectCode}")]
+    public IActionResult Get(string projectCode)
+    {
+        var project = DataManager.FindProjectByCode(projectCode, q => q
+            .Include(p => p.Categories));
         if (project == null)
             return NotFound();
-        var projectWithUsersModel = Mapper.Map<ProjectWithUserSummaryModel>(project);
-        var reports = DataManager.FindReportsByProject(id, x => x
-            .Include(y => y.AcceptedTime)
-            .Include(y => y.Owner)
-            .Include(y => y.Entries));
+        if (project.ManagerId != LoggedInUser!.Id)
+            return Forbid();
+        var projectDetails = Mapper.Map<ProjectDetailsResponse>(project);
+        var reports = DataManager.FindReportsByProject(projectCode, q => q
+            .Include(r => r.AcceptedTime)
+            .Include(r => r.Owner));
         var userSummaries = reports.Where(x => x.Frozen).Select(x =>
         {
-            var acceptedSummary = x.AcceptedTime.FirstOrDefault(y => y.ProjectCode == project.Code);
-            return new ProjectWithUserSummaryEntry
+            var acceptedTime = x.AcceptedTime!.FirstOrDefault(y => y.ProjectCode == project.Code);
+            var entries = x.Entries!.Where(y => y.ProjectCode == project.Code);
+            return new AcceptedTimeListEntry
             {
-                Username = x.Owner.Name,
-                // TODO: Month = x.Month,
-                Month = DateTime.Today,
-                DeclaredTime = x.Entries.Where(y => y.ProjectCode == project.Code).Sum(y => y.Time),
-                AcceptedTime = acceptedSummary?.Time,
-                Timestamp = acceptedSummary?.Timestamp
+                Username = x.Owner!.Name,
+                Month = x.Month,
+                DeclaredTime = entries.Sum(y => y.Time),
+                AcceptedTime = acceptedTime?.Time,
+                Timestamp = acceptedTime?.Timestamp
             };
         }).ToList();
-        projectWithUsersModel.BudgetLeft = projectWithUsersModel.Budget - userSummaries.Sum(x => x.AcceptedTime ?? 0);
-        projectWithUsersModel.UserSummaries = userSummaries;
-        return Ok(projectWithUsersModel);
+        projectDetails.AcceptedTime = userSummaries;
+        return Ok(projectDetails);
     }
 
     [HttpPatch]
-    [Route("{id}")]
-    public IActionResult Edit(string id, [FromBody] ProjectModel projectModel)
+    [Route("{projectCode}")]
+    public IActionResult Patch(string projectCode, [FromBody] ProjectUpdateRequest updateRequest)
     {
-        var inputProject = Mapper.Map<Project>(projectModel);
-        var modifiedProject = DataManager.FindProjectByCode(projectModel.Code, q => q
-            .Include(qn => qn.Categories));
-        modifiedProject.Timestamp = projectModel.Timestamp;
-        if (modifiedProject == null)
-        {
-            ModelState.AddModelError(nameof(projectModel.Code), ErrorMessages.GetProjectNotFoundMessage(projectModel.Code));
-            return BadRequest();
-        }
-        modifiedProject.Budget = inputProject.Budget;
-        var addedCategories = inputProject.Categories.Select(x => x.Code)
-            .Except(modifiedProject.Categories.Select(x => x.Code));
-        foreach (var addedCategory in addedCategories)
-            DataManager.AddCategory(new Category { ProjectCode = modifiedProject.Code, Code = addedCategory });
-        modifiedProject.Categories = null;
+        var originalProject = DataManager.FindProjectByCode(projectCode, q => q
+            .Include(p => p.Categories));
+        if (originalProject == null)
+            return NotFound();
+        if (originalProject.ManagerId != LoggedInUser!.Id)
+            return Forbid();
+        var updatedProject = Mapper.Map(updateRequest, originalProject);
+        var addedCategories = updatedProject.Categories!.Select(x => x.Code)
+            .Except(originalProject.Categories!.Select(x => x.Code));
+        var removedCategories = originalProject.Categories!.Select(x => x.Code)
+            .Except(updatedProject.Categories!.Select(x => x.Code));
+        if (removedCategories.Any())
+            return BadRequest(ErrorMessages.CannotRemoveCategory);
+        updatedProject.Categories = null;
         try
         {
-            DataManager.UpdateProject(modifiedProject);
+            DataManager.UpdateProject(updatedProject);
         }
         catch (DbUpdateConcurrencyException)
         {
-            ModelState.Clear();
-            projectModel.Timestamp = DataManager.FindProjectByCode(projectModel.Code)!.Timestamp;
-            ModelState.AddModelError(nameof(projectModel.Timestamp), ErrorMessages.ConcurrencyError);
-            return Conflict(projectModel);
+            return Conflict();
         }
+        foreach (var addedCategory in addedCategories)
+            DataManager.AddCategory(new Category { ProjectCode = originalProject.Code, Code = addedCategory });
         return Ok();
     }
 
     [HttpPost]
-    public IActionResult Add([FromBody] ProjectModel projectModel)
+    [Route("{projectCode}/close")]
+    public IActionResult Close(string projectCode)
     {
-        var duplicatedProject = DataManager.FindProjectByCode(projectModel.Code);
-        if (duplicatedProject != null)
-        {
-            ModelState.AddModelError(nameof(projectModel.Code), ErrorMessages.GetProjectAlreadyExistingMessage(projectModel.Code));
-            return BadRequest();
-        }
-        projectModel.Active = true;
-        var project = Mapper.Map<Project>(projectModel);
-        project.ManagerId = LoggedInUser!.Id;
-        DataManager.AddProject(project);
+        var closedProject = DataManager.FindProjectByCode(projectCode);
+        if (closedProject == null)
+            return NotFound();
+        if (closedProject.ManagerId != LoggedInUser!.Id)
+            return Forbid();
+        if (closedProject.Active == false)
+            return Ok();
+        closedProject.Active = false;
+        DataManager.UpdateProject(closedProject);
         return Ok();
     }
 
-    [HttpPost]
-    [Route("{id}/close")]
-    public IActionResult Close(string id)
+    [HttpPut]
+    [Route("{projectCode}/acceptedtime/{username}/{monthString:regex(^\\d{{4}}-\\d{{2}}$)}")]
+    public IActionResult PutAcceptedTime(string projectCode, string username, string monthString, [FromBody] AcceptedTimeUpdateRequest updateRequest)
     {
-        var project = DataManager.FindProjectByCode(id);
+        var project = DataManager.FindProjectByCode(projectCode);
         if (project == null)
             return NotFound();
-        project.Active = false;
-        DataManager.UpdateProject(project);
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(username, monthString, q => q
+            .Include(r => r.Entries));
+        if (project.ManagerId != LoggedInUser!.Id || report.Entries!.All(x => x.ProjectCode != projectCode))
+            return Forbid();
+        var updatedAcceptedTime = Mapper.Map<AcceptedTime>(updateRequest);
+        updatedAcceptedTime.ProjectCode = project.Code;
+        updatedAcceptedTime.OwnerId = report.OwnerId;
+        updatedAcceptedTime.ReportMonth = report.Month;
+        try
+        {
+            DataManager.SetAcceptedTime(updatedAcceptedTime);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Conflict();
+        }
         return Ok();
     }
 }

@@ -1,13 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Globalization;
+﻿using System.Globalization;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Trs.Controllers.Attributes;
+using Trs.Controllers.Constants;
 using Trs.DataManager;
 using Trs.Extensions;
 using Trs.Models.DomainModels;
-using Trs.Models.ViewModels;
+using Trs.Models.RestModels;
 
 namespace Trs.Controllers;
 
@@ -23,88 +23,114 @@ public class ReportsController : BaseController
         _logger = logger;
     }
 
-    [HttpGet]
-    [Route("{monthString?}")]
-    public IActionResult Index(string? monthString)
+    private bool IsMonthString(string monthString)
     {
-        var month = DateTime.Today.TrimToMonth();
-        if (!string.IsNullOrEmpty(monthString)
-            && !DateTime.TryParseExact(monthString,
-                DateTimeExtensions.MonthFormat,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out month))
-            return NotFound();
-        // TODO: var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, month, x => x
-        //     .Include(y => y.Entries)
-        //     .Include(y => y.AcceptedTime));
-        var report = new Report();
-        var summaryEntries = report.Entries.GroupBy(x => x.ProjectCode)
+        return DateTime.TryParseExact(monthString, DateTimeExtensions.MonthFormat, CultureInfo.InvariantCulture,
+            DateTimeStyles.None, out _);
+    }
+
+    private bool IsDateString(string dateString)
+    {
+        return DateTime.TryParseExact(dateString, DateTimeExtensions.DateFormat, CultureInfo.InvariantCulture,
+            DateTimeStyles.None, out _);
+    }
+
+    [HttpGet]
+    [Route("{monthString:regex(^\\d{{4}}-\\d{{2}}$)}")]
+    public IActionResult Get(string monthString)
+    {
+        if (!IsMonthString(monthString))
+            return BadRequest();  // yyyy-MM
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, monthString, q => q
+            .Include(r => r.Entries)
+            .Include(r => r.AcceptedTime));
+        var summaryEntries = report.Entries!.GroupBy(x => x.ProjectCode)
             .Select(x => new ProjectTimeSummaryEntry
             {
                 ProjectCode = x.Key,
-                Time = x.Sum(y => y.Time),
-                AcceptedTime = report.AcceptedTime.FirstOrDefault(y => y.ProjectCode == x.Key)?.Time
+                Time = x.Sum(e => e.Time),
+                AcceptedTime = report.AcceptedTime!.FirstOrDefault(t => t.ProjectCode == x.Key)?.Time
             }).ToList();
-        var model = new MonthlySummaryModel
+        var response = new ReportDetailsResponse
         {
-            Month = month,
             Frozen = report.Frozen,
-            ProjectTimeSummaries = summaryEntries,
-            TotalTime = summaryEntries.Sum(x => x.Time),
-            TotalAcceptedTime = summaryEntries.Sum(x => x.AcceptedTime ?? 0)
+            ProjectTimeSummaries = summaryEntries
         };
-        return Ok(model);
+        return Ok(response);
+    }
+
+    [HttpGet]
+    [Route("{dateString:regex(^\\d{{4}}-\\d{{2}}-\\d{{2}}$)}")]
+    public IActionResult GetDailyView(string dateString)
+    {
+        if (!IsDateString(dateString))
+            return BadRequest();  // yyyy-MM-dd
+        var dayOfMonth = dateString[8..];
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, dateString, x => x
+            .Include(r => r.Entries!.Where(e => e.DayOfMonth == dayOfMonth))
+                .ThenInclude(e => e.Project)
+            .Include(r => r.Entries!.Where(e => e.DayOfMonth == dayOfMonth))
+                .ThenInclude(e => e.Category));
+        var summaryEntries = report.Entries!.GroupBy(x => x.ProjectCode)
+            .Select(x => new ProjectTimeSummaryEntry
+            {
+                ProjectCode = x.Key,
+                Time = x.Sum(e => e.Time)
+            }).ToList();
+        return Ok(new DailyReportDetailsResponse
+        {
+            Frozen = report.Frozen,
+            Entries = Mapper.Map<List<ReportEntryResponse>>(report.Entries),
+            ProjectTimeSummaries = summaryEntries
+        });
     }
 
     [HttpPost]
-    [Route("{monthString?}/freeze")]
-    public IActionResult Freeze(string? monthString)
+    [Route("{monthString:regex(^\\d{{4}}-\\d{{2}}$)}/freeze")]
+    public IActionResult Freeze(string monthString)
     {
-        var month = DateTime.Today.TrimToMonth();
-        if (!string.IsNullOrEmpty(monthString)
-            && !DateTime.TryParseExact(monthString,
-                DateTimeExtensions.MonthFormat,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out month))
-            return NotFound();
-        // TODO: var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, month);
-        var report = new Report();
-        // TODO: DataManager.FreezeReportById(report.Id);
+        if (!IsMonthString(monthString))
+            return BadRequest();  // yyyy-MM
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, monthString);
+        if (!report.Frozen)
+            DataManager.FreezeReportByOwnerIdAndMonth(report.OwnerId, report.Month);
         return Ok();
     }
 
-    [HttpPatch]
-    [Route("{monthString?}/accepted")]
-    public IActionResult UpdateAcceptedTime(string? monthString, [FromBody] string code, [FromBody] string username, [FromBody] [Range(0, int.MaxValue)] int acceptedTime, [FromBody] byte[] timestamp)
+    [HttpPost]
+    [Route("{dateString:regex(^\\d{{4}}-\\d{{2}}-\\d{{2}}$)}/entries")]
+    public IActionResult PostEntry(string dateString, [FromBody] ReportEntryCreationRequest creationRequest)
     {
-        var month = DateTime.Today.TrimToMonth();
-        if (!string.IsNullOrEmpty(monthString)
-            && !DateTime.TryParseExact(monthString,
-                DateTimeExtensions.MonthFormat,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out month))
-            return NotFound();
-        var project = DataManager.FindProjectByCode(code);
-        if (project == null)
-            return NotFound();
-        // TODO: var report = DataManager.FindOrCreateReportByUsernameAndMonth(username, month, q => q
-        //     .Include(qn => qn.Entries));
-        var report = new Report();
-        if (project.ManagerId != LoggedInUser!.Id || report.Entries.All(x => x.ProjectCode != code))
+        if (!IsDateString(dateString))
+            return BadRequest();  // yyyy-MM-dd
+        var dayOfMonth = dateString[8..];
+        var monthString = dateString[..7];
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, monthString);
+        if (report.Frozen)
             return Forbid();
-        // TODO: var accepted = new AcceptedTime { ProjectCode = code, Time = acceptedTime, ReportId = report.Id, Timestamp = timestamp };
-        var accepted = new AcceptedTime();
-        try
+        var category = DataManager.FindCategoryByProjectCodeAndCode(creationRequest.ProjectCode, creationRequest.CategoryCode, q => q
+            .Include(c => c.Project));
+        if (category == null)
+            return BadRequest(ErrorMessages.GetCategoryNotFoundMessage(creationRequest.ProjectCode, creationRequest.CategoryCode));
+        if (!category.Project!.Active)
+            return Forbid(ErrorMessages.GetProjectNoLongerActiveMessage(creationRequest.ProjectCode));
+        var createdReportEntry = Mapper.Map<ReportEntry>(creationRequest);
+        createdReportEntry.OwnerId = LoggedInUser!.Id;
+        createdReportEntry.ReportMonth = monthString;
+        createdReportEntry.DayOfMonth = dayOfMonth;
+        DataManager.AddReportEntry(createdReportEntry);
+        return CreatedAtAction(nameof(Get), nameof(ReportEntriesController), new { id = createdReportEntry.Id });
+    }
+
+    [HttpGet]
+    [Route("{dateString}/{path?}")]
+    public IActionResult GetBadDateFormat(string dateString, string? path)
+    {
+        return path switch
         {
-            DataManager.SetAcceptedTime(accepted);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return Conflict(accepted);
-        }
-        return Ok();
+            null => BadRequest("yyyy-MM-dd or yyyy-MM"),
+            "entries" => BadRequest("yyyy-MM-dd"),
+            _ => BadRequest("yyyy-MM")
+        };
     }
 }

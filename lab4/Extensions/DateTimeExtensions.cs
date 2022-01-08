@@ -16,4 +16,7 @@ public static class DateTimeExtensions
 
     public static string ToMonthString(this DateTime dateTime) =>
         dateTime.ToString(MonthFormat, CultureInfo.InvariantCulture);
+
+    public static string ToDayOfMonthString(this DateTime dateTime) =>
+        dateTime.ToString(DayOfMonthFormat, CultureInfo.InvariantCulture);
 }

@@ -4,7 +4,7 @@ namespace Trs.DataManager;
 
 public interface IDataManager
 {
-    AcceptedTime? FindAcceptedTimeByOwnerIdAndReportMonthAndProjectCode(int ownerId, string month, string projectCode,
+    AcceptedTime? FindAcceptedTimeByUsernameAndReportMonthAndProjectCode(string username, string month, string projectCode,
         Func<IQueryable<AcceptedTime>, IQueryable<AcceptedTime>>? modifierFunc = null);
 
     void SetAcceptedTime(AcceptedTime acceptedTime);
@@ -14,7 +14,6 @@ public interface IDataManager
     Category? FindCategoryByProjectCodeAndCode(string projectCode, string categoryCode,
         Func<IQueryable<Category>, IQueryable<Category>>? modifierFunc = null);
     void AddCategory(Category category);
-    void DeleteCategory(Category category);
 
     Project? FindProjectByCode(string code, Func<IQueryable<Project>, IQueryable<Project>>? modifierFunc = null);
 

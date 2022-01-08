@@ -8,6 +8,7 @@ public static class ErrorMessages
     private const string CategoryNotFoundByProjectCodeAndCode = "Nie znaleziono kategorii z kodem \"{0}\" dla projektu \"{1}\".";
     private const string ProjectAlreadyExisting = "Projekt z kodem \"{0}\" już istnieje.";
     private const string ProjectNoLongerActive = "Projekt z kodem \"{0}\" jest zamknięty.";
+    public const string CannotRemoveCategory = "Usuwanie kategorii jest niezgodne z założeniami.";
 
     private const string AcceptedTimeNotFoundByCode = "Nie znaleziono zaakceptowanego czasu dla projektu z kodem \"{0}\".";
     private const string AcceptedTimeAlreadyExisting = "Zaakceptowany czas dla projektu z kodem \"{0}\" już istnieje.";

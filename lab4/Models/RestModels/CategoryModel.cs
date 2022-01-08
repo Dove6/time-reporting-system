@@ -1,4 +1,4 @@
-﻿namespace Trs.Models.ViewModels;
+﻿namespace Trs.Models.RestModels;
 
 public class CategoryModel
 {
