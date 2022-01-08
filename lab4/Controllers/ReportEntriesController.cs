@@ -10,7 +10,7 @@ using Trs.Models.RestModels;
 namespace Trs.Controllers;
 
 [ForLoggedInOnly]
-[Route("[controller]/{id:int}")]
+[Route("api/[controller]/{id:int}")]
 public class ReportEntriesController : BaseController
 {
     private ILogger<ReportEntriesController> _logger;

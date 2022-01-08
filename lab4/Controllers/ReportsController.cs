@@ -12,7 +12,6 @@ using Trs.Models.RestModels;
 namespace Trs.Controllers;
 
 [ForLoggedInOnly]
-[Route("[controller]")]
 public class ReportsController : BaseController
 {
     private ILogger<ReportsController> _logger;
@@ -35,8 +34,7 @@ public class ReportsController : BaseController
             DateTimeStyles.None, out _);
     }
 
-    [HttpGet]
-    [Route("{monthString:regex(^\\d{{4}}-\\d{{2}}$)}")]
+    [HttpGet("{monthString:regex(^\\d{{4}}-\\d{{2}}$)}")]
     public IActionResult Get(string monthString)
     {
         if (!IsMonthString(monthString))
@@ -59,8 +57,7 @@ public class ReportsController : BaseController
         return Ok(response);
     }
 
-    [HttpGet]
-    [Route("{dateString:regex(^\\d{{4}}-\\d{{2}}-\\d{{2}}$)}")]
+    [HttpGet("{dateString:regex(^\\d{{4}}-\\d{{2}}-\\d{{2}}$)}")]
     public IActionResult GetDailyView(string dateString)
     {
         if (!IsDateString(dateString))
@@ -85,8 +82,7 @@ public class ReportsController : BaseController
         });
     }
 
-    [HttpPost]
-    [Route("{monthString:regex(^\\d{{4}}-\\d{{2}}$)}/freeze")]
+    [HttpPost("{monthString}/freeze")]
     public IActionResult Freeze(string monthString)
     {
         if (!IsMonthString(monthString))
@@ -97,8 +93,7 @@ public class ReportsController : BaseController
         return Ok();
     }
 
-    [HttpPost]
-    [Route("{dateString:regex(^\\d{{4}}-\\d{{2}}-\\d{{2}}$)}/entries")]
+    [HttpPost("{dateString}/entries")]
     public IActionResult PostEntry(string dateString, [FromBody] ReportEntryCreationRequest creationRequest)
     {
         if (!IsDateString(dateString))
@@ -122,15 +117,9 @@ public class ReportsController : BaseController
         return CreatedAtAction(nameof(Get), nameof(ReportEntriesController), new { id = createdReportEntry.Id });
     }
 
-    [HttpGet]
-    [Route("{dateString}/{path?}")]
-    public IActionResult GetBadDateFormat(string dateString, string? path)
+    [HttpGet("{notDateString}")]
+    public IActionResult GetBadDateFormat(string notDateString, string? path)
     {
-        return path switch
-        {
-            null => BadRequest("yyyy-MM-dd or yyyy-MM"),
-            "entries" => BadRequest("yyyy-MM-dd"),
-            _ => BadRequest("yyyy-MM")
-        };
+        return BadRequest();  // yyyy-MM-dd or yyyy-MM
     }
 }

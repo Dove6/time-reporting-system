@@ -1,16 +1,17 @@
-﻿using AutoMapper;
+﻿using System.Globalization;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Trs.Controllers.Attributes;
 using Trs.Controllers.Constants;
 using Trs.DataManager;
+using Trs.Extensions;
 using Trs.Models.DomainModels;
 using Trs.Models.RestModels;
 
 namespace Trs.Controllers;
 
 [ForLoggedInOnly]
-[Route("[controller]")]
 public class ProjectsController : BaseController
 {
     private ILogger<ProjectsController> _logger;
@@ -21,6 +22,12 @@ public class ProjectsController : BaseController
         _logger = logger;
     }
 
+    private bool IsMonthString(string monthString)
+    {
+        return DateTime.TryParseExact(monthString, DateTimeExtensions.MonthFormat, CultureInfo.InvariantCulture,
+            DateTimeStyles.None, out _);
+    }
+
     [HttpGet]
     public IActionResult GetAll()
     {
@@ -29,8 +36,7 @@ public class ProjectsController : BaseController
         return Ok(Mapper.Map<List<ProjectListResponseEntry>>(projectList));
     }
 
-    [HttpGet]
-    [Route("managed")]
+    [HttpGet("managed")]
     public IActionResult GetManaged()
     {
         var managedProjectList = DataManager.FindProjectsByManager(LoggedInUser!.Name, q => q
@@ -39,8 +45,7 @@ public class ProjectsController : BaseController
         return Ok(Mapper.Map<List<ManagedProjectListResponseEntry>>(managedProjectList));
     }
 
-    [HttpPut]
-    [Route("{projectCode}")]
+    [HttpPut("{projectCode}")]
     public IActionResult Put(string projectCode, [FromBody] ProjectCreationRequest creationRequest)
     {
         var duplicatedProject = DataManager.FindProjectByCode(projectCode);
@@ -60,8 +65,7 @@ public class ProjectsController : BaseController
         return CreatedAtAction(nameof(Get), new { projectCode });
     }
 
-    [HttpGet]
-    [Route("{projectCode}")]
+    [HttpGet("{projectCode}")]
     public IActionResult Get(string projectCode)
     {
         var project = DataManager.FindProjectByCode(projectCode, q => q
@@ -91,8 +95,7 @@ public class ProjectsController : BaseController
         return Ok(projectDetails);
     }
 
-    [HttpPatch]
-    [Route("{projectCode}")]
+    [HttpPatch("{projectCode}")]
     public IActionResult Patch(string projectCode, [FromBody] ProjectUpdateRequest updateRequest)
     {
         var originalProject = DataManager.FindProjectByCode(projectCode, q => q
@@ -122,8 +125,7 @@ public class ProjectsController : BaseController
         return Ok();
     }
 
-    [HttpPost]
-    [Route("{projectCode}/close")]
+    [HttpPost("{projectCode}/close")]
     public IActionResult Close(string projectCode)
     {
         var closedProject = DataManager.FindProjectByCode(projectCode);
@@ -138,10 +140,11 @@ public class ProjectsController : BaseController
         return Ok();
     }
 
-    [HttpPut]
-    [Route("{projectCode}/acceptedtime/{username}/{monthString:regex(^\\d{{4}}-\\d{{2}}$)}")]
+    [HttpPut("{projectCode}/acceptedtime/{username}/{monthString}")]
     public IActionResult PutAcceptedTime(string projectCode, string username, string monthString, [FromBody] AcceptedTimeUpdateRequest updateRequest)
     {
+        if (!IsMonthString(monthString))
+            return BadRequest();  // yyyy-MM
         var project = DataManager.FindProjectByCode(projectCode);
         if (project == null)
             return NotFound();

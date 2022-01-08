@@ -7,7 +7,6 @@ using Trs.Models.RestModels;
 
 namespace Trs.Controllers;
 
-[Route("[controller]")]
 public class UsersController : BaseController
 {
     private ILogger<UsersController> _logger;
@@ -27,16 +26,14 @@ public class UsersController : BaseController
     }
 
     [ForLoggedInOnly]
-    [HttpGet]
-    [Route("current")]
+    [HttpGet("current")]
     public IActionResult GetCurrent()
     {
         return Ok(LoggedInUser);
     }
 
     [ForNotLoggedInOnly]
-    [HttpPost]
-    [Route("{username}/login")]
+    [HttpPost("{username}/login")]
     public IActionResult Login(string username)
     {
         var foundUser = DataManager.FindUserByName(username);
@@ -47,8 +44,7 @@ public class UsersController : BaseController
     }
 
     [ForLoggedInOnly]
-    [HttpPost]
-    [Route("logout")]
+    [HttpPost("logout")]
     public IActionResult Logout()
     {
         LoggedInUser = null;
@@ -56,8 +52,7 @@ public class UsersController : BaseController
     }
 
     [ForNotLoggedInOnly]
-    [HttpPut]
-    [Route("{username}")]
+    [HttpPut("{username}")]
     public IActionResult Put(string username)
     {
         var existingUser = DataManager.FindUserByName(username);
