@@ -63,7 +63,8 @@ public class ReportsController : BaseController
         if (!IsDateString(dateString))
             return BadRequest();  // yyyy-MM-dd
         var dayOfMonth = dateString[8..];
-        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, dateString, x => x
+        var monthString = dateString[..7];
+        var report = DataManager.FindOrCreateReportByUsernameAndMonth(LoggedInUser!.Name, monthString, x => x
             .Include(r => r.Entries!.Where(e => e.DayOfMonth == dayOfMonth))
                 .ThenInclude(e => e.Project)
             .Include(r => r.Entries!.Where(e => e.DayOfMonth == dayOfMonth))

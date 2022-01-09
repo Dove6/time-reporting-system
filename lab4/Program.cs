@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Trs;
 using Trs.DataManager;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,12 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IDataManager>(x => new DbDataManager(x.GetRequiredService<TrsDbContext>(), x.GetRequiredService<IMapper>()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAuthentication(options =>
+{
+    var customSchemeName = "customScheme";
+    options.AddScheme<AuthHandler>(customSchemeName, "Custom scheme");
+    options.DefaultScheme = customSchemeName;
+});
 
 var app = builder.Build();
 

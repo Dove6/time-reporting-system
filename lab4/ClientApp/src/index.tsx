@@ -9,9 +9,11 @@ const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href') as
 const rootElement = document.getElementById('root');
 
 ReactDOM.render(
-  <BrowserRouter basename={baseUrl}>
-    <App />
-  </BrowserRouter>,
+    <React.StrictMode>
+        <BrowserRouter basename={baseUrl}>
+            <App />
+        </BrowserRouter>
+    </React.StrictMode>,
   rootElement);
 
 // If you want to start measuring performance in your app, pass a function

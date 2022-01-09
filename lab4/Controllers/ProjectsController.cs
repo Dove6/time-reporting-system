@@ -29,7 +29,7 @@ public class ProjectsController : BaseController
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public IActionResult Get()
     {
         var projectList = DataManager.GetAllProjects(q => q
             .Include(p => p.Categories));
