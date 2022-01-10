@@ -29,7 +29,7 @@ public class UsersController : BaseController
     [HttpGet("current")]
     public IActionResult GetCurrent()
     {
-        return Ok(LoggedInUser);
+        return Ok(Mapper.Map<UserModel>(LoggedInUser));
     }
 
     [ForNotLoggedInOnly]

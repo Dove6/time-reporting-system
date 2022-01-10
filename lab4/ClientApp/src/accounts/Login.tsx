@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LoginContext } from "../App";
 import { Alert, Button, Form } from "react-bootstrap";
 import fetchData from "../fetchData";
-
-type User = {
-    name: string;
-};
+import User from "../models/User";
 
 export default function Login() {
     const loginState = useContext(LoginContext);
@@ -22,7 +19,6 @@ export default function Login() {
     const performLogin = () => {
         fetchData(`/api/users/${selectedName}/login`, 'POST')
             .then(() => {
-                console.log(selectedName);
                 loginState.setUsername(selectedName);
                 navigate('/');
             })

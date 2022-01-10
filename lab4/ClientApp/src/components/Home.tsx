@@ -1,22 +1,120 @@
-import React from 'react';
+import React, {useContext, useEffect, useState} from 'react';
+import {LastDateContext} from "../App";
+import DailyReport from "../models/DailyReport";
+import fetchData from "../fetchData";
+import {Button, ButtonToolbar, Form, Table} from "react-bootstrap";
+import '../custom.css';
+import Project from "../models/Project";
+import ReportEntryCreationRequest from "../models/ReportEntryCreationRequest";
 
 export default function Home() {
+    const lastDateState = useContext(LastDateContext);
+    const [dailyReport, setDailyReport] = useState<DailyReport | null>(null);
+    const [projectList, setProjectList] = useState<Project[] | null>(null);
+    const [addedEntry, setAddedEntry] = useState<ReportEntryCreationRequest>({
+        projectCode: '',
+        categoryCode: '',
+        time: 0,
+        description: ''
+    });
+    useEffect(() => {
+        fetchData(`/api/reports/${lastDateState.lastDate}`)
+            .then(data => setDailyReport(data));
+    }, [lastDateState.lastDate]);
+    useEffect(() => {
+        fetchData('/api/projects')
+            .then(data => {
+                setProjectList(data);
+                if (data.length > 0)
+                    setAddedEntryProject(data[0].code);
+            });
+    }, []);
+
+    const setAddedEntryProject = (projectCode: string) => {
+        setAddedEntry(prevState => ({...prevState, projectCode: projectCode, categoryCode: '' }))
+    };
+
+    const setAddedEntryCategory = (categoryCode: string) => {
+        setAddedEntry(prevState => ({...prevState, categoryCode: categoryCode }))
+    };
+
+    const setAddedEntryTime = (time: number) => {
+        setAddedEntry(prevState => ({...prevState, time: time }))
+    };
+
+    const setAddedEntryDescription = (description: string) => {
+        setAddedEntry(prevState => ({...prevState, description: description }))
+    };
+
+    const clearAddedEntry = () => {
+        setAddedEntry({
+            projectCode: projectList?.at(0)?.code ?? '',
+            categoryCode: '',
+            time: 0,
+            description: ''
+        });
+    }
+
     return (
-        <div>
-            <h1>Hello, world!</h1>
-            <p>Welcome to your new single-page application, built with:</p>
-            <ul>
-                <li><a href='https://get.asp.net/'>ASP.NET Core</a> and <a href='https://msdn.microsoft.com/en-us/library/67ef8sbd.aspx'>C#</a> for cross-platform server-side code</li>
-                <li><a href='https://facebook.github.io/react/'>React</a> for client-side code</li>
-                <li><a href='http://getbootstrap.com/'>Bootstrap</a> for layout and styling</li>
-            </ul>
-            <p>To help you get started, we have also set up:</p>
-            <ul>
-                <li><strong>Client-side navigation</strong>. For example, click <em>Counter</em> then <em>Back</em> to return here.</li>
-                <li><strong>Development server integration</strong>. In development mode, the development server from <code>create-react-app</code> runs in the background automatically, so your client-side resources are dynamically built on demand and the page refreshes when you modify any file.</li>
-                <li><strong>Efficient production builds</strong>. In production mode, development-time features are disabled, and your <code>dotnet publish</code> configuration produces minified, efficiently bundled JavaScript files.</li>
-            </ul>
-            <p>The <code>ClientApp</code> subdirectory is a standard React application based on the <code>create-react-app</code> template. If you open a command prompt in that directory, you can run <code>npm</code> commands such as <code>npm test</code> or <code>npm install</code>.</p>
-        </div>
+        <>
+            <h1>Raport czasu pracy na dzień {lastDateState.lastDate}</h1>
+            {dailyReport?.frozen ? <p>[Raport został zatwierdzony]</p> : <></>}
+            <Table striped bordered hover>
+                <thead>
+                    <tr>
+                        <th className="shrinked">Projekt</th>
+                        <th className="shrinked">Kategoria</th>
+                        <th className="shrinked">Czas (w minutach)</th>
+                        <th>Opis</th>
+                        <th className="shrinked">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {dailyReport?.entries.map(entry => (<tr key={entry.id}>
+                        <td className="shrinked">{entry.projectCode}</td>
+                        <td className="shrinked">{entry.categoryCode}</td>
+                        <td className="shrinked">{entry.time}</td>
+                        <td>{entry.description}</td>
+                        <td className="shrinked">
+                            <ButtonToolbar className="flex-md-nowrap">
+                                <Button className="me-2" disabled={dailyReport?.frozen}>Edytuj</Button>
+                                <Button className="me-2" disabled={dailyReport?.frozen}>Skasuj</Button>
+                            </ButtonToolbar>
+                        </td>
+                    </tr>))}
+                    <tr>
+                        <td colSpan={5}>Dodaj wpis...</td>
+                    </tr>
+                    <tr>
+                        <td className="shrinked">
+                            <Form.Select value={addedEntry.projectCode} onChange={evt => setAddedEntryProject(evt.target.value)}>
+                                {projectList?.map(project => (
+                                    <option key={project.code} value={project.code}>{project.name} ({project.code})</option>
+                                ))}
+                            </Form.Select>
+                        </td>
+                        <td className="shrinked">
+                            <Form.Select value={addedEntry.categoryCode} onChange={evt => setAddedEntryCategory(evt.target.value)}>
+                                {projectList?.filter(e => e.code == addedEntry.projectCode)[0]?.categories.map(category => (
+                                    <option key={category.code} value={category.code}>{category.code}</option>
+                                ))}
+                            </Form.Select>
+                        </td>
+                        <td className="shrinked">
+                            <Form.Control type="number" value={addedEntry.time} onChange={evt => setAddedEntryTime(Number(evt.target.value))} />
+                        </td>
+                        <td>
+                            <Form.Control as="textarea" value={addedEntry.description} onChange={evt => setAddedEntryDescription(evt.target.value)} />
+                        </td>
+                        <td className="shrinked">
+                            <ButtonToolbar className="flex-md-nowrap">
+                                <Button className="me-2">Zatwierdź</Button>
+                                <Button className="me-2" onClick={clearAddedEntry}>Czyść</Button>
+                            </ButtonToolbar>
+                        </td>
+                    </tr>
+                </tbody>
+            </Table>
+        </>
     );
 }

@@ -12,3 +12,12 @@ code {
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
+
+th.shrinked, td.shrinked {
+  width: 1%;
+  white-space: nowrap;
+}
+
+td.shrinked .form-select {
+  width: min-content;
+}
