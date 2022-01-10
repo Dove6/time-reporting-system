@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import { LoginContext } from "../App";
 import { Alert, Button, Form } from "react-bootstrap";
 import fetchData from "../fetchData";
@@ -7,6 +7,7 @@ import User from "../models/User";
 
 export default function Login() {
     const loginState = useContext(LoginContext);
+    const location = useLocation();
     const navigate = useNavigate();
     const [selectedName, setSelectedName] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -16,11 +17,13 @@ export default function Login() {
             .then(data => setUsers(data));
     }, []);
 
+    const prevLocation = (location.state as any)?.from?.pathname || '/';
+
     const performLogin = () => {
         fetchData(`/api/users/${selectedName}/login`, 'POST')
             .then(() => {
                 loginState.setUsername(selectedName);
-                navigate('/');
+                navigate(prevLocation, { replace: true });
             })
             .catch(error => setErrorMessage(error));
     };

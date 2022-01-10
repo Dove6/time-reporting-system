@@ -95,7 +95,7 @@ export default function Home() {
                         </td>
                         <td className="shrinked">
                             <Form.Select value={addedEntry.categoryCode} onChange={evt => setAddedEntryCategory(evt.target.value)}>
-                                {projectList?.filter(e => e.code == addedEntry.projectCode)[0]?.categories.map(category => (
+                                {projectList?.filter(e => e.code === addedEntry.projectCode)[0]?.categories.map(category => (
                                     <option key={category.code} value={category.code}>{category.code}</option>
                                 ))}
                             </Form.Select>

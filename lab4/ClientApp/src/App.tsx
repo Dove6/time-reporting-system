@@ -8,6 +8,7 @@ import './custom.css'
 import Projects from "./projects/Projects";
 import MonthlyReport from "./reports/MonthlyReport";
 import fetchData from "./fetchData";
+import EnsureLoggedIn from "./accounts/EnsureLoggedIn";
 
 export type LoginState = {
     username: string | null;
@@ -35,9 +36,21 @@ export default function App() {
             <LastDateContext.Provider value={{ lastDate: lastDate, setLastDate: setLastDate }}>
                 <Routes>
                     <Route path="/" element={<Layout />}>
-                        <Route index element={<Home />} />
-                        <Route path="monthly" element={<MonthlyReport />} />
-                        <Route path="projects" element={<Projects />} />
+                        <Route index element={
+                            <EnsureLoggedIn>
+                                <Home />
+                            </EnsureLoggedIn>
+                        } />
+                        <Route path="monthly" element={
+                            <EnsureLoggedIn>
+                                <MonthlyReport />
+                            </EnsureLoggedIn>
+                        } />
+                        <Route path="projects" element={
+                            <EnsureLoggedIn>
+                                <Projects />
+                            </EnsureLoggedIn>
+                        } />
                         <Route path="counter" element={<Counter />} />
                         <Route path="login" element={<Login />} />
                     </Route>
