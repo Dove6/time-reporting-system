@@ -8,7 +8,7 @@ import ReportEntryCreationRequest from "../models/ReportEntryCreationRequest";
 import DailySummary from "../reports/DailySummary";
 import '../custom.css';
 
-export default function Home() {
+export default function DailyReport() {
     const lastDateState = useContext(LastDateContext);
     const [dailyReport, setDailyReport] = useState<DailyReportModel | null>(null);
     const [projectList, setProjectList] = useState<Project[] | null>(null);

@@ -33,7 +33,7 @@ export default function DailySummary(props: DailySummaryProps) {
         <tfoot>
             <tr>
                 <th>Razem</th>
-                <th>{Object.values(projectTimeGrouping).reduce((acc, val) => +acc + +val)}</th>
+                <th>{Object.values(projectTimeGrouping).reduce((acc, val) => +acc + +val, 0)}</th>
             </tr>
         </tfoot>
     </Table>);
