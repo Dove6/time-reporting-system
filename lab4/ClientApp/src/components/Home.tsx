@@ -1,15 +1,16 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {LastDateContext} from "../App";
-import DailyReport from "../models/DailyReport";
+import DailyReportModel from "../models/DailyReport";
 import fetchData from "../fetchData";
 import {Button, ButtonToolbar, Form, Table} from "react-bootstrap";
-import '../custom.css';
 import Project from "../models/Project";
 import ReportEntryCreationRequest from "../models/ReportEntryCreationRequest";
+import DailySummary from "../reports/DailySummary";
+import '../custom.css';
 
 export default function Home() {
     const lastDateState = useContext(LastDateContext);
-    const [dailyReport, setDailyReport] = useState<DailyReport | null>(null);
+    const [dailyReport, setDailyReport] = useState<DailyReportModel | null>(null);
     const [projectList, setProjectList] = useState<Project[] | null>(null);
     const [addedEntry, setAddedEntry] = useState<ReportEntryCreationRequest>({
         projectCode: '',
@@ -58,7 +59,7 @@ export default function Home() {
     return (
         <>
             <h1>Raport czasu pracy na dzień {lastDateState.lastDate}</h1>
-            {dailyReport?.frozen ? <p>[Raport został zatwierdzony]</p> : <></>}
+            {dailyReport?.frozen ? <p className="lead">[Raport został zatwierdzony]</p> : <></>}
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -82,6 +83,8 @@ export default function Home() {
                             </ButtonToolbar>
                         </td>
                     </tr>))}
+                </tbody>
+                <tfoot style={{ verticalAlign: 'top' }}>
                     <tr>
                         <td colSpan={5}>Dodaj wpis...</td>
                     </tr>
@@ -113,8 +116,12 @@ export default function Home() {
                             </ButtonToolbar>
                         </td>
                     </tr>
-                </tbody>
+                </tfoot>
             </Table>
+            {dailyReport !== null && projectList !== null ? (<>
+                <h2>Podsumowanie dzienne</h2>
+                <DailySummary entries={dailyReport.entries} projects={projectList} />
+            </>) : <></>}
         </>
     );
 }
