@@ -20,6 +20,7 @@ export default function Login() {
     const prevLocation = (location.state as any)?.from?.pathname || '/';
 
     const performLogin = () => {
+        loginState.setIsInProgress(true);
         fetchData(`/api/users/${selectedName}/login`, 'POST')
             .then(() => {
                 loginState.setUsername(selectedName);

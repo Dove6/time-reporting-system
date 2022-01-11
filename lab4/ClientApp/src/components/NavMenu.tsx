@@ -11,7 +11,7 @@ export default function NavMenu() {
         fetch(`/api/users/logout`, {
             method: 'POST'
         })
-            .finally(() => loginState.setUsername(null));
+            .finally(() => loginState.setState({ isInProgress: false, username: null }));
     };
 
     const loggedOutPanel = (
@@ -22,7 +22,7 @@ export default function NavMenu() {
     const loggedInPanel = (
         <>
             <Nav.Item className="nav-link text-dark">
-                Zalogowany jako {loginState.username}
+                Zalogowany jako {loginState.state.username}
             </Nav.Item>
             <Nav.Item>
                 <Nav.Link className="text-dark" onClick={performLogout}>Wyloguj się</Nav.Link>
@@ -41,7 +41,7 @@ export default function NavMenu() {
                             <Nav.Item>
                                 <Nav.Link as={Link} className="text-dark" to="/">Strona główna</Nav.Link>
                             </Nav.Item>
-                            {loginState.username !== null ? <>
+                            {loginState.state.username !== null ? <>
                                 <Nav.Item>
                                     <Nav.Link as={Link} className="text-dark" to="/monthly">Zestawienie miesięczne</Nav.Link>
                                 </Nav.Item>
@@ -50,7 +50,7 @@ export default function NavMenu() {
                                 </Nav.Item>
                             </> : <></>}
                             <Nav.Item className="spacer flex-grow-1"> </Nav.Item>
-                            {loginState.username !== null ? loggedInPanel : loggedOutPanel}
+                            {loginState.state.username !== null ? loggedInPanel : loggedOutPanel}
                         </ul>
                     </Navbar.Collapse>
                 </Container>

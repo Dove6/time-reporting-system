@@ -19,9 +19,9 @@ export default function DailyReport() {
         description: ''
     });
     useEffect(() => {
-        fetchData(`/api/reports/${lastDateState.lastDate}`)
+        fetchData(`/api/reports/${lastDateState.state.lastDate}`)
             .then(data => setDailyReport(data));
-    }, [lastDateState.lastDate]);
+    }, [lastDateState.state.lastDate]);
     useEffect(() => {
         fetchData('/api/projects')
             .then(data => {
@@ -58,7 +58,7 @@ export default function DailyReport() {
 
     return (
         <>
-            <h1>Raport czasu pracy na dzień {lastDateState.lastDate}</h1>
+            <h1>Raport czasu pracy na dzień {lastDateState.state.lastDate}</h1>
             {dailyReport?.frozen ? <p className="lead">[Raport został zatwierdzony]</p> : <></>}
             <Table striped bordered hover>
                 <thead>

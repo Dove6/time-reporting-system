@@ -6,7 +6,7 @@ export default function EnsureLoggedIn({ children }: { children: JSX.Element }) 
     let loginContext = useContext(LoginContext);
     let location = useLocation();
 
-    if (loginContext.username === null)
+    if (!loginContext.state.isInProgress && loginContext.state.username === null)
         return <Navigate to="/login" state={{ from: location }} replace />;
 
     return children;
