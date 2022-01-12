@@ -7,21 +7,20 @@ import Project from "../models/Project";
 import ReportEntryCreationRequest from "../models/ReportEntryCreationRequest";
 import DailySummary from "../reports/DailySummary";
 import '../custom.css';
+import ReportEntryUpdateRequest from "../models/ReportEntryUpdateRequest";
+import getSpecificSetter from "../getSpecificSetter";
+import ReportEntry from "../models/ReportEntry";
 
 export default function DailyReport() {
     const lastDateState = useContext(LastDateContext);
+
     const [dailyReport, setDailyReport] = useState<DailyReportModel | null>(null);
-    const [projectList, setProjectList] = useState<Project[] | null>(null);
-    const [addedEntry, setAddedEntry] = useState<ReportEntryCreationRequest>({
-        projectCode: '',
-        categoryCode: '',
-        time: 0,
-        description: ''
-    });
     useEffect(() => {
         fetchData(`/api/reports/${lastDateState.state.lastDate}`)
             .then(data => setDailyReport(data));
     }, [lastDateState.state.lastDate]);
+
+    const [projectList, setProjectList] = useState<Project[] | null>(null);
     useEffect(() => {
         fetchData('/api/projects')
             .then(data => {
@@ -31,22 +30,16 @@ export default function DailyReport() {
             });
     }, []);
 
-    const setAddedEntryProject = (projectCode: string) => {
-        setAddedEntry(prevState => ({...prevState, projectCode: projectCode, categoryCode: '' }))
-    };
-
-    const setAddedEntryCategory = (categoryCode: string) => {
-        setAddedEntry(prevState => ({...prevState, categoryCode: categoryCode }))
-    };
-
-    const setAddedEntryTime = (time: number) => {
-        setAddedEntry(prevState => ({...prevState, time: time }))
-    };
-
-    const setAddedEntryDescription = (description: string) => {
-        setAddedEntry(prevState => ({...prevState, description: description }))
-    };
-
+    const [addedEntry, setAddedEntry] = useState<ReportEntryCreationRequest>({
+        projectCode: '',
+        categoryCode: '',
+        time: 0,
+        description: ''
+    });
+    const setAddedEntryProject = (projectCode: string) => setAddedEntry(prevState => ({...prevState, projectCode: projectCode, categoryCode: '' }));
+    const setAddedEntryCategory = getSpecificSetter(addedEntry, setAddedEntry, 'categoryCode') as ((value: typeof addedEntry.categoryCode) => void);
+    const setAddedEntryTime = getSpecificSetter(addedEntry, setAddedEntry, 'time') as ((value: typeof addedEntry.time) => void);
+    const setAddedEntryDescription = getSpecificSetter(addedEntry, setAddedEntry, 'description') as ((value: typeof addedEntry.description) => void);
     const clearAddedEntry = () => {
         setAddedEntry({
             projectCode: projectList?.at(0)?.code ?? '',
@@ -55,6 +48,65 @@ export default function DailyReport() {
             description: ''
         });
     }
+
+    const [modifiedEntryId, setModifiedEntryId] = useState<number | null>(null);
+    const [modifiedEntry, setModifiedEntry] = useState<ReportEntry>({
+        id: 0,
+        date: '',
+        projectCode: '',
+        categoryCode: '',
+        time: 0,
+        description: '',
+        timestamp: ''
+    });
+    const setModifiedEntryCategory = getSpecificSetter(modifiedEntry, setModifiedEntry, 'categoryCode') as ((value: typeof modifiedEntry.categoryCode) => void);
+    const setModifiedEntryTime = getSpecificSetter(modifiedEntry, setModifiedEntry, 'time') as ((value: typeof modifiedEntry.time) => void);
+    const setModifiedEntryDescription = getSpecificSetter(modifiedEntry, setModifiedEntry, 'description') as ((value: typeof modifiedEntry.description) => void);
+
+    useEffect(() => {
+        if (modifiedEntryId === null)
+            return;
+        let foundEntry = dailyReport?.entries.filter(e => e.id === modifiedEntryId)[0];
+        if (foundEntry === null || foundEntry === undefined)
+            return;
+        setModifiedEntry({ ...foundEntry });
+    }, [modifiedEntryId, dailyReport]);
+
+    const getEditView = (entry: ReportEntry) => (<tr key={entry.id}>
+        <td className="shrinked">{entry.projectCode}</td>
+        <td className="shrinked">
+            <Form.Select value={modifiedEntry.categoryCode} onChange={evt => setModifiedEntryCategory(evt.target.value)}>
+                {projectList?.filter(e => e.code === modifiedEntry.projectCode)[0]?.categories.map(category => (
+                    <option key={category.code} value={category.code}>{category.code}</option>
+                ))}
+            </Form.Select>
+        </td>
+        <td className="shrinked">
+            <Form.Control type="number" value={modifiedEntry.time} onChange={evt => setModifiedEntryTime(Number(evt.target.value))} />
+        </td>
+        <td>
+            <Form.Control as="textarea" value={modifiedEntry.description} onChange={evt => setModifiedEntryDescription(evt.target.value)} />
+        </td>
+        <td className="shrinked">
+            <ButtonToolbar className="flex-md-nowrap">
+                <Button className="me-2">Zatwierdź</Button>
+                <Button className="me-2" onClick={() => setModifiedEntryId(null)}>Anuluj</Button>
+            </ButtonToolbar>
+        </td>
+    </tr>);
+
+    const getDisplayView = (entry: ReportEntry) => (<tr key={entry.id}>
+        <td className="shrinked">{entry.projectCode}</td>
+        <td className="shrinked">{entry.categoryCode}</td>
+        <td className="shrinked">{entry.time}</td>
+        <td>{entry.description}</td>
+        <td className="shrinked">
+            <ButtonToolbar className="flex-md-nowrap">
+                <Button className="me-2" disabled={dailyReport?.frozen} onClick={() => setModifiedEntryId(entry.id)}>Edytuj</Button>
+                <Button className="me-2" disabled={dailyReport?.frozen}>Skasuj</Button>
+            </ButtonToolbar>
+        </td>
+    </tr>);
 
     return (
         <>
@@ -71,22 +123,11 @@ export default function DailyReport() {
                     </tr>
                 </thead>
                 <tbody>
-                    {dailyReport?.entries.map(entry => (<tr key={entry.id}>
-                        <td className="shrinked">{entry.projectCode}</td>
-                        <td className="shrinked">{entry.categoryCode}</td>
-                        <td className="shrinked">{entry.time}</td>
-                        <td>{entry.description}</td>
-                        <td className="shrinked">
-                            <ButtonToolbar className="flex-md-nowrap">
-                                <Button className="me-2" disabled={dailyReport?.frozen}>Edytuj</Button>
-                                <Button className="me-2" disabled={dailyReport?.frozen}>Skasuj</Button>
-                            </ButtonToolbar>
-                        </td>
-                    </tr>))}
+                    {dailyReport?.entries.map(entry => entry.id === modifiedEntryId ? getEditView(entry) : getDisplayView(entry))}
                 </tbody>
                 <tfoot style={{ verticalAlign: 'top' }}>
                     <tr>
-                        <td colSpan={5}>Dodaj wpis...</td>
+                        <th colSpan={5}>Dodaj wpis...</th>
                     </tr>
                     <tr>
                         <td className="shrinked">
