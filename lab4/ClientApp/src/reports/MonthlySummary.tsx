@@ -4,30 +4,31 @@ import MonthlyReportModel from "../models/MonthlyReport";
 import fetchData from "../fetchData";
 import {Table} from "react-bootstrap";
 
-export default function MonthlyReport() {
+export default function MonthlySummary() {
     const lastDateState = useContext(LastDateContext);
-    const getLastMonth = () => lastDateState.state.lastDate.substring(0, 7);
-    const setLastMonth = (monthString: string) => lastDateState.setLastDate(`${monthString}-01`);
+    const toMonthString = (dateString: string) => dateString.substring(0, 7);
+    const toDateString = (monthString: string) => `${monthString}-01`;
 
     const [monthlyReport, setMonthlyReport] = useState<MonthlyReportModel | null>(null);
-    const refreshDailyReport = () => {
-        fetchData(`/api/reports/${getLastMonth()}`)
+    const refreshMonthlyReport = () => {
+        fetchData(`/api/reports/${toMonthString(lastDateState.state.lastDate)}`)
             .then(data => setMonthlyReport(data));
     }
-    useEffect(refreshDailyReport, [lastDateState.state.lastDate]);
+    useEffect(refreshMonthlyReport, [lastDateState.state.lastDate]);
 
     return (<>
         <h1>Raport czasu pracy na miesiąc{' '}
             <input type="month"
-                   value={getLastMonth()}
-                   onChange={evt => setLastMonth(evt.target.value)}
+                   value={toMonthString(lastDateState.state.lastDate)}
+                   onChange={evt => lastDateState.setLastDate(toDateString(evt.target.value))}
             />
         </h1>
+        {monthlyReport?.frozen ? <p className="lead">[Raport został zatwierdzony]</p> : <></>}
         <Table>
             <thead>
             <tr>
                 <th>Projekt</th>
-                <th>Zadeklarowany czas</th>
+                <th>{monthlyReport?.frozen ? 'Zadeklarowany' : 'Łączny'} czas</th>
                 <th>Zaakceptowany czas</th>
             </tr>
             </thead>

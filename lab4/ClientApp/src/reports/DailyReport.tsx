@@ -15,15 +15,6 @@ export default function DailyReport() {
     const lastDateState = useContext(LastDateContext);
 
     const [dailyReport, setDailyReport] = useState<DailyReportModel | null>(null);
-    const setDailyReportEntry = (id: number | null, updatedEntry: ReportEntry) => {
-        if (id === null)
-            return;
-        setDailyReport((prevState) => {
-            if (prevState === null || !(id in prevState.entries))
-                return null;
-            return { ...prevState, entries: { ...prevState.entries, [id]: updatedEntry } };
-        });
-    };
     const refreshDailyReport = () => {
         fetchData(`/api/reports/${lastDateState.state.lastDate}`)
             .then(data => setDailyReport(data));

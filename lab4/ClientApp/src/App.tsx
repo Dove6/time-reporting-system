@@ -6,7 +6,7 @@ import Counter from './components/Counter';
 import Login from './accounts/Login';
 import './custom.css'
 import Projects from "./projects/Projects";
-import MonthlyReport from "./reports/MonthlyReport";
+import MonthlySummary from "./reports/MonthlySummary";
 import fetchData from "./fetchData";
 import EnsureLoggedIn from "./accounts/EnsureLoggedIn";
 
@@ -91,7 +91,7 @@ export default function App() {
                         } />
                         <Route path="monthly" element={
                             <EnsureLoggedIn>
-                                <MonthlyReport />
+                                <MonthlySummary />
                             </EnsureLoggedIn>
                         } />
                         <Route path="projects" element={
