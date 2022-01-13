@@ -12,7 +12,7 @@ type DictStrNum = { [key: string]: number };
 type DictStrStr = { [key: string]: string };
 
 export default function DailySummary(props: DailySummaryProps) {
-    const projectTimeGrouping = props.entries.reduce((acc: DictStrNum, val) =>
+    const projectTimeGrouping = Object.values(props.entries).reduce((acc: DictStrNum, val) =>
         ({ ...acc, [val.projectCode]: ((acc[val.projectCode] ?? 0) + val.time) }), {});
     const projectCodeNameMap = props.projects.reduce((acc: DictStrStr, val) =>
         ({ ...acc, [val.code]: val.name }), {});

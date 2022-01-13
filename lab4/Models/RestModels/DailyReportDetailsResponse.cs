@@ -2,5 +2,5 @@
 
 public class DailyReportDetailsResponse : ReportDetailsResponse
 {
-    public List<ReportEntryResponse> Entries { get; set; }
+    public Dictionary<int, ReportEntryResponse> Entries { get; set; }
 }

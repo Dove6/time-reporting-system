@@ -80,7 +80,7 @@ public class ReportsController : BaseController
         return Ok(new DailyReportDetailsResponse
         {
             Frozen = report.Frozen,
-            Entries = Mapper.Map<List<ReportEntryResponse>>(report.Entries),
+            Entries = report.Entries!.ToDictionary(x => x.Id, x => Mapper.Map<ReportEntryResponse>(x)),
             ProjectTimeSummaries = summaryEntries
         });
     }
@@ -117,7 +117,7 @@ public class ReportsController : BaseController
         createdReportEntry.ReportMonth = monthString;
         createdReportEntry.DayOfMonth = dayOfMonth;
         DataManager.AddReportEntry(createdReportEntry);
-        return CreatedAtAction(nameof(Get), nameof(ReportEntriesController), new { id = createdReportEntry.Id });
+        return Created($"/api/ReportEntries/{createdReportEntry.Id}", Mapper.Map<ReportEntryResponse>(createdReportEntry));
     }
 
     [HttpGet("{notDateString}")]
