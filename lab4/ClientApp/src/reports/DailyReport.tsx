@@ -34,18 +34,18 @@ export default function DailyReport() {
     const [addedEntry, setAddedEntry] = useState<ReportEntryCreationRequest>({
         projectCode: '',
         categoryCode: '',
-        time: 0,
+        time: 1,
         description: ''
     });
     const setAddedEntryProject = (projectCode: string) => setAddedEntry(prevState => ({...prevState, projectCode: projectCode, categoryCode: '' }));
     const setAddedEntryCategory = getSpecificSetter(addedEntry, setAddedEntry, 'categoryCode') as ((value: typeof addedEntry.categoryCode) => void);
-    const setAddedEntryTime = getSpecificSetter(addedEntry, setAddedEntry, 'time') as ((value: typeof addedEntry.time) => void);
+    const setAddedEntryTime = (time: number) => setAddedEntry(prevValue => ({ ...prevValue, time: Math.max(time, 1) }));
     const setAddedEntryDescription = getSpecificSetter(addedEntry, setAddedEntry, 'description') as ((value: typeof addedEntry.description) => void);
     const clearAddedEntry = () => {
         setAddedEntry({
             projectCode: projectList?.at(0)?.code ?? '',
             categoryCode: '',
-            time: 0,
+            time: 1,
             description: ''
         });
     }
@@ -59,7 +59,7 @@ export default function DailyReport() {
         description: ''
     });
     const setModifiedEntryCategory = getSpecificSetter(modifiedEntry, setModifiedEntry, 'categoryCode') as ((value: typeof modifiedEntry.categoryCode) => void);
-    const setModifiedEntryTime = getSpecificSetter(modifiedEntry, setModifiedEntry, 'time') as ((value: typeof modifiedEntry.time) => void);
+    const setModifiedEntryTime = (time: number) => setModifiedEntry(prevValue => ({ ...prevValue, time: Math.max(time, 1) }));
     const setModifiedEntryDescription = getSpecificSetter(modifiedEntry, setModifiedEntry, 'description') as ((value: typeof modifiedEntry.description) => void);
 
     useEffect(() => {
@@ -113,7 +113,7 @@ export default function DailyReport() {
             </Form.Select>
         </td>
         <td className="shrinked">
-            <Form.Control type="number" value={modifiedEntry.time} onChange={evt => setModifiedEntryTime(Number(evt.target.value))} />
+            <Form.Control type="number" value={modifiedEntry.time} min={1} onChange={evt => setModifiedEntryTime(Number(evt.target.value))} />
         </td>
         <td>
             <Form.Control as="textarea" value={modifiedEntry.description} onChange={evt => setModifiedEntryDescription(evt.target.value)} />
@@ -185,7 +185,7 @@ export default function DailyReport() {
                             </Form.Select>
                         </td>
                         <td className="shrinked">
-                            <Form.Control type="number" value={addedEntry.time} onChange={evt => setAddedEntryTime(Number(evt.target.value))} />
+                            <Form.Control type="number" value={addedEntry.time} min={1} onChange={evt => setAddedEntryTime(Number(evt.target.value))} />
                         </td>
                         <td>
                             <Form.Control as="textarea" value={addedEntry.description} onChange={evt => setAddedEntryDescription(evt.target.value)} />
