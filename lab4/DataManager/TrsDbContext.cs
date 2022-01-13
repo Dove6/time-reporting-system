@@ -6,6 +6,10 @@ namespace Trs.DataManager;
 
 public class TrsDbContext : DbContext
 {
+    public const string DbDirectory = "storage";
+    public const string DbFilename = "trs.db";
+    public static string DbPath => $"{DbDirectory}/{DbFilename}";
+
     public virtual DbSet<AcceptedTime> AcceptedTime { get; set; }
     public virtual DbSet<Category> Categories { get; set; }
     public virtual DbSet<Project> Projects { get; set; }

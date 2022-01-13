@@ -6,7 +6,7 @@ using Trs.DataManager;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<TrsDbContext>(options => options.UseSqlite("Data Source=storage/trs.db"));
+builder.Services.AddDbContext<TrsDbContext>(options => options.UseSqlite($"Data Source={TrsDbContext.DbPath}"));
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddControllers();
 builder.Services.AddScoped<IDataManager>(x => new DbDataManager(x.GetRequiredService<TrsDbContext>(), x.GetRequiredService<IMapper>()));
@@ -14,7 +14,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication(options =>
 {
-    var customSchemeName = "customScheme";
+    const string customSchemeName = "customScheme";
     options.AddScheme<AuthHandler>(customSchemeName, "Custom scheme");
     options.DefaultScheme = customSchemeName;
 });

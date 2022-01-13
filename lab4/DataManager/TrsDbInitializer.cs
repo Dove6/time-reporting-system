@@ -6,6 +6,7 @@ public static class TrsDbInitializer
 {
     public static void Initialize(TrsDbContext dbContext)
     {
+        Directory.CreateDirectory(Path.Join(".", TrsDbContext.DbDirectory));
         dbContext.Database.EnsureCreated();
 
         if (dbContext.Categories.Any() || dbContext.Projects.Any() || dbContext.Reports.Any() ||
