@@ -18,9 +18,4 @@ public class AcceptedTime
     public Report? Report { get; set; }
     [ForeignKey(nameof(ProjectCode))]
     public Project? Project { get; set; }
-
-    [Timestamp]
-    [Required]
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public byte[] Timestamp { get; set; }
 }

@@ -87,8 +87,7 @@ public class ProjectsController : BaseController
                 Username = x.Owner!.Name,
                 Month = x.Month,
                 DeclaredTime = entries.Sum(y => y.Time),
-                AcceptedTime = acceptedTime?.Time,
-                Timestamp = acceptedTime?.Timestamp
+                AcceptedTime = acceptedTime?.Time
             };
         }).ToList();
         projectDetails.AcceptedTime = userSummaries;

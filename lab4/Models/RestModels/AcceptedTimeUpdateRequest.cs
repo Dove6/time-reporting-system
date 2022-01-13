@@ -6,5 +6,4 @@ public class AcceptedTimeUpdateRequest
 {
     [Range(0, int.MaxValue)]
     public int Time { get; set; }
-    public byte[] Timestamp { get; set; }
 }

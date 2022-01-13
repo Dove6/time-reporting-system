@@ -1,7 +1,5 @@
 ﻿import ProjectCreationRequest from "./ProjectCreationRequest";
 
-type ProjectUpdateRequest = ProjectCreationRequest & {
-    timestamp: string;
-}
+type ProjectUpdateRequest = ProjectCreationRequest;
 
 export default ProjectUpdateRequest;

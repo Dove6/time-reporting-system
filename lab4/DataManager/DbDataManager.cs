@@ -26,11 +26,6 @@ public class DbDataManager : IDataManager
         return addedUser.Entity.Id;
     }
 
-    public byte[]? GetTimestampForReportEntryById(int id) =>
-        _dbContext.ReportEntries
-            .FirstOrDefault(x => x.Id == id)?
-            .Timestamp;
-
     public User? FindUserById(int id, Func<IQueryable<User>, IQueryable<User>>? modifierFunc = null)
     {
         var query = _dbContext.Users.AsQueryable();
@@ -102,9 +97,6 @@ public class DbDataManager : IDataManager
         _dbContext.Projects.Update(project);
         _dbContext.SaveChanges();
     }
-
-    public byte[] GetTimestampForProject(Project project) =>
-        _dbContext.Entry(project).Entity.Timestamp;
 
     public Report FindOrCreateReportByUsernameAndMonth(string username, string month, Func<IQueryable<Report>, IQueryable<Report>>? modifierFunc = null)
     {
@@ -231,9 +223,6 @@ public class DbDataManager : IDataManager
             _dbContext.AcceptedTime.Add(acceptedTime);
         _dbContext.SaveChanges();
     }
-
-    public byte[] GetTimestampForAcceptedTime(AcceptedTime acceptedTime) =>
-        _dbContext.Entry(acceptedTime).Entity.Timestamp;
 
     public Category? FindCategoryByProjectCodeAndCode(string projectCode, string categoryCode, Func<IQueryable<Category>, IQueryable<Category>>? modifierFunc = null)
     {

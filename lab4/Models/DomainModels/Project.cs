@@ -20,9 +20,4 @@ public class Project
     public ICollection<Category>? Categories { get; set; }
     public ICollection<ReportEntry>? ReportEntries { get; set; }
     public ICollection<AcceptedTime>? AcceptedTime { get; set; }
-
-    [Timestamp]
-    [Required]
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public byte[] Timestamp { get; set; }
 }

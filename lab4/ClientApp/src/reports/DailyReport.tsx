@@ -65,8 +65,7 @@ export default function DailyReport() {
         projectCode: '',
         categoryCode: '',
         time: 0,
-        description: '',
-        timestamp: ''
+        description: ''
     });
     const setModifiedEntryCategory = getSpecificSetter(modifiedEntry, setModifiedEntry, 'categoryCode') as ((value: typeof modifiedEntry.categoryCode) => void);
     const setModifiedEntryTime = getSpecificSetter(modifiedEntry, setModifiedEntry, 'time') as ((value: typeof modifiedEntry.time) => void);
@@ -86,8 +85,7 @@ export default function DailyReport() {
         let updateRequest: ReportEntryUpdateRequest = {
             categoryCode: modifiedEntry.categoryCode,
             time: modifiedEntry.time,
-            description: modifiedEntry.description,
-            timestamp: modifiedEntry.timestamp
+            description: modifiedEntry.description
         };
         fetchData(`/api/reportentries/${modifiedEntryId}`, 'PATCH', updateRequest)
             .then(() => {

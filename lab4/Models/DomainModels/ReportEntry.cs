@@ -29,9 +29,4 @@ public class ReportEntry
     public User? Owner { get; set; }
     [ForeignKey($"{nameof(OwnerId)}, {nameof(ReportMonth)}")]
     public Report? Report { get; set; }
-
-    [Timestamp]
-    [Required]
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public byte[] Timestamp { get; set; }
 }

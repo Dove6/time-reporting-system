@@ -6,5 +6,4 @@ public class AcceptedTimeListEntry
     public string Month { get; set; }
     public int DeclaredTime { get; set; }
     public int? AcceptedTime { get; set; }
-    public byte[] Timestamp { get; set; }
 }
