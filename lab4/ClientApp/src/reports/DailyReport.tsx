@@ -150,7 +150,12 @@ export default function DailyReport() {
 
     return (
         <>
-            <h1>Raport czasu pracy na dzień {lastDateState.state.lastDate}</h1>
+            <h1>Raport czasu pracy na dzień{' '}
+                <input type="date"
+                   value={lastDateState.state.lastDate}
+                   onChange={evt => lastDateState.setLastDate(evt.target.value)}
+                />
+            </h1>
             {dailyReport?.frozen ? <p className="lead">[Raport został zatwierdzony]</p> : <></>}
             <Table striped bordered hover>
                 <thead>
@@ -167,6 +172,9 @@ export default function DailyReport() {
                         .map(({key, value}) => key === modifiedEntryId ? getEditView(key, value) : getDisplayView(key, value))}
                 </tbody>
                 <tfoot style={{ verticalAlign: 'top' }}>
+                    <tr>
+                        <td colSpan={5} style={{ borderLeft: 'hidden', borderRight: 'hidden' }}> </td>
+                    </tr>
                     <tr>
                         <th colSpan={5}>Dodaj wpis...</th>
                     </tr>

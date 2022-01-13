@@ -17,7 +17,12 @@ export default function MonthlyReport() {
     useEffect(refreshDailyReport, [lastDateState.state.lastDate]);
 
     return (<>
-        <h1>Raport czasu pracy na miesiąc {getLastMonth()}</h1>
+        <h1>Raport czasu pracy na miesiąc{' '}
+            <input type="month"
+                   value={getLastMonth()}
+                   onChange={evt => setLastMonth(evt.target.value)}
+            />
+        </h1>
         <Table>
             <thead>
             <tr>

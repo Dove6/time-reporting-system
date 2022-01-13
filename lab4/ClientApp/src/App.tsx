@@ -57,8 +57,8 @@ export default function App() {
     const setLoginStateIsInProgress = (isInProgress: boolean) => {
         setLoginState(prevState => ({...prevState, isInProgress: isInProgress }))
     }
-    const setLastDate = (username: string | null) => {
-        setLoginState(prevState => ({...prevState, username: username }))
+    const setLastDate = (lastDate: string) => {
+        setLastDateState(prevState => ({...prevState, lastDate: lastDate }))
     }
 
     useEffect(() => {
