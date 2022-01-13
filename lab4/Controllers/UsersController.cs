@@ -60,6 +60,7 @@ public class UsersController : BaseController
             return Conflict();
         var addedUser = new User { Name = username };
         DataManager.AddUser(addedUser);
-        return CreatedAtAction(nameof(Login), new { username });
+        LoggedInUser = addedUser;
+        return Created($"/api/users/{username}/login", Mapper.Map<UserModel>(addedUser));
     }
 }

@@ -7,6 +7,7 @@ import './custom.css'
 import MonthlySummary from "./reports/MonthlySummary";
 import fetchData from "./fetchData";
 import EnsureLoggedIn from "./accounts/EnsureLoggedIn";
+import Register from "./accounts/Register";
 
 export type LoginState = {
     isInProgress: boolean;
@@ -93,6 +94,7 @@ export default function App() {
                             </EnsureLoggedIn>
                         } />
                         <Route path="login" element={<Login />} />
+                        <Route path="register" element={<Register />} />
                     </Route>
                 </Routes>
             </LastDateContext.Provider>

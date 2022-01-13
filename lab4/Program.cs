@@ -6,7 +6,8 @@ using Trs.DataManager;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<TrsDbContext>(options => options.UseSqlite($"Data Source={TrsDbContext.DbPath}"));
+builder.Services.AddDbContext<TrsDbContext>(options => options.UseSqlite($"Data Source={TrsDbContext.DbPath}",
+    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)));
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddControllers();
 builder.Services.AddScoped<IDataManager>(x => new DbDataManager(x.GetRequiredService<TrsDbContext>(), x.GetRequiredService<IMapper>()));

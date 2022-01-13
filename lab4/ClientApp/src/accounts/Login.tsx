@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LoginContext } from "../App";
 import { Alert, Button, Form } from "react-bootstrap";
 import fetchData from "../fetchData";
@@ -7,7 +7,6 @@ import User from "../models/User";
 
 export default function Login() {
     const loginState = useContext(LoginContext);
-    const location = useLocation();
     const navigate = useNavigate();
     const [selectedName, setSelectedName] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -17,14 +16,12 @@ export default function Login() {
             .then(data => setUsers(data));
     }, []);
 
-    const prevLocation = (location.state as any)?.from?.pathname || '/';
-
     const performLogin = () => {
         loginState.setIsInProgress(true);
         fetchData(`/api/users/${selectedName}/login`, 'POST')
             .then(() => {
                 loginState.setUsername(selectedName);
-                navigate(prevLocation, { replace: true });
+                navigate('/', { replace: true });
             })
             .catch(error => setErrorMessage(error));
     };
@@ -45,6 +42,11 @@ export default function Login() {
                 </Form.Select>
             </Form.Group>
             <Button onClick={performLogin} variant="primary">Zaloguj się</Button>
+            <hr />
+            <p>
+                Nie posiadasz konta?{' '}
+                <Link to="/register">Zarejestruj się!</Link>
+            </p>
         </>
     );
 }

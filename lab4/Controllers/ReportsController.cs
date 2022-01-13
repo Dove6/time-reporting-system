@@ -121,7 +121,7 @@ public class ReportsController : BaseController
     }
 
     [HttpGet("{notDateString}")]
-    public IActionResult GetBadDateFormat(string notDateString, string? path)
+    public IActionResult GetBadDateFormat(string notDateString)
     {
         return BadRequest();  // yyyy-MM-dd or yyyy-MM
     }

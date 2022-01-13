@@ -56,13 +56,14 @@ public class ProjectsController : BaseController
         createdProject.Active = true;
         createdProject.ManagerId = LoggedInUser!.Id;
         DataManager.AddProject(createdProject);
+        createdProject.Categories = Mapper.Map<List<Category>>(creationRequest.Categories);
         Mapper.Map<List<Category>>(creationRequest.Categories.Prepend(new CategoryModel { Code = "" }))
             .ForEach(c =>
             {
                 c.ProjectCode = projectCode;
                 DataManager.AddCategory(c);
             });
-        return CreatedAtAction(nameof(Get), new { projectCode });
+        return Created($"/api/projects/{projectCode}", Mapper.Map<ProjectDetailsResponse>(createdProject));
     }
 
     [HttpGet("{projectCode}")]
