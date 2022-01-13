@@ -7,15 +7,15 @@ namespace Trs.DataManager;
 public class TrsDbContext : DbContext
 {
     public const string DbDirectory = "storage";
-    public const string DbFilename = "trs.db";
+    private const string DbFilename = "trs.db";
     public static string DbPath => $"{DbDirectory}/{DbFilename}";
 
-    public virtual DbSet<AcceptedTime> AcceptedTime { get; set; }
-    public virtual DbSet<Category> Categories { get; set; }
-    public virtual DbSet<Project> Projects { get; set; }
-    public virtual DbSet<Report> Reports { get; set; }
-    public virtual DbSet<ReportEntry> ReportEntries { get; set; }
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<AcceptedTime> AcceptedTime { get; set; } = null!;
+    public virtual DbSet<Category> Categories { get; set; } = null!;
+    public virtual DbSet<Project> Projects { get; set; } = null!;
+    public virtual DbSet<Report> Reports { get; set; } = null!;
+    public virtual DbSet<ReportEntry> ReportEntries { get; set; } = null!;
+    public virtual DbSet<User> Users { get; set; } = null!;
 
     public TrsDbContext(DbContextOptions<TrsDbContext> options) : base(options) {}
 

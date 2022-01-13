@@ -9,7 +9,7 @@ namespace Trs.Models.DomainModels;
 public class Report
 {
     [RegularExpression("^\\d{4}-\\d{2}$")]
-    public string Month { get; set; }
+    public string Month { get; set; } = "";
     [DefaultValue(false)]
     public bool Frozen { get; set; }
 

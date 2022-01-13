@@ -10,7 +10,7 @@ public class ReportEntry
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [RegularExpression("^\\d{2}$")]
-    public string DayOfMonth { get; set; }
+    public string DayOfMonth { get; set; } = "";
     [Range(1, int.MaxValue)]
     public int Time { get; set; }
     [DefaultValue("")]

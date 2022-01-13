@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication(options =>
 {
     const string customSchemeName = "customScheme";
-    options.AddScheme<AuthHandler>(customSchemeName, "Custom scheme");
+    options.AddScheme<DummyAuthHandler>(customSchemeName, "Custom scheme");
     options.DefaultScheme = customSchemeName;
 });
 

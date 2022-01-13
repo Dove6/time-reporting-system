@@ -2,5 +2,5 @@
 
 public class ProjectDetailsResponse : ManagedProjectListResponseEntry
 {
-    public List<AcceptedTimeListEntry> AcceptedTime { get; set; }
+    public List<AcceptedTimeListEntry> AcceptedTime { get; set; } = new();
 }
