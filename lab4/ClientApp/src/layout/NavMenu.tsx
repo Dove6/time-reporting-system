@@ -45,9 +45,6 @@ export default function NavMenu() {
                                 <Nav.Item>
                                     <Nav.Link as={Link} className="text-dark" to="/monthly">Zestawienie miesięczne</Nav.Link>
                                 </Nav.Item>
-                                <Nav.Item>
-                                    <Nav.Link as={Link} className="text-dark" to="/projects">Zarządzane projekty</Nav.Link>
-                                </Nav.Item>
                             </> : <></>}
                             <Nav.Item className="spacer flex-grow-1"> </Nav.Item>
                             {loginState.state.username !== null ? loggedInPanel : loggedOutPanel}

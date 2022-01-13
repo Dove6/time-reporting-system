@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import Layout from './components/Layout';
+import Layout from './layout/Layout';
 import DailyReport from './reports/DailyReport';
-import Counter from './components/Counter';
 import Login from './accounts/Login';
 import './custom.css'
-import Projects from "./projects/Projects";
 import MonthlySummary from "./reports/MonthlySummary";
 import fetchData from "./fetchData";
 import EnsureLoggedIn from "./accounts/EnsureLoggedIn";
@@ -94,12 +92,6 @@ export default function App() {
                                 <MonthlySummary />
                             </EnsureLoggedIn>
                         } />
-                        <Route path="projects" element={
-                            <EnsureLoggedIn>
-                                <Projects />
-                            </EnsureLoggedIn>
-                        } />
-                        <Route path="counter" element={<Counter />} />
                         <Route path="login" element={<Login />} />
                     </Route>
                 </Routes>
