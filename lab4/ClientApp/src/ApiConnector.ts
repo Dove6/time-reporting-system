@@ -10,6 +10,7 @@ export default class ApiConnector {
 
     static getDailyReport = (dateString: string) => fetchData(`/api/reports/${dateString}`);
     static getMonthlyReport = (monthString: string) => fetchData(`/api/reports/${monthString}`);
+    static freezeMonthlyReport = (monthString: string) => fetchData(`/api/reports/${monthString}/freeze`, 'POST');
 
     static addReportEntry = (dateString: string, data: ReportEntryCreationRequest) =>
         fetchData(`/api/reports/${dateString}/entries`, 'POST', data);

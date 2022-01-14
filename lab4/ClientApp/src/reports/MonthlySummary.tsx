@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {LastDateContext} from "../App";
 import MonthlyReportModel from "../models/MonthlyReport";
-import {Table} from "react-bootstrap";
+import {Button, Table} from "react-bootstrap";
 import ApiConnector from "../ApiConnector";
 
 export default function MonthlySummary() {
@@ -10,11 +10,26 @@ export default function MonthlySummary() {
     const toDateString = (monthString: string) => `${monthString}-01`;
 
     const [monthlyReport, setMonthlyReport] = useState<MonthlyReportModel | null>(null);
+    const setMonthlyReportFrozen = (frozen: boolean) => {
+        if (!monthlyReport)
+            return;
+        setMonthlyReport(prevState => {
+            if (prevState === null)
+                return null;
+            return { ...prevState, frozen: frozen };
+        });
+    };
     const refreshMonthlyReport = () => {
         ApiConnector.getMonthlyReport(toMonthString(lastDateState.state.lastDate))
             .then(data => setMonthlyReport(data));
     }
     useEffect(refreshMonthlyReport, [lastDateState.state.lastDate]);
+
+    const freezeReport = () => {
+        ApiConnector.freezeMonthlyReport(toMonthString(lastDateState.state.lastDate))
+            .then(() => setMonthlyReportFrozen(true))
+            .catch(error => alert(error));
+    }
 
     return (<>
         <h1>Raport czasu pracy na miesiąc{' '}
@@ -23,7 +38,9 @@ export default function MonthlySummary() {
                    onChange={evt => lastDateState.setLastDate(toDateString(evt.target.value))}
             />
         </h1>
-        {monthlyReport?.frozen ? <p className="lead">[Raport został zatwierdzony]</p> : <></>}
+        {monthlyReport?.frozen ?
+            <p className="lead">[Raport został zatwierdzony]</p> :
+            <Button className="me-2" onClick={freezeReport}>Zatwierdź raport</Button>}
         <Table>
             <thead>
             <tr>
