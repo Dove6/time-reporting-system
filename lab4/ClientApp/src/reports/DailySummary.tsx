@@ -1,11 +1,11 @@
-import Project from "../models/Project";
-import ReportEntry from "../models/ReportEntry";
+import ProjectModel from "../models/ProjectModel";
+import ReportEntryModel from "../models/ReportEntryModel";
 import {Table} from "react-bootstrap";
 import '../custom.css';
 
 type DailySummaryProps = {
-    entries: ReportEntry[];
-    projects: Project[];
+    entries: ReportEntryModel[];
+    projects: ProjectModel[];
 };
 
 type DictStrNum = { [key: string]: number };

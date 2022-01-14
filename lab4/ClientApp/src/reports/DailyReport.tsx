@@ -1,15 +1,17 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {LastDateContext} from "../App";
-import DailyReportModel from "../models/DailyReport";
+import DailyReportModel from "../models/DailyReportModel";
 import {Button, ButtonToolbar, Form, Table} from "react-bootstrap";
-import Project from "../models/Project";
+import ProjectModel from "../models/ProjectModel";
 import ReportEntryCreationRequest from "../models/ReportEntryCreationRequest";
 import DailySummary from "../reports/DailySummary";
 import '../custom.css';
 import ReportEntryUpdateRequest from "../models/ReportEntryUpdateRequest";
 import getSpecificSetter from "../getSpecificSetter";
-import ReportEntry from "../models/ReportEntry";
+import ReportEntryModel from "../models/ReportEntryModel";
 import ApiConnector from "../ApiConnector";
+import ReportEntry from "./ReportEntry";
+import EditableReportEntry from "./EditableReportEntry";
 
 export default function DailyReport() {
     const lastDateState = useContext(LastDateContext);
@@ -21,7 +23,7 @@ export default function DailyReport() {
     }
     useEffect(refreshDailyReport, [lastDateState.state.lastDate]);
 
-    const [projectList, setProjectList] = useState<Project[] | null>(null);
+    const [projectList, setProjectList] = useState<ProjectModel[] | null>(null);
     useEffect(() => {
         ApiConnector.getProjects()
             .then(data => {
@@ -51,33 +53,10 @@ export default function DailyReport() {
     }
 
     const [modifiedEntryId, setModifiedEntryId] = useState<number | null>(null);
-    const [modifiedEntry, setModifiedEntry] = useState<ReportEntry>({
-        date: '',
-        projectCode: '',
-        categoryCode: '',
-        time: 0,
-        description: ''
-    });
-    const setModifiedEntryCategory = getSpecificSetter(modifiedEntry, setModifiedEntry, 'categoryCode') as ((value: typeof modifiedEntry.categoryCode) => void);
-    const setModifiedEntryTime = (time: number) => setModifiedEntry(prevValue => ({ ...prevValue, time: Math.max(time, 1) }));
-    const setModifiedEntryDescription = getSpecificSetter(modifiedEntry, setModifiedEntry, 'description') as ((value: typeof modifiedEntry.description) => void);
 
-    useEffect(() => {
-        if (modifiedEntryId === null || dailyReport === null)
+    const updateEntry = (updateRequest: ReportEntryUpdateRequest) => {
+        if (modifiedEntryId === null)
             return;
-        if (!(modifiedEntryId in dailyReport.entries))
-            return;
-        setModifiedEntry({ ...dailyReport.entries[modifiedEntryId] });
-    }, [modifiedEntryId, dailyReport]);
-
-    const updateEntry = () => {
-        if (!modifiedEntry || modifiedEntryId === null)
-            return;
-        let updateRequest: ReportEntryUpdateRequest = {
-            categoryCode: modifiedEntry.categoryCode,
-            time: modifiedEntry.time,
-            description: modifiedEntry.description
-        };
         ApiConnector.updateReportEntry(modifiedEntryId, updateRequest)
             .then(() => {
                 setModifiedEntryId(null);
@@ -103,41 +82,19 @@ export default function DailyReport() {
             .catch(error => alert(error));
     }
 
-    const getEditView = (id: number, entry: ReportEntry) => (<tr key={id}>
-        <td className="shrinked">{entry.projectCode}</td>
-        <td className="shrinked">
-            <Form.Select value={modifiedEntry.categoryCode} onChange={evt => setModifiedEntryCategory(evt.target.value)}>
-                {projectList?.filter(e => e.code === modifiedEntry.projectCode)[0]?.categories.map(category => (
-                    <option key={category.code} value={category.code}>{category.code}</option>
-                ))}
-            </Form.Select>
-        </td>
-        <td className="shrinked">
-            <Form.Control type="number" value={modifiedEntry.time} min={1} onChange={evt => setModifiedEntryTime(Number(evt.target.value))} />
-        </td>
-        <td>
-            <Form.Control as="textarea" value={modifiedEntry.description} onChange={evt => setModifiedEntryDescription(evt.target.value)} />
-        </td>
-        <td className="shrinked">
-            <ButtonToolbar className="flex-md-nowrap">
-                <Button className="me-2" onClick={() => updateEntry()}>Zatwierdź</Button>
-                <Button className="me-2" onClick={() => setModifiedEntryId(null)}>Anuluj</Button>
-            </ButtonToolbar>
-        </td>
-    </tr>);
+    const getEditView = (id: number, entry: ReportEntryModel) => (
+        <EditableReportEntry key={id} original={entry}
+            categories={projectList?.filter(e => e.code === entry.projectCode)[0]?.categories ?? [{ code: '' }]}
+            onConfirmClick={modified => updateEntry(modified)} onCancelClick={() => setModifiedEntryId(null)} />
+    );
 
-    const getDisplayView = (id: number, entry: ReportEntry) => (<tr key={id}>
-        <td className="shrinked">{entry.projectCode}</td>
-        <td className="shrinked">{entry.categoryCode}</td>
-        <td className="shrinked">{entry.time}</td>
-        <td>{entry.description}</td>
-        <td className="shrinked">
-            <ButtonToolbar className="flex-md-nowrap">
-                <Button className="me-2" disabled={dailyReport?.frozen} onClick={() => setModifiedEntryId(id)}>Edytuj</Button>
-                <Button className="me-2" disabled={dailyReport?.frozen} onClick={() => removeEntry(id)}>Skasuj</Button>
-            </ButtonToolbar>
-        </td>
-    </tr>);
+    const getDisplayView = (id: number, entry: ReportEntryModel) => (
+        <ReportEntry key={id} content={entry} disabled={dailyReport?.frozen ?? false}
+             onModifyClick={() => setModifiedEntryId(id)} onRemoveClick={() => removeEntry(id)} />
+    );
+
+    const getReportEntriesDict = () =>
+        Object.entries(dailyReport?.entries ??  {}).map(e => ({ key: Number(e[0]), value: e[1] }));
 
     return (
         <>
@@ -159,8 +116,9 @@ export default function DailyReport() {
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.entries(dailyReport?.entries ??  {}).map(e => ({ key: Number(e[0]), value: e[1] }))
-                        .map(({key, value}) => key === modifiedEntryId ? getEditView(key, value) : getDisplayView(key, value))}
+                    {getReportEntriesDict().map(({key, value}) => key === modifiedEntryId ?
+                        getEditView(key, value) :
+                        getDisplayView(key, value))}
                 </tbody>
                 <tfoot style={{ verticalAlign: 'top' }}>
                     <tr>

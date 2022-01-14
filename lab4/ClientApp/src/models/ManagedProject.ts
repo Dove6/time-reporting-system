@@ -1,6 +1,6 @@
-﻿import Project from "./Project";
+﻿import ProjectModel from "./ProjectModel";
 
-type ManagedProject = Project & {
+type ManagedProject = ProjectModel & {
     active: boolean;
     budget: number;
     budgetLeft: number;

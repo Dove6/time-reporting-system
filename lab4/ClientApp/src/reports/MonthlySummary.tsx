@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {LastDateContext} from "../App";
-import MonthlyReportModel from "../models/MonthlyReport";
+import MonthlyReportModel from "../models/MonthlyReportModel";
 import {Button, Table} from "react-bootstrap";
 import ApiConnector from "../ApiConnector";
 

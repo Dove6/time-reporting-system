@@ -1,8 +1,8 @@
 ﻿import ProjectTimeSummary from "./ProjectTimeSummary";
 
-type MonthlyReport = {
+type MonthlyReportModel = {
     frozen: boolean;
     projectTimeSummaries: ProjectTimeSummary[];
 };
 
-export default MonthlyReport;
+export default MonthlyReportModel;

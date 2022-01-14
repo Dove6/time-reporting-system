@@ -1,9 +1,9 @@
 ﻿import CategoryModel from './CategoryModel';
 
-type ProjectCreationRequest = {
-    budget: number;
+type ProjectModel = {
+    code: string;
     name: string;
     categories: CategoryModel[];
 }
 
-export default ProjectCreationRequest;
+export default ProjectModel;
