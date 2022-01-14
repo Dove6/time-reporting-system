@@ -5,9 +5,9 @@ import DailyReport from './reports/DailyReport';
 import Login from './accounts/Login';
 import './custom.css'
 import MonthlySummary from "./reports/MonthlySummary";
-import fetchData from "./fetchData";
 import EnsureLoggedIn from "./accounts/EnsureLoggedIn";
 import Register from "./accounts/Register";
+import ApiConnector from "./ApiConnector";
 
 export type LoginState = {
     isInProgress: boolean;
@@ -61,7 +61,7 @@ export default function App() {
     }
 
     useEffect(() => {
-        fetchData('/api/users/current')
+        ApiConnector.getCurrentUser()
             .then(data => setLoginStateUsername(data.name))
             .finally(() => setLoginStateIsInProgress(false));
     }, []);

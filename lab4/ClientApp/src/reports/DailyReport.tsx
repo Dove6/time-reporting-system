@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {LastDateContext} from "../App";
 import DailyReportModel from "../models/DailyReport";
-import fetchData from "../fetchData";
 import {Button, ButtonToolbar, Form, Table} from "react-bootstrap";
 import Project from "../models/Project";
 import ReportEntryCreationRequest from "../models/ReportEntryCreationRequest";
@@ -10,20 +9,21 @@ import '../custom.css';
 import ReportEntryUpdateRequest from "../models/ReportEntryUpdateRequest";
 import getSpecificSetter from "../getSpecificSetter";
 import ReportEntry from "../models/ReportEntry";
+import ApiConnector from "../ApiConnector";
 
 export default function DailyReport() {
     const lastDateState = useContext(LastDateContext);
 
     const [dailyReport, setDailyReport] = useState<DailyReportModel | null>(null);
     const refreshDailyReport = () => {
-        fetchData(`/api/reports/${lastDateState.state.lastDate}`)
+        ApiConnector.getDailyReport(lastDateState.state.lastDate)
             .then(data => setDailyReport(data));
     }
     useEffect(refreshDailyReport, [lastDateState.state.lastDate]);
 
     const [projectList, setProjectList] = useState<Project[] | null>(null);
     useEffect(() => {
-        fetchData('/api/projects')
+        ApiConnector.getProjects()
             .then(data => {
                 setProjectList(data);
                 if (data.length > 0)
@@ -71,14 +71,14 @@ export default function DailyReport() {
     }, [modifiedEntryId, dailyReport]);
 
     const updateEntry = () => {
-        if (!modifiedEntry)
+        if (!modifiedEntry || modifiedEntryId === null)
             return;
         let updateRequest: ReportEntryUpdateRequest = {
             categoryCode: modifiedEntry.categoryCode,
             time: modifiedEntry.time,
             description: modifiedEntry.description
         };
-        fetchData(`/api/reportentries/${modifiedEntryId}`, 'PATCH', updateRequest)
+        ApiConnector.updateReportEntry(modifiedEntryId, updateRequest)
             .then(() => {
                 setModifiedEntryId(null);
                 refreshDailyReport();
@@ -87,7 +87,7 @@ export default function DailyReport() {
     };
 
     const appendEntry = () => {
-        fetchData(`/api/reports/${lastDateState.state.lastDate}/entries`, 'POST', addedEntry)
+        ApiConnector.addReportEntry(lastDateState.state.lastDate, addedEntry)
             .then(() => {
                 clearAddedEntry();
                 refreshDailyReport();
@@ -96,7 +96,7 @@ export default function DailyReport() {
     };
 
     const removeEntry = (id: number) => {
-        fetchData(`/api/reportentries/${id}`, 'DELETE')
+        ApiConnector.deleteReportEntry(id)
             .then(() => {
                 refreshDailyReport();
             })

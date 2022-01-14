@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginContext } from "../App";
 import { Alert, Button, Form } from "react-bootstrap";
-import fetchData from "../fetchData";
 import User from "../models/User";
+import ApiConnector from "../ApiConnector";
 
 export default function Login() {
     const loginState = useContext(LoginContext);
@@ -12,13 +12,13 @@ export default function Login() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [users, setUsers] = useState<User[]>([]);
     useEffect(() => {
-        fetchData('/api/users')
+        ApiConnector.getUsers()
             .then(data => setUsers(data));
     }, []);
 
     const performLogin = () => {
         loginState.setIsInProgress(true);
-        fetchData(`/api/users/${selectedName}/login`, 'POST')
+        ApiConnector.login({ name: selectedName })
             .then(() => {
                 loginState.setUsername(selectedName);
                 navigate('/', { replace: true });

@@ -1,8 +1,8 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {LastDateContext} from "../App";
 import MonthlyReportModel from "../models/MonthlyReport";
-import fetchData from "../fetchData";
 import {Table} from "react-bootstrap";
+import ApiConnector from "../ApiConnector";
 
 export default function MonthlySummary() {
     const lastDateState = useContext(LastDateContext);
@@ -11,7 +11,7 @@ export default function MonthlySummary() {
 
     const [monthlyReport, setMonthlyReport] = useState<MonthlyReportModel | null>(null);
     const refreshMonthlyReport = () => {
-        fetchData(`/api/reports/${toMonthString(lastDateState.state.lastDate)}`)
+        ApiConnector.getMonthlyReport(toMonthString(lastDateState.state.lastDate))
             .then(data => setMonthlyReport(data));
     }
     useEffect(refreshMonthlyReport, [lastDateState.state.lastDate]);

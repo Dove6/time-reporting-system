@@ -2,8 +2,8 @@ import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LoginContext } from "../App";
 import { Alert, Button, Form } from "react-bootstrap";
-import fetchData from "../fetchData";
 import User from "../models/User";
+import ApiConnector from "../ApiConnector";
 
 export default function Register() {
     const loginState = useContext(LoginContext);
@@ -13,7 +13,7 @@ export default function Register() {
 
     const performRegistration = () => {
         loginState.setIsInProgress(true);
-        fetchData(`/api/users/${addedUsername}`, 'PUT')
+        ApiConnector.addUser({ name: addedUsername })
             .then(() => {
                 loginState.setUsername(addedUsername);
                 navigate('/', { replace: true });
