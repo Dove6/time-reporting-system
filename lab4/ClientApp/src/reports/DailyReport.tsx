@@ -1,17 +1,17 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {LastDateContext} from "../App";
 import DailyReportModel from "../models/DailyReportModel";
-import {Button, ButtonToolbar, Form, Table} from "react-bootstrap";
+import { Table } from "react-bootstrap";
 import ProjectModel from "../models/ProjectModel";
 import ReportEntryCreationRequest from "../models/ReportEntryCreationRequest";
 import DailySummary from "../reports/DailySummary";
 import '../custom.css';
 import ReportEntryUpdateRequest from "../models/ReportEntryUpdateRequest";
-import getSpecificSetter from "../getSpecificSetter";
 import ReportEntryModel from "../models/ReportEntryModel";
 import ApiConnector from "../ApiConnector";
 import ReportEntry from "./ReportEntry";
 import EditableReportEntry from "./EditableReportEntry";
+import ReportEntryCreator from "./ReportEntryCreator";
 
 export default function DailyReport() {
     const lastDateState = useContext(LastDateContext);
@@ -26,31 +26,9 @@ export default function DailyReport() {
     const [projectList, setProjectList] = useState<ProjectModel[] | null>(null);
     useEffect(() => {
         ApiConnector.getProjects()
-            .then(data => {
-                setProjectList(data);
-                if (data.length > 0)
-                    setAddedEntryProject(data[0].code);
-            });
+            .then(data => setProjectList(data))
+            .catch(error => alert(error));
     }, []);
-
-    const [addedEntry, setAddedEntry] = useState<ReportEntryCreationRequest>({
-        projectCode: '',
-        categoryCode: '',
-        time: 1,
-        description: ''
-    });
-    const setAddedEntryProject = (projectCode: string) => setAddedEntry(prevState => ({...prevState, projectCode: projectCode, categoryCode: '' }));
-    const setAddedEntryCategory = getSpecificSetter(addedEntry, setAddedEntry, 'categoryCode') as ((value: typeof addedEntry.categoryCode) => void);
-    const setAddedEntryTime = (time: number) => setAddedEntry(prevValue => ({ ...prevValue, time: Math.max(time, 1) }));
-    const setAddedEntryDescription = getSpecificSetter(addedEntry, setAddedEntry, 'description') as ((value: typeof addedEntry.description) => void);
-    const clearAddedEntry = () => {
-        setAddedEntry({
-            projectCode: projectList?.at(0)?.code ?? '',
-            categoryCode: '',
-            time: 1,
-            description: ''
-        });
-    }
 
     const [modifiedEntryId, setModifiedEntryId] = useState<number | null>(null);
 
@@ -65,11 +43,11 @@ export default function DailyReport() {
             .catch(error => alert(error));
     };
 
-    const appendEntry = () => {
-        ApiConnector.addReportEntry(lastDateState.state.lastDate, addedEntry)
+    const appendEntry = (addedEntry: ReportEntryCreationRequest) => {
+        return ApiConnector.addReportEntry(lastDateState.state.lastDate, addedEntry)
             .then(() => {
-                clearAddedEntry();
                 refreshDailyReport();
+                return Promise.resolve();
             })
             .catch(error => alert(error));
     };
@@ -127,34 +105,7 @@ export default function DailyReport() {
                     <tr>
                         <th colSpan={5}>Dodaj wpis...</th>
                     </tr>
-                    <tr>
-                        <td className="shrinked">
-                            <Form.Select value={addedEntry.projectCode} onChange={evt => setAddedEntryProject(evt.target.value)}>
-                                {projectList?.map(project => (
-                                    <option key={project.code} value={project.code}>{project.name} ({project.code})</option>
-                                ))}
-                            </Form.Select>
-                        </td>
-                        <td className="shrinked">
-                            <Form.Select value={addedEntry.categoryCode} onChange={evt => setAddedEntryCategory(evt.target.value)}>
-                                {projectList?.filter(e => e.code === addedEntry.projectCode)[0]?.categories.map(category => (
-                                    <option key={category.code} value={category.code}>{category.code}</option>
-                                ))}
-                            </Form.Select>
-                        </td>
-                        <td className="shrinked">
-                            <Form.Control type="number" value={addedEntry.time} min={1} onChange={evt => setAddedEntryTime(Number(evt.target.value))} />
-                        </td>
-                        <td>
-                            <Form.Control as="textarea" value={addedEntry.description} onChange={evt => setAddedEntryDescription(evt.target.value)} />
-                        </td>
-                        <td className="shrinked">
-                            <ButtonToolbar className="flex-md-nowrap">
-                                <Button className="me-2" onClick={() => appendEntry()}>Zatwierdź</Button>
-                                <Button className="me-2" onClick={clearAddedEntry}>Czyść</Button>
-                            </ButtonToolbar>
-                        </td>
-                    </tr>
+                    <ReportEntryCreator projects={projectList} onConfirmClick={created => appendEntry(created)} />
                 </tfoot>
             </Table>
             {dailyReport !== null && projectList !== null ? (<>
